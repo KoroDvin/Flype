@@ -1974,6 +1974,9 @@
       getDatabase, ref, set, onValue, get, child,
       push, update, remove, query, orderByChild, equalTo
     } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-database.js";
+    import {
+      getAuth, signInAnonymously, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAIbeepIF2GPcXQUZAt2cr2r54JNM6jMLM",
@@ -1988,13 +1991,35 @@
 
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
+    const auth = getAuth(app);
+
+    // --- Анонимная авторизация ---
+    // При первом заходе Firebase создаст невидимого пользователя
+    signInAnonymously(auth)
+      .then((userCredential) => {
+        console.log('🔐 Анонимный вход выполнен. UID:', userCredential.user.uid);
+      })
+      .catch((error) => {
+        console.error('❌ Ошибка анонимного входа:', error.code, error.message);
+      });
+
+    // Слушаем изменения состояния авторизации
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('✅ Пользователь авторизован. UID:', user.uid);
+      } else {
+        console.log('⚠️ Пользователь не авторизован');
+      }
+    });
 
     window.flypeFirebase = {
       database, ref, set, onValue, get, child,
-      push, update, remove, query, orderByChild, equalTo
+      push, update, remove, query, orderByChild, equalTo,
+      auth, signInAnonymously, onAuthStateChanged
     };
 
     console.log('✅ Firebase подключён. databaseURL:', firebaseConfig.databaseURL);
+  </script>
   </script>
 </body>
 </html>
