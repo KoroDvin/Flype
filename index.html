@@ -1629,12 +1629,48 @@
       document.getElementById('mainScreen').classList.add('active');
       document.getElementById('authFooter').style.display = 'none';
       loadState(); renderAll();
+            listenToUsers();
       if (state.currentUser) {
         const hour = new Date().getHours();
         let g = 'Добрый день';
         if (hour < 12) g = 'Доброе утро'; else if (hour >= 18) g = 'Добрый вечер';
         setTimeout(() => showToast('Flype', `${g}, ${state.currentUser.firstName}!`, 'fa-hand-wave', 4000), 600);
       }
+          // ============================================================
+    // СИНХРОНИЗАЦИЯ ПОЛЬЗОВАТЕЛЕЙ С FIREBASE
+    // ============================================================
+    function listenToUsers() {
+      if (!window.flypeFirebase) {
+        console.warn('Firebase ещё не загрузился, повтор через 500 мс');
+        setTimeout(listenToUsers, 500);
+        return;
+      }
+      const { database, ref, onValue } = window.flypeFirebase;
+
+      onValue(ref(database, 'users'), (snapshot) => {
+        const data = snapshot.val() || {};
+        const cloudUsers = Object.values(data);
+
+        // Объединяем с локальными (на случай офлайна)
+        const localUsers = loadData(STORAGE_KEYS.users, []);
+        const merged = [...localUsers];
+        cloudUsers.forEach(cu => {
+          const idx = merged.findIndex(u => u.id === cu.id);
+          if (idx === -1) merged.push(cu);
+          else merged[idx] = cu; // облако приоритетнее
+        });
+        state.users = merged;
+
+        // Обновляем UI
+        renderChatList();
+        // Если открыто окно нового чата — обновляем результаты поиска
+        const overlay = document.getElementById('newChatOverlay');
+        if (overlay && overlay.classList.contains('open')) {
+          renderNewChatResults(document.getElementById('newChatSearch').value);
+        }
+        console.log('👥 Пользователи синхронизированы:', state.users.length);
+      });
+    }
     }
     function loadState() {
       const userId = state.currentUser.id;
@@ -1668,7 +1704,7 @@
     function persistSettings() { saveData(STORAGE_KEYS.settings, state.settings); }
 
     // ---------- РЕГИСТРАЦИЯ ----------
-    function handleRegister(e) {
+    async renderAll() {
       e.preventDefault();
       const firstName = document.getElementById('regFirstName').value.trim();
       const lastName = document.getElementById('regLastName').value.trim();
@@ -1684,9 +1720,20 @@
         id: genId(), flypeId, firstName, lastName, password,
         avatar: '', online: true, lastSeen: Date.now()
       };
+            // Сохраняем в localStorage (для офлайн-доступа)
       const users = loadData(STORAGE_KEYS.users, []);
-      users.push(newUser);
+      if (!users.find(u => u.id === newUser.id)) users.push(newUser);
       saveData(STORAGE_KEYS.users, users);
+
+      // Сохраняем в Firebase — теперь пользователя увидят все устройства
+      try {
+        const { database, ref, set } = window.flypeFirebase;
+        await set(ref(database, 'users/' + newUser.id), newUser);
+        console.log('✅ Пользователь сохранён в Firebase:', newUser.flypeId);
+      } catch (err) {
+        console.error('❌ Ошибка сохранения в Firebase:', err);
+        showToast('Ошибка синхронизации', 'Не удалось сохранить аккаунт в облако', 'fa-exclamation-circle');
+      }
       document.getElementById('generatedFlypeId').textContent = flypeId;
       document.getElementById('flypeIdBlock').classList.remove('hidden');
       localStorage.setItem(STORAGE_KEYS.currentUserId, newUser.id);
@@ -2435,6 +2482,37 @@ async function toggleRecording() {
         document.removeEventListener('click', rn);
       }, { once: true });
     }
+    </script>
+
+  <!-- ============================================================
+       FIREBASE — СИНХРОНИЗАЦИЯ ПОЛЬЗОВАТЕЛЕЙ
+       ============================================================ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import {
+      getDatabase, ref, set, onValue, get, child
+    } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-database.js";
+
+    // --- Ваш конфиг ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyAIbeepIF2GPcXQUZAt2cr2r54JNM6jMLM",
+      authDomain: "flype-d8034.firebaseapp.com",
+      databaseURL: "https://flype-d8034-default-rtdb.firebaseio.com",
+      projectId: "flype-d8034",
+      storageBucket: "flype-d8034.firebasestorage.app",
+      messagingSenderId: "928586015641",
+      appId: "1:928586015641:web:1fd2c85c48d49694e9e908",
+      measurementId: "G-1RRG5QFNC7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // --- Выставляем Firebase в глобальную область,
+    //     чтобы основной скрипт мог их использовать ---
+    window.flypeFirebase = { database, ref, set, onValue, get, child };
+
+    console.log('✅ Firebase подключён, databaseURL:', firebaseConfig.databaseURL);
   </script>
 </body>
 </html>
