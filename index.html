@@ -1483,6 +1483,7 @@
     </div>
   </div>
 
+  <audio id="audioPlayer" class="hidden"></audio>
   <div class="toast-container" id="toastContainer"></div>
   <div class="auth-footer" id="authFooter">© 2026 Flype. Все права защищены.</div>
 
@@ -1892,9 +1893,22 @@
         img.addEventListener('click', () => window.open(img.src, '_blank'));
       });
       container.querySelectorAll('.voice-msg .play-btn').forEach(btn => {
-        btn.addEventListener('click', function() { playVoicePreview(parseInt(this.dataset.duration || 5)); });
+  btn.addEventListener('click', function() {
+    const audioUrl = this.dataset.audioUrl;
+    const duration = parseInt(this.dataset.duration || 5);
+    if (audioUrl) {
+      // Реальное воспроизведение
+      const player = document.getElementById('audioPlayer');
+      player.src = audioUrl;
+      player.play().catch(() => {
+        showToast('Ошибка', 'Не удалось воспроизвести аудио', 'fa-exclamation-circle');
       });
+    } else {
+      // Заглушка для старых сообщений без audioUrl
+      playVoicePreview(duration);
     }
+  });
+});
 
     function renderMessageBubble(msg, chatId) {
       const isOut = msg.senderId === state.currentUser.id;
@@ -1904,7 +1918,7 @@
       let content = '';
       if (msg.type === 'image') content = `<div>${escapeHtml(msg.text || '')}</div><img class="msg-image" src="${msg.imageUrl}">`;
       else if (msg.type === 'file') content = `<div class="file-attach"><i class="fas fa-file"></i><div style="flex:1;min-width:0;"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(msg.fileName)}</div><div style="font-size:11px;opacity:0.7;">${formatFileSize(msg.fileSize || 0)}</div></div></div>`;
-      else if (msg.type === 'voice') content = `<div class="voice-msg"><button class="play-btn" data-duration="${msg.duration || 5}"><i class="fas fa-play"></i></button><div class="wave"></div><span class="dur">${formatDuration(msg.duration || 5)}</span></div>`;
+     else if (msg.type === 'voice') content = `<div class="voice-msg"><button class="play-btn" data-duration="${msg.duration || 5}" data-audio-url="${msg.audioUrl || ''}"><i class="fas fa-play"></i></button><div class="wave"></div><span class="dur">${formatDuration(msg.duration || 5)}</span></div>`;
       else content = `<div>${escapeHtml(msg.text || '')}</div>`;
       let checks = '';
       if (isOut) checks = msg.read
@@ -2052,37 +2066,86 @@
       state.callChatId = null; state.callSeconds = 0;
     }
 
-    // ---------- ЗАПИСЬ ГОЛОСА ----------
-    function toggleRecording() {
-      const voiceBtn = document.getElementById('voiceBtn');
-      const recBar = document.getElementById('recordingBar');
-      const msgInput = document.getElementById('messageInput');
-      if (state.isRecording) {
-        clearInterval(state.recordingTimer);
-        state.isRecording = false;
-        voiceBtn.classList.remove('recording');
-        voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-        recBar.classList.remove('active');
-        msgInput.style.display = '';
-        const dur = state.recordingSeconds;
-        state.recordingSeconds = 0;
-        if (dur >= 1) sendMessage('', 'voice', { duration: dur });
-        else { showToast('Слишком коротко', 'Запись должна быть не менее 1 секунды', 'fa-exclamation-circle'); Sound.error(); }
-      } else {
-        state.isRecording = true; state.recordingSeconds = 0;
-        voiceBtn.classList.add('recording');
-        voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
-        recBar.classList.add('active');
-        msgInput.style.display = 'none';
-        document.getElementById('recTime').textContent = '0:00';
-        state.recordingTimer = setInterval(() => {
-          state.recordingSeconds++;
-          const m = Math.floor(state.recordingSeconds / 60); const s = state.recordingSeconds % 60;
-          document.getElementById('recTime').textContent = `${m}:${String(s).padStart(2, '0')}`;
-        }, 1000);
-        Sound.messageOut();
-      }
+// ---------- ЗАПИСЬ ГОЛОСА (РЕАЛЬНАЯ) ----------
+let mediaRecorder = null;
+let audioChunks = [];
+let recordingStream = null;
+
+async function toggleRecording() {
+  const voiceBtn = document.getElementById('voiceBtn');
+  const recBar = document.getElementById('recordingBar');
+  const msgInput = document.getElementById('messageInput');
+
+  if (state.isRecording) {
+    // ОСТАНОВКА ЗАПИСИ
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
     }
+    if (recordingStream) {
+      recordingStream.getTracks().forEach(t => t.stop());
+      recordingStream = null;
+    }
+    clearInterval(state.recordingTimer);
+    state.isRecording = false;
+    voiceBtn.classList.remove('recording');
+    voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+    recBar.classList.remove('active');
+    msgInput.style.display = '';
+    state.recordingSeconds = 0;
+  } else {
+    // НАЧАЛО ЗАПИСИ
+    try {
+      recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      Sound.error();
+      showToast('Нет доступа', 'Разрешите доступ к микрофону в настройках браузера', 'fa-microphone-slash', 5000);
+      return;
+    }
+
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(recordingStream);
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const duration = state.recordingSeconds;
+      if (duration < 1) {
+        showToast('Слишком коротко', 'Запись должна быть не менее 1 секунды', 'fa-exclamation-circle');
+        Sound.error();
+        return;
+      }
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        sendMessage('', 'voice', {
+          duration: duration,
+          audioUrl: ev.target.result   // base64-аудио
+        });
+      };
+      reader.readAsDataURL(blob);
+    };
+
+    mediaRecorder.start();
+    state.isRecording = true;
+    state.recordingSeconds = 0;
+    voiceBtn.classList.add('recording');
+    voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+    recBar.classList.add('active');
+    msgInput.style.display = 'none';
+    document.getElementById('recTime').textContent = '0:00';
+
+    state.recordingTimer = setInterval(() => {
+      state.recordingSeconds++;
+      const m = Math.floor(state.recordingSeconds / 60);
+      const s = state.recordingSeconds % 60;
+      document.getElementById('recTime').textContent = `${m}:${String(s).padStart(2, '0')}`;
+    }, 1000);
+
+    Sound.messageOut();
+  }
+}
 
     // ---------- ОБРАБОТЧИКИ ----------
     document.querySelectorAll('.auth-tab').forEach(tab => {
