@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flype Messenger</title>
+    <style>
+        :root {
+            --skype-blue: #0078d4;
+            --skype-dark-blue: #005a9e;
+            --skype-light-bg: #f3f2f1;
+            --skype-text-dark: #201f1e;
+            --skype-text-light: #605e5c;
+            --skype-border: #edebe9;
+            --skype-white: #ffffff;
+            --skype-success: #107c41;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--skype-light-bg);
+            color: var(--skype-text-dark);
+            height: 100vh;
+            display: flex;
+            align-serif: center;
+            justify-content: center;
+        }
+
+        /* Окно авторизации */
+        .auth-container {
+            background: var(--skype-white);
+            width: 400px;
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            text-align: center;
+            margin: auto;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--skype-blue);
+            margin-bottom: 5px;
+        }
+        
+        .logo span {
+            color: var(--skype-dark-blue);
+        }
+
+        .subtitle {
+            color: var(--skype-text-light);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: var(--skype-text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #a19f9d;
+            border-radius: 2px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--skype-blue);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--skype-blue);
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background-color: var(--skype-dark-blue);
+        }
+
+        .auth-toggle {
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--skype-blue);
+            cursor: pointer;
+        }
+
+        /* Главный интерфейс мессенджера */
+        .app-container {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            background: var(--skype-white);
+        }
+
+        .sidebar {
+            width: 350px;
+            border-right: 1px solid var(--skype-border);
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--skype-border);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--skype-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .current-username {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: none;
+            color: var(--skype-text-light);
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-logout:hover {
+            color: red;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 5px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--skype-border);
+            border-radius: 4px;
+            background: var(--skype-light-bg);
+            font-size: 14px;
+        }
+
+        .btn-search {
+            padding: 8px 12px;
+            background: var(--skype-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--skype-border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--skype-text-light);
+        }
+
+        .tab.active {
+            color: var(--skype-blue);
+            border-bottom: 2px solid var(--skype-blue);
+        }
+
+        .list-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(0,0,0,0.02);
+            gap: 12px;
+        }
+
+        .list-item:hover {
+            background-color: var(--skype-light-bg);
+        }
+
+        .list-item.active {
+            background-color: #e1dfdd;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .item-status {
+            font-size: 12px;
+            color: var(--skype-text-light);
+        }
+
+        .btn-action {
+            padding: 4px 8px;
+            background: var(--skype-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* Окно чата */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #faf9f8;
+        }
+
+        .chat-welcome {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--skype-text-light);
+        }
+
+        .chat-header {
+            padding: 15px 25px;
+            background: var(--skype-white);
+            border-bottom: 1px solid var(--skype-border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 20px 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 60%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .message.incoming {
+            background: var(--skype-white);
+            align-self: flex-start;
+            border: 1px solid var(--skype-border);
+        }
+
+        .message.outgoing {
+            background: #dee3f3;
+            align-self: flex-end;
+        }
+
+        .message-time {
+            font-size: 10px;
+            color: var(--skype-text-light);
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .chat-footer {
+            padding: 15px 25px;
+            background: var(--skype-white);
+            border-top: 1px solid var(--skype-border);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--skype-border);
+            border-radius: 4px;
+            resize: none;
+            height: 44px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .btn-send {
+            padding: 0 20px;
+            background: var(--skype-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ОКНО АВТОРИЗАЦИИ -->
+    <div id="authContainer" class="auth-container">
+        <div class="logo">Flype<span>.</span></div>
+        <div id="authSubtitle" class="subtitle">Войдите, чтобы продолжить в Flype</div>
+        
+        <div class="form-group">
+            <label for="emailInput">Электронная почта (@gmail.com)</label>
+            <input type="email" id="emailInput" class="form-control" placeholder="example@gmail.com">
+        </div>
+        <div class="form-group">
+            <label for="passwordInput">Пароль</label>
+            <input type="password" id="passwordInput" class="form-control" placeholder="••••••••">
+        </div>
+        
+        <button id="btnAuthSubmit" class="btn">Войти</button>
+        <div id="authToggle" class="auth-toggle">Нет учетной записи? Создайте ее</div>
+    </div>
+
+    <!-- ГЛАВНЫЙ ИНТЕРФЕЙС ПРИЛОЖЕНИЯ -->
+    <div id="appContainer" class="app-container">
+        <!-- Боковая панель -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-profile">
+                    <div class="user-info">
+                        <div id="userAvatar" class="avatar">U</div>
+                        <div id="currentUsername" class="current-username">user@gmail.com</div>
+                    </div>
+                    <button id="btnLogout" class="btn-logout">Выйти</button>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Поиск по email...">
+                    <button id="btnSearch" class="btn-search">Найти</button>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <div id="tabChats" class="tab active">Чаты</div>
+                <div id="tabSearch" class="tab" style="display:none;">Результаты поиска</div>
+            </div>
+
+            <div id="listContainer" class="list-container">
+                <!-- Сюда динамически рендерятся пользователи или чаты -->
+            </div>
+        </div>
+
+        <!-- Основная область чата -->
+        <div id="chatMain" class="chat-main">
+            <!-- Начальный экран приветствия -->
+            <div id="chatWelcome" class="chat-welcome">
+                <h2>Добро пожаловать в Flype!</h2>
+                <p>Выберите друга из списка чатов или найдите его через поиск.</p>
+            </div>
+
+            <!-- Активное окно переписки -->
+            <div id="chatArea" class="chat-main" style="display: none;">
+                <div class="chat-header">
+                    <div id="activeChatAvatar" class="avatar">D</div>
+                    <div>
+                        <div id="activeChatName" style="font-weight: 600;">Друг</div>
+                        <div style="font-size: 12px; color: var(--skype-success);">В сети (Flype)</div>
+                    </div>
+                </div>
+                
+                <div id="chatBody" class="chat-body">
+                    <!-- Сообщения -->
+                </div>
+                
+                <div class="chat-footer">
+                    <textarea id="chatInput" class="chat-input" placeholder="Введите сообщение..."></textarea>
+                    <button id="btnSend" class="btn-send">Отправить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Имитация базы данных в LocalStorage для сохранения состояния между перезагрузками
+        const DB = {
+            getUsers: () => JSON.parse(localStorage.getItem('flype_users')) || {},
+            setUsers: (users) => localStorage.setItem('flype_users', JSON.stringify(users)),
+            getMessages: () => JSON.parse(localStorage.getItem('flype_messages')) || [],
+            setMessages: (msgs) => localStorage.setItem('flype_messages', JSON.stringify(msgs))
+        };
+
+        // Инициализация пустых данных, если они отсутствуют
+        if (!localStorage.getItem('flype_users')) DB.setUsers({});
+        if (!localStorage.getItem('flype_messages')) DB.setMessages([]);
+
+        // Состояние текущей сессии
+        let currentUser = null; 
+        let activeChatUserEmail = null;
+        let isLoginMode = true;
+        let currentTab = 'chats'; // 'chats' или 'search'
+
+        // DOM элементы
+        const authContainer = document.getElementById('authContainer');
+        const appContainer = document.getElementById('appContainer');
+        const authSubtitle = document.getElementById('authSubtitle');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const btnAuthSubmit = document.getElementById('btnAuthSubmit');
+        const authToggle = document.getElementById('authToggle');
+        
+        const currentUsername = document.getElementById('currentUsername');
+        const userAvatar = document.getElementById('userAvatar');
+        const btnLogout = document.getElementById('btnLogout');
+        const searchInput = document.getElementById('searchInput');
+        const btnSearch = document.getElementById('btnSearch');
+        const tabChats = document.getElementById('tabChats');
+        const tabSearch = document.getElementById('tabSearch');
+        const listContainer = document.getElementById('listContainer');
+        
+        const chatWelcome = document.getElementById('chatWelcome');
+        const chatArea = document.getElementById('chatArea');
+        const activeChatName = document.getElementById('activeChatName');
+        const activeChatAvatar = document.getElementById('activeChatAvatar');
+        const chatBody = document.getElementById('chatBody');
+        const chatInput = document.getElementById('chatInput');
+        const btnSend = document.getElementById('btnSend');
+
+        // --- АВТОРИЗАЦИЯ И РЕГИСТРАЦИЯ ---
+        authToggle.addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            if (isLoginMode) {
+                authSubtitle.innerText = 'Войдите, чтобы продолжить в Flype';
+                btnAuthSubmit.innerText = 'Войти';
+                authToggle.innerText = 'Нет учетной записи? Создайте ее';
+            } else {
+                authSubtitle.innerText = 'Регистрация нового аккаунта Flype';
+                btnAuthSubmit.innerText = 'Зарегистрироваться';
+                authToggle.innerText = 'Уже есть аккаунт? Войти';
+            }
+        });
+
+        btnAuthSubmit.addEventListener('click', () => {
+            const email = emailInput.value.trim().toLowerCase();
+            const password = passwordInput.value;
+
+            if (!email.endsWith('@gmail.com')) {
+                alert('Регистрация и вход возможны только через почту @gmail.com');
+                return;
+            }
+            if (password.length < 4) {
+                alert('Пароль должен быть не менее 4 символов');
+                return;
+            }
+
+            const users = DB.getUsers();
+
+            if (isLoginMode) {
+                // Логика Входа
+                if (users[email] && users[email].password === password) {
+                    loginSuccess(email);
+                } else {
+                    alert('Неверный email или пароль!');
+                }
+            } else {
+                // Логика Регистрации
+                if (users[email]) {
+                    alert('Пользователь с таким email уже существует!');
+                } else {
+                    users[email] = {
+                        email: email,
+                        password: password,
+                        friends: [] // Список email-адресов друзей
+                    };
+                    DB.setUsers(users);
+                    alert('Регистрация успешна! Теперь вы можете войти.');
+                    isLoginMode = true;
+                    authToggle.click();
+                }
+            }
+        });
+
+        function loginSuccess(email) {
+            currentUser = email;
+            authContainer.style.display = 'none';
+            appContainer.style.display = 'flex';
+            currentUsername.innerText = currentUser;
+            userAvatar.innerText = currentUser.substring(0, 2).toUpperCase();
+            
+            switchTab('chats');
+            renderSidebar();
+        }
+
+        btnLogout.addEventListener('click', () => {
+            currentUser = null;
+            activeChatUserEmail = null;
+            emailInput.value = '';
+            passwordInput.value = '';
+            appContainer.style.display = 'none';
+            authContainer.style.display = 'block';
+            chatArea.style.display = 'none';
+            chatWelcome.style.display = 'flex';
+        });
+
+        // --- ВЗАИМОДЕЙСТВИЕ И СВЯЗИ (ДРУЗЬЯ) ---
+        
+        // Переключение вкладок
+        tabChats.addEventListener('click', () => switchTab('chats'));
+        tabSearch.addEventListener('click', () => switchTab('search'));
+
+        function switchTab(tab) {
+            currentTab = tab;
+            if (tab === 'chats') {
+                tabChats.classList.add('active');
+                tabSearch.classList.remove('active');
+                tabSearch.style.display = 'none';
+                renderSidebar();
+            } else {
+                tabChats.classList.remove('active');
+                tabSearch.classList.add('active');
+                tabSearch.style.style = 'block';
+            }
+        }
+
+        // Поиск пользователей
+        btnSearch.addEventListener('click', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            if (!query) return;
+
+            tabSearch.style.display = 'block';
+            switchTab('search');
+            
+            const users = DB.getUsers();
+            listContainer.innerHTML = '';
+
+            let found = false;
+            for (let email in users) {
+                // Исключаем себя из поиска и ищем совпадения по подстроке
+                if (email !== currentUser && email.includes(query)) {
+                    found = true;
+                    createSearchItemDOM(users[email]);
+                }
+            }
+
+            if (!found) {
+                listContainer.innerHTML = '<div style="padding:20px; color:var(--skype-text-light); text-align:center;">Пользователи не найдены</div>';
+            }
+        });
+
+        function createSearchItemDOM(user) {
+            const users = DB.getUsers();
+            const myFriends = users[currentUser].friends || [];
+            const theirFriends = user.friends || [];
+
+            const iAddedThem = myFriends.includes(user.email);
+            const theyAddedMe = theirFriends.includes(currentUser);
+
+            const div = document.createElement('div');
+            div.className = 'list-item';
+
+            let statusText = 'Не в друзьях';
+            let buttonHtml = `<button class="btn-action" onclick="addFriend('${user.email}')">Добавить</button>`;
+
+            if (iAddedThem && theyAddedMe) {
+                statusText = 'Вы друзья';
+                buttonHtml = `<span style="color: var(--skype-success); font-size:12px; font-weight:600;">✓ Друзья</span>`;
+            } else if (iAddedThem && !theyAddedMe) {
+                statusText = 'Заявка отправлена';
+                buttonHtml = `<span style="color: var(--skype-text-light); font-size:12px;">Ожидание</span>`;
+            } else if (!iAddedThem && theyAddedMe) {
+                statusText = 'Хочет добавиться в друзья';
+                buttonHtml = `<button class="btn-action" onclick="addFriend('${user.email}')">Принять</button>`;
+            }
+
+            div.innerHTML = `
+                <div class="avatar">${user.email.substring(0,2).toUpperCase()}</div>
+                <div class="item-details">
+                    <div class="item-name">${user.email}</div>
+                    <div class="item-status">${statusText}</div>
+                </div>
+                <div>${buttonHtml}</div>
+            `;
+            listContainer.appendChild(div);
+        }
+
+        // Функция добавления/принятия в друзья (проброшена глобально для onclick)
+        window.addFriend = function(targetEmail) {
+            const users = DB.getUsers();
+            
+            if (!users[currentUser].friends.includes(targetEmail)) {
+                users[currentUser].friends.push(targetEmail);
+            }
+            
+            DB.setUsers(users);
+            alert(`Действие выполнено для ${targetEmail}`);
+            
+            // Обновляем текущий вид
+            btnSearch.click();
+        };
+
+        // Рендеринг списка чатов (только взаимные друзья!)
+        function renderSidebar() {
+            if (currentTab !== 'chats') return;
+            
+            listContainer.innerHTML = '';
+            const users = DB.getUsers();
+            const myFriends = users[currentUser].friends || [];
+            
+            let chatCount = 0;
+
+            myFriends.forEach(friendEmail => {
+                const friendData = users[friendEmail];
+                // Проверяем взаимность (двусторонняя связь)
+                if (friendData && friendData.friends && friendData.friends.includes(currentUser)) {
+                    chatCount++;
+                    const div = document.createElement('div');
+                    div.className = `list-item ${activeChatUserEmail === friendEmail ? 'active' : ''}`;
+                    div.onclick = () => openChat(friendEmail);
+
+                    div.innerHTML = `
+                        <div class="avatar" style="background:#005a9e">${friendEmail.substring(0,2).toUpperCase()}</div>
+                        <div class="item-details">
+                            <div class="item-name">${friendEmail}</div>
+                            <div class="item-status">Нажмите, чтобы открыть чат</div>
+                        </div>
+                    `;
+                    listContainer.appendChild(div);
+                }
+            });
+
+            if (chatCount === 0) {
+                listContainer.innerHTML = '<div style="padding:20px; color:var(--skype-text-light); text-align:center;">У вас пока нет чатов.<br><br>Найдите пользователя через поиск и добавьте его в друзья (связь должна быть взаимной), чтобы начать общение.</div>';
+            }
+        }
+
+
+        // --- ЧАТ И СООБЩЕНИЯ ---
+        function openChat(friendEmail) {
+            activeChatUserEmail = friendEmail;
+            chatWelcome.style.display = 'none';
+            chatArea.style.display = 'flex';
+            
+            activeChatName.innerText = friendEmail;
+            activeChatAvatar.innerText = friendEmail.substring(0,2).toUpperCase();
+            
+            renderSidebar(); // Обновить выделение активного чата
+            renderMessages();
+        }
+
+        function renderMessages() {
+            if (!activeChatUserEmail) return;
+            
+            chatBody.innerHTML = '';
+            const messages = DB.getMessages();
+            
+            // Фильтруем сообщения только между currentUser и activeChatUserEmail
+            const chatLog = messages.filter(m => 
+                (m.from === currentUser && m.to === activeChatUserEmail) || 
+                (m.from === activeChatUserEmail && m.to === currentUser)
+            );
+
+            chatLog.forEach(m => {
+                const div = document.createElement('div');
+                const isOutgoing = m.from === currentUser;
+                div.className = `message ${isOutgoing ? 'outgoing' : 'incoming'}`;
+                
+                div.innerHTML = `
+                    <div>${m.text}</div>
+                    <div class="message-time">${m.time}</div>
+                `;
+                chatBody.appendChild(div);
+            });
+            
+            // Прокрутка вниз
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text || !activeChatUserEmail) return;
+
+            const messages = DB.getMessages();
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            messages.push({
+                from: currentUser,
+                to: activeChatUserEmail,
+                text: text,
+                time: timeStr
+            });
+
+            DB.setMessages(messages);
+            chatInput.value = '';
+            renderMessages();
+        }
+
+        btnSend.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+    </script>
+</body>
+</html>
