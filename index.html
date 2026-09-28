@@ -2286,21 +2286,33 @@
     let outgoingCallTimer = null;
     let outgoingCallRef = null;
 
+    // Рингтон из файла
+    let ringtoneAudio = null;
+    const RINGTONE_FILE = 'ringtone.mp3';
+
     function startRingtone() {
       stopRingtone();
       if (!state.settings.sounds) return;
-      ringtoneActive = true;
-      const ring = () => {
-        if (!ringtoneActive) return;
-        playTone(600, 0.3, 'sine', 0.25);
-        setTimeout(() => { if (ringtoneActive) playTone(800, 0.3, 'sine', 0.25); }, 350);
-      };
-      ring();
-      ringtoneInterval = setInterval(ring, 1500);
+      try {
+        ringtoneAudio = new Audio(RINGTONE_FILE);
+        ringtoneAudio.loop = true;
+        ringtoneAudio.volume = 0.7;
+        ringtoneAudio.play().catch(err => {
+          console.warn('⚠️ Не удалось воспроизвести рингтон:', err.message);
+        });
+      } catch (e) {
+        console.warn('Ошибка рингтона:', e);
+      }
     }
+
     function stopRingtone() {
-      ringtoneActive = false;
-      if (ringtoneInterval) { clearInterval(ringtoneInterval); ringtoneInterval = null; }
+      if (ringtoneAudio) {
+        try {
+          ringtoneAudio.pause();
+          ringtoneAudio.currentTime = 0;
+        } catch (e) {}
+        ringtoneAudio = null;
+      }
     }
 
     function listenToCalls() {
