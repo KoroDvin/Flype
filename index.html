@@ -2284,15 +2284,34 @@
     let outgoingCallTimer = null;
     let outgoingCallRef = null;
 
+       // Рингтон из файла
+    let ringtoneAudio = null;
+    const RINGTONE_FILE = 'main/ringtone.mp3';
+
     function startRingtone() {
       stopRingtone();
       if (!state.settings.sounds) return;
-      ringtoneActive = true;
-      const ring = () => {
-        if (!ringtoneActive) return;
-        playTone(600, 0.3, 'sine', 0.25);
-        setTimeout(() => { if (ringtoneActive) playTone(800, 0.3, 'sine', 0.25); }, 350);
-      };
+      try {
+        ringtoneAudio = new Audio(RINGTONE_FILE);
+        ringtoneAudio.loop = true;
+        ringtoneAudio.volume = 0.7;
+        ringtoneAudio.play().catch(err => {
+          console.warn('⚠️ Не удалось воспроизвести рингтон:', err.message);
+        });
+      } catch (e) {
+        console.warn('Ошибка рингтона:', e);
+      }
+    }
+
+    function stopRingtone() {
+      if (ringtoneAudio) {
+        try {
+          ringtoneAudio.pause();
+          ringtoneAudio.currentTime = 0;
+        } catch (e) {}
+        ringtoneAudio = null;
+      }
+    }
       ring();
       ringtoneInterval = setInterval(ring, 1500);
     }
