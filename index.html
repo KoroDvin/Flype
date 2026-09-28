@@ -1,0 +1,2426 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Flype — мессенджер</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --blue: #0B6BCB; --blue-hover: #0A5AAB; --blue-light: #E8F0FE;
+      --white: #FFFFFF; --bg: #F8F9FA;
+      --border: #DADCE0; --border-light: #E8EAED;
+      --text: #202124; --text-secondary: #5F6368; --text-muted: #80868B;
+      --danger: #D93025; --success: #188038; --online: #34A853;
+      --radius: 8px; --radius-lg: 12px;
+      --shadow: 0 1px 2px rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+      --shadow-lg: 0 4px 8px 3px rgba(60,64,67,0.15), 0 1px 3px rgba(60,64,67,0.3);
+      --font: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font); background: var(--bg); color: var(--text);
+      height: 100vh; height: 100dvh; overflow: hidden;
+      font-size: 14px; -webkit-font-smoothing: antialiased;
+    }
+    .screen { display: none; flex-direction: column; height: 100vh; height: 100dvh; }
+    .screen.active { display: flex; }
+
+    /* --- Авторизация --- */
+    #authScreen { justify-content: center; align-items: center; background: var(--bg); padding: 20px; overflow-y: auto; }
+    .auth-card {
+      background: var(--white); border-radius: var(--radius-lg);
+      padding: 48px 40px; width: 100%; max-width: 450px;
+      box-shadow: var(--shadow); animation: fadeIn 0.3s ease; margin: auto;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .auth-logo { text-align: center; margin-bottom: 8px; }
+    .auth-logo span { font-size: 42px; font-weight: 700; color: var(--blue); letter-spacing: -1px; font-family: Arial, sans-serif; }
+    .auth-logo i { display: none; }
+    .auth-sub { text-align: center; color: var(--text-secondary); font-size: 16px; margin-bottom: 32px; font-weight: 400; }
+    .auth-tabs { display: flex; border-bottom: 1px solid var(--border-light); margin-bottom: 28px; }
+    .auth-tab {
+      flex: 1; padding: 12px; text-align: center; border: none;
+      background: transparent; font-family: var(--font);
+      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; border-bottom: 3px solid transparent;
+      transition: color 0.2s, border-color 0.2s; margin-bottom: -1px;
+    }
+    .auth-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .auth-form { display: none; flex-direction: column; gap: 20px; }
+    .auth-form.active { display: flex; }
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    .input-group label { font-size: 14px; font-weight: 500; color: var(--text); padding-left: 0; }
+    .input-group input {
+      width: 100%; padding: 14px 16px; border: 1px solid var(--border);
+      border-radius: var(--radius); background: var(--white);
+      color: var(--text); font-size: 15px; font-family: var(--font);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-group input::placeholder { color: var(--text-muted); }
+    .input-group input:focus { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+    .input-group input.error { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger); }
+    .error-text { color: var(--danger); font-size: 12.5px; padding-left: 0; display: none; }
+    .error-text.visible { display: block; }
+    .btn {
+      padding: 14px 24px; border-radius: var(--radius); border: none;
+      font-family: var(--font); font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s, box-shadow 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover { background: var(--blue-hover); box-shadow: var(--shadow); }
+    .btn-secondary { background: var(--white); color: var(--blue); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--blue-light); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: #B3261E; box-shadow: var(--shadow); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .google-note {
+      margin-top: 8px; padding: 14px; background: var(--bg);
+      border-radius: var(--radius); font-size: 12.5px;
+      color: var(--text-secondary); text-align: center; line-height: 1.5;
+      display: flex; align-items: center; gap: 8px; justify-content: center;
+    }
+    .google-note i { font-size: 16px; color: var(--text-muted); }
+    .flype-id-box {
+      background: var(--blue-light); border: 1px solid var(--blue);
+      border-radius: var(--radius); padding: 16px; text-align: center; margin-top: 4px;
+    }
+    .flype-id-box .id-value {
+      font-size: 22px; font-weight: 700; color: var(--blue);
+      letter-spacing: 1px; margin: 6px 0; font-family: 'Courier New', monospace;
+    }
+    .flype-id-box .id-note { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+    .auth-footer { text-align: center; font-size: 12px; color: var(--text-muted); padding: 16px; position: fixed; bottom: 0; left: 0; right: 0; }
+
+    /* --- Главный экран --- */
+    #mainScreen { background: var(--bg); display: none; flex-direction: column; }
+    #mainScreen.active { display: flex; }
+    .main-header {
+      background: var(--white); color: var(--text);
+      padding: 10px 20px; display: flex; align-items: center;
+      gap: 14px; border-bottom: 1px solid var(--border-light);
+      z-index: 20; flex-shrink: 0; height: 60px;
+    }
+    .main-header .logo { display: flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 700; color: var(--blue); letter-spacing: -0.5px; }
+    .main-header .logo i { display: none; }
+    .main-header .search-wrap { flex: 1; max-width: 500px; position: relative; margin-left: 20px; }
+    .main-header .search-wrap i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; }
+    .main-header .search-wrap input {
+      width: 100%; padding: 10px 14px 10px 40px;
+      border-radius: var(--radius); border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); font-size: 14px;
+      outline: none; font-family: var(--font);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .main-header .search-wrap input:focus { background: var(--white); border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+    .main-header .header-actions { display: flex; gap: 8px; margin-left: auto; }
+    .header-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: none; background: transparent;
+      color: var(--text-secondary); font-size: 16px;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; transition: background 0.2s;
+    }
+    .header-btn:hover { background: var(--bg); }
+    .main-body { display: flex; flex: 1; overflow: hidden; background: var(--bg); }
+
+    /* --- Сайдбар --- */
+    .sidebar {
+      width: 340px; min-width: 280px; background: var(--white);
+      border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; overflow: hidden; transition: transform 0.3s;
+    }
+    .sidebar-tabs { display: flex; border-bottom: 1px solid var(--border-light); padding: 0 8px; gap: 4px; flex-shrink: 0; }
+    .sidebar-tab {
+      flex: 1; padding: 14px 8px; text-align: center;
+      border: none; background: transparent; font-family: var(--font);
+      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; border-bottom: 3px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-bottom: -1px;
+    }
+    .sidebar-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .sidebar-tab:hover { color: var(--blue); }
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .sidebar-content::-webkit-scrollbar { width: 6px; }
+    .sidebar-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .tab-panel { display: none; flex-direction: column; }
+    .tab-panel.active { display: flex; }
+    .sidebar-actions { padding: 12px 16px; display: flex; gap: 8px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
+    .sidebar-actions .btn { padding: 10px 14px; font-size: 13px; border-radius: var(--radius); flex: 1; }
+    .chat-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 16px; cursor: pointer;
+      transition: background 0.15s;
+      border-left: 3px solid transparent; position: relative;
+    }
+    .chat-item:hover { background: var(--bg); }
+    .chat-item.active { background: var(--blue-light); border-left-color: var(--blue); }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 600;
+      flex-shrink: 0; position: relative; overflow: hidden;
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar.sm { width: 36px; height: 36px; font-size: 13px; }
+    .avatar.lg { width: 88px; height: 88px; font-size: 32px; }
+    .online-dot { position: absolute; bottom: 1px; right: 1px; width: 11px; height: 11px; background: var(--online); border-radius: 50%; border: 2px solid var(--white); }
+    .chat-info { flex: 1; min-width: 0; }
+    .chat-info .name { font-size: 14.5px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chat-info .last-msg { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .chat-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+    .chat-meta .time { font-size: 11px; color: var(--text-muted); }
+    .unread-badge { background: var(--blue); color: #fff; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; min-width: 18px; text-align: center; }
+    .status-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; cursor: pointer; transition: background 0.15s; }
+    .status-item:hover { background: var(--bg); }
+    .status-avatar { width: 44px; height: 44px; border-radius: 50%; padding: 2.5px; background: linear-gradient(45deg, #0B6BCB, #34A853); flex-shrink: 0; }
+    .status-avatar.viewed { background: var(--border); }
+    .status-avatar .inner {
+      width: 100%; height: 100%; border-radius: 50%; background: var(--blue); color: #fff;
+      display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600;
+      border: 2px solid var(--white); overflow: hidden;
+    }
+    .status-avatar .inner img { width: 100%; height: 100%; object-fit: cover; }
+    .status-info .name { font-size: 14.5px; font-weight: 500; }
+    .status-info .time { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* --- Чат --- */
+    .chat-area { flex: 1; display: flex; flex-direction: column; background: var(--white); min-width: 0; position: relative; }
+    .chat-header {
+      background: var(--white); padding: 10px 16px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--border-light);
+      flex-shrink: 0; height: 60px;
+    }
+    .chat-header .back-btn {
+      display: none; width: 36px; height: 36px; border-radius: 50%; border: none;
+      background: transparent; color: var(--text-secondary); font-size: 16px; cursor: pointer;
+      align-items: center; justify-content: center;
+    }
+    .chat-header .back-btn:hover { background: var(--bg); }
+    .chat-header .chat-title { flex: 1; min-width: 0; }
+    .chat-header .chat-title .name { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chat-header .chat-title .status { font-size: 12.5px; color: var(--text-secondary); margin-top: 1px; }
+    .chat-header .chat-title .status.online { color: var(--online); }
+    .chat-header .actions { display: flex; gap: 4px; }
+    .chat-header .actions .header-btn { background: transparent; color: var(--text-secondary); position: relative; }
+    .chat-header .actions .header-btn:hover { background: var(--bg); color: var(--blue); }
+    #callBtn::after, #videoCallBtn::after, #voiceBtn::after {
+      content: 'скоро';
+      position: absolute;
+      top: -2px; right: -4px;
+      background: var(--danger); color: #fff;
+      font-size: 8px; padding: 1px 4px;
+      border-radius: 6px; font-weight: 600;
+      pointer-events: none; font-family: var(--font);
+      letter-spacing: 0.3px;
+    }
+    #callBtn, #videoCallBtn, #voiceBtn { opacity: 0.7; }
+    .messages { flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 6px; background: var(--bg); }
+    .messages::-webkit-scrollbar { width: 6px; }
+    .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .empty-chat {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; color: var(--text-secondary); gap: 12px;
+      padding: 40px; text-align: center; background: var(--bg);
+    }
+    .empty-chat h1 { font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .empty-chat p { font-size: 15px; color: var(--text-secondary); }
+    .empty-chat i { display: none; }
+    .message-row { display: flex; animation: msgIn 0.2s ease; }
+    @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .message-row.out { justify-content: flex-end; }
+    .message-row.in { justify-content: flex-start; }
+    .message-bubble {
+      max-width: 70%; padding: 10px 14px; border-radius: 18px;
+      font-size: 14.5px; line-height: 1.45; word-wrap: break-word;
+      position: relative; box-shadow: 0 1px 1px rgba(60,64,67,0.1);
+      cursor: pointer; user-select: none;
+    }
+    .message-row.out .message-bubble { background: var(--blue); color: #fff; border-bottom-right-radius: 4px; }
+    .message-row.in .message-bubble { background: var(--white); color: var(--text); border-bottom-left-radius: 4px; border: 1px solid var(--border-light); }
+    .message-bubble .msg-time {
+      font-size: 11px; opacity: 0.8; margin-top: 4px;
+      display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+    }
+    .message-bubble .msg-time .checks { font-size: 12px; }
+    .message-bubble .sender-name { font-size: 12px; font-weight: 600; color: var(--blue); margin-bottom: 3px; }
+    .message-bubble img.msg-image { max-width: 100%; border-radius: 10px; margin-top: 4px; cursor: pointer; display: block; }
+    .message-bubble .file-attach {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; background: rgba(0,0,0,0.05);
+      border-radius: 8px; margin-top: 4px; font-size: 13px;
+    }
+    .message-row.out .file-attach { background: rgba(255,255,255,0.2); }
+    .message-bubble .file-attach i { font-size: 20px; }
+    .message-bubble .voice-msg { display: flex; align-items: center; gap: 10px; padding: 4px 0; min-width: 160px; }
+    .message-bubble .voice-msg .play-btn {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,0.25); border: none;
+      color: inherit; font-size: 13px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .message-row.in .voice-msg .play-btn { background: var(--blue-light); color: var(--blue); }
+    .message-bubble .voice-msg .wave {
+      flex: 1; height: 4px; background: rgba(255,255,255,0.35);
+      border-radius: 2px; position: relative; overflow: hidden;
+    }
+    .message-row.in .voice-msg .wave { background: var(--border); }
+    .voice-msg .wave::after {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 40%;
+      background: rgba(255,255,255,0.8); border-radius: 2px; animation: waveAnim 2s infinite;
+    }
+    .message-row.in .voice-msg .wave::after { background: var(--blue); }
+    @keyframes waveAnim { 0% { width: 10%; } 50% { width: 90%; } 100% { width: 10%; } }
+    .voice-msg .dur { font-size: 11px; opacity: 0.8; }
+    .encrypted-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; opacity: 0.7; margin-right: 4px; }
+    .typing-indicator {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 16px 8px; font-size: 12.5px;
+      color: var(--text-secondary); min-height: 24px; background: var(--bg);
+    }
+    .typing-dots { display: flex; gap: 3px; }
+    .typing-dots span {
+      width: 6px; height: 6px; background: var(--text-secondary);
+      border-radius: 50%; animation: typingBounce 1.2s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-5px); opacity: 1; } }
+    .chat-input-area {
+      background: var(--white); padding: 10px 12px;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      display: flex; align-items: flex-end; gap: 6px;
+      border-top: 1px solid var(--border-light); flex-shrink: 0;
+    }
+    .chat-input-area .input-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: none; background: transparent;
+      color: var(--text-secondary); font-size: 17px;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; transition: background 0.15s, color 0.15s; flex-shrink: 0;
+      position: relative;
+    }
+    .chat-input-area .input-btn:hover { background: var(--bg); color: var(--blue); }
+    .chat-input-area textarea {
+      flex: 1; border: 1px solid var(--border);
+      border-radius: 20px; padding: 11px 16px;
+      font-family: var(--font); font-size: 14.5px;
+      resize: none; outline: none; background: var(--bg);
+      color: var(--text); max-height: 120px; min-height: 40px;
+      line-height: 1.4; transition: background 0.2s, border-color 0.2s;
+    }
+    .chat-input-area textarea:focus { background: var(--white); border-color: var(--blue); }
+    .chat-input-area .send-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: none; background: var(--blue); color: #fff;
+      font-size: 15px; cursor: pointer;
+      display: flex; align-items: center;
+      justify-content: center; transition: background 0.2s; flex-shrink: 0;
+    }
+    .chat-input-area .send-btn:hover { background: var(--blue-hover); }
+    .chat-input-area .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* --- Профиль --- */
+    .profile-panel {
+      width: 300px; background: var(--white);
+      border-left: 1px solid var(--border-light);
+      display: none; flex-direction: column; overflow-y: auto; flex-shrink: 0;
+      position: relative;
+    }
+    .profile-panel.open { display: flex; }
+    .profile-panel .profile-head { padding: 24px; text-align: center; border-bottom: 1px solid var(--border-light); }
+    .profile-panel .profile-head .avatar { margin: 0 auto 12px; }
+    .profile-panel .profile-head .name { font-size: 17px; font-weight: 600; }
+    .profile-panel .profile-head .status { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+    .profile-panel .profile-head .status.online { color: var(--online); }
+    .profile-section { padding: 16px 20px; border-bottom: 1px solid var(--border-light); }
+    .profile-section h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 10px; }
+    .profile-id {
+      background: var(--blue-light); border-radius: var(--radius);
+      padding: 10px 12px; font-family: 'Courier New', monospace;
+      font-size: 14px; font-weight: 600; color: var(--blue);
+      text-align: center; word-break: break-all;
+    }
+    .profile-action {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 8px; border-radius: var(--radius);
+      cursor: pointer; transition: background 0.15s;
+      color: var(--text); font-size: 14px;
+      border: none; background: transparent;
+      width: 100%; font-family: var(--font); text-align: left;
+    }
+    .profile-action:hover { background: var(--bg); }
+    .profile-action i { width: 20px; text-align: center; color: var(--blue); font-size: 16px; }
+    .profile-action.danger i { color: var(--danger); }
+    .profile-action.danger { color: var(--danger); }
+
+    /* --- Меню действий с сообщением --- */
+    .message-menu {
+      position: fixed;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 6px 0;
+      z-index: 1500;
+      min-width: 200px;
+      animation: fadeIn 0.15s ease;
+      border: 1px solid var(--border-light);
+    }
+    .message-menu button {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%; padding: 12px 16px;
+      border: none; background: transparent;
+      font-family: var(--font); font-size: 14px;
+      color: var(--text); cursor: pointer; text-align: left;
+    }
+    .message-menu button:hover { background: var(--bg); }
+    .message-menu button i { width: 18px; text-align: center; color: var(--text-secondary); font-size: 15px; }
+    .message-menu button.danger { color: var(--danger); }
+    .message-menu button.danger i { color: var(--danger); }
+
+    /* --- Модалки --- */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(32,33,36,0.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px; animation: fadeIn 0.15s ease;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: var(--radius-lg);
+      padding: 28px 24px; width: 100%; max-width: 400px;
+      box-shadow: var(--shadow-lg); animation: fadeIn 0.2s ease;
+      max-height: 90vh; overflow-y: auto;
+      position: relative;
+    }
+    .modal h3 { font-size: 18px; margin-bottom: 20px; text-align: center; color: var(--text); font-weight: 600; }
+    .modal .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+    .modal .modal-actions .btn { flex: 1; }
+    .modal-close-x {
+      position: absolute;
+      top: 8px; right: 8px;
+      width: 36px; height: 36px;
+      border-radius: 50%; border: none;
+      background: transparent; color: var(--text-secondary);
+      font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+      z-index: 5;
+    }
+    .modal-close-x:hover { background: var(--bg); color: var(--text); }
+    .status-view-modal { max-width: 380px; padding: 0; overflow: hidden; background: #202124; }
+    .status-view-modal .sv-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; color: #fff; }
+    .status-view-modal .sv-header .name { font-size: 15px; font-weight: 600; }
+    .status-view-modal .sv-header .time { font-size: 12px; opacity: 0.7; }
+    .status-view-modal .sv-body {
+      min-height: 280px; display: flex; align-items: center;
+      justify-content: center; padding: 32px 24px; color: #fff;
+      font-size: 20px; text-align: center; line-height: 1.5;
+      background: linear-gradient(135deg, #0B6BCB, #0A5AAB);
+    }
+    .status-view-modal .sv-body img { max-width: 100%; max-height: 340px; border-radius: 12px; }
+    .toast-container { position: fixed; top: 16px; right: 16px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--white); color: var(--text);
+      padding: 14px 18px; border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      display: flex; align-items: center; gap: 12px;
+      min-width: 260px; max-width: 340px;
+      animation: slideInRight 0.25s ease;
+      border-left: 4px solid var(--blue);
+    }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+    .toast.fade-out { animation: fadeOutRight 0.25s ease forwards; }
+    @keyframes fadeOutRight { to { opacity: 0; transform: translateX(40px); } }
+    .toast i { font-size: 20px; color: var(--blue); }
+    .toast .toast-text { font-size: 13.5px; line-height: 1.4; }
+    .toast .toast-text strong { display: block; margin-bottom: 2px; }
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #BDC1C6; transition: .3s; border-radius: 24px; }
+    .slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px;
+      left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--blue); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* --- Адаптив --- */
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 100%; min-width: 0;
+        position: absolute; inset: 0; z-index: 30;
+        transform: translateX(0); transition: transform 0.3s ease;
+      }
+      .sidebar.hidden { transform: translateX(-100%); }
+      .chat-area { width: 100%; }
+      .chat-header .back-btn { display: flex; }
+      .profile-panel { position: absolute; top: 0; right: 0; bottom: 0; z-index: 40; width: 300px; box-shadow: var(--shadow-lg); }
+      .main-header .search-wrap { max-width: none; }
+    }
+    @media (max-width: 500px) {
+      .main-header { padding: 10px 12px; gap: 8px; }
+      .main-header .logo span { display: none; }
+      .main-header .search-wrap { margin-left: 0; }
+      .sidebar-actions .btn span { display: none; }
+      .message-bubble { max-width: 82%; }
+      .profile-panel { width: 100%; }
+      .auth-card { padding: 32px 24px; }
+      .auth-logo span { font-size: 36px; }
+    }
+
+    /* --- Тёмная тема --- */
+    body.dark-theme {
+      --bg: #18191A; --white: #242526; --blue-light: #1E3A5F;
+      --border: #3E4042; --border-light: #2C2D2E;
+      --text: #E4E6EB; --text-secondary: #B0B3B8; --text-muted: #80868B;
+    }
+    body.dark-theme .main-header,
+    body.dark-theme .sidebar,
+    body.dark-theme .chat-area,
+    body.dark-theme .chat-header,
+    body.dark-theme .chat-input-area,
+    body.dark-theme .modal,
+    body.dark-theme .profile-panel,
+    body.dark-theme .toast,
+    body.dark-theme .message-menu { background: var(--white); color: var(--text); }
+    body.dark-theme .messages,
+    body.dark-theme .empty-chat,
+    body.dark-theme .typing-indicator { background: var(--bg); }
+    body.dark-theme .message-row.in .message-bubble { background: #3A3B3C; color: var(--text); border-color: #3E4042; }
+    body.dark-theme .chat-item:hover,
+    body.dark-theme .status-item:hover { background: #2C2D2E; }
+    body.dark-theme .chat-item.active { background: rgba(11, 107, 203, 0.25); }
+    body.dark-theme .input-group input,
+    body.dark-theme .chat-input-area textarea { background: #3A3B3C; color: var(--text); border-color: #3E4042; }
+    body.dark-theme .main-header .search-wrap input { background: #3A3B3C; color: var(--text); border-color: #3E4042; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== ЭКРАН АВТОРИЗАЦИИ ==================== -->
+  <div id="authScreen" class="screen active">
+    <div class="auth-card">
+      <div class="auth-logo"><span>Flype.</span></div>
+      <p class="auth-sub">Войдите, чтобы продолжить в Flype</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Вход</button>
+        <button class="auth-tab" data-tab="register">Регистрация</button>
+      </div>
+
+      <form class="auth-form active" id="loginForm" novalidate>
+        <div class="input-group">
+          <label for="loginId">Flype ID</label>
+          <input type="text" id="loginId" placeholder="123-456-789.fye" autocomplete="off">
+          <div class="error-text" id="loginIdError">Введите корректный Flype ID (формат: 123-456-789.fye)</div>
+        </div>
+        <div class="input-group">
+          <label for="loginPassword">Пароль</label>
+          <input type="password" id="loginPassword" placeholder="Минимум 6 символов" autocomplete="off">
+          <div class="error-text" id="loginPasswordError">Пароль должен содержать минимум 6 символов</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Войти</button>
+        <div class="google-note">
+          <i class="fas fa-info-circle"></i>
+          <span>Извините, пока что вход по Google невозможен. В скором времени функция может появиться.</span>
+        </div>
+      </form>
+
+      <form class="auth-form" id="registerForm" novalidate>
+        <div class="input-group">
+          <label for="regFirstName">Имя</label>
+          <input type="text" id="regFirstName" placeholder="Иван" autocomplete="off">
+          <div class="error-text" id="regFirstNameError">Введите имя</div>
+        </div>
+        <div class="input-group">
+          <label for="regLastName">Фамилия</label>
+          <input type="text" id="regLastName" placeholder="Иванов" autocomplete="off">
+          <div class="error-text" id="regLastNameError">Введите фамилию</div>
+        </div>
+        <div class="input-group">
+          <label for="regPassword">Пароль</label>
+          <input type="password" id="regPassword" placeholder="Минимум 6 символов" autocomplete="off">
+          <div class="error-text" id="regPasswordError">Пароль должен содержать минимум 6 символов</div>
+        </div>
+
+        <div id="flypeIdBlock" class="flype-id-box hidden">
+          <div style="font-size:13px;color:var(--text-secondary);">Ваш Flype ID</div>
+          <div class="id-value" id="generatedFlypeId">—</div>
+          <div class="id-note">Сохраните его — он понадобится для входа.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+        <div class="google-note">
+          <i class="fas fa-info-circle"></i>
+          <span>Извините, пока что вход по Google невозможен. В скором времени функция может появиться.</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== ГЛАВНЫЙ ЭКРАН ==================== -->
+  <div id="mainScreen" class="screen">
+    <header class="main-header">
+      <div class="logo"><span>Flype.</span></div>
+      <button class="header-btn" id="myIdBtn" title="Посмотреть ID" style="margin-left:8px;">
+        <i class="fas fa-id-card"></i>
+      </button>
+      <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="globalSearch" placeholder="Поиск по ID...">
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" id="settingsBtn" title="Настройки"><i class="fas fa-cog"></i></button>
+        <button class="header-btn" id="logoutBtn" title="Выйти"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </header>
+
+    <div class="main-body">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-tabs">
+          <button class="sidebar-tab active" data-stab="chats"><i class="fas fa-comment"></i> Чаты</button>
+          <button class="sidebar-tab" data-stab="statuses"><i class="fas fa-circle-notch"></i> Статусы</button>
+        </div>
+
+        <div class="sidebar-content">
+          <div class="tab-panel active" id="tabChats">
+            <div class="sidebar-actions">
+              <button class="btn btn-primary" id="newChatBtn"><i class="fas fa-plus"></i> <span>Новый чат</span></button>
+              <button class="btn btn-secondary" id="newGroupBtn"><i class="fas fa-users"></i> <span>Группа</span></button>
+            </div>
+            <div id="chatList"></div>
+          </div>
+
+          <div class="tab-panel" id="tabStatuses">
+            <div class="sidebar-actions">
+              <button class="btn btn-primary" id="addStatusBtn"><i class="fas fa-plus"></i> <span>Добавить статус</span></button>
+            </div>
+            <div id="statusList"></div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="chat-area" id="chatArea">
+        <div class="empty-chat" id="emptyChat">
+          <h1>Добро пожаловать в Flype!</h1>
+          <p>Выберите друга из списка чатов или найдите его через поиск.</p>
+        </div>
+
+        <div class="chat-header hidden" id="chatHeader">
+          <button class="back-btn" id="backToSidebar"><i class="fas fa-arrow-left"></i></button>
+          <div class="avatar sm" id="chatHeaderAvatar">?</div>
+          <div class="chat-title">
+            <div class="name" id="chatHeaderName">—</div>
+            <div class="status" id="chatHeaderStatus">—</div>
+          </div>
+          <div class="actions">
+            <button class="header-btn" id="callBtn" title="Позвонить"><i class="fas fa-phone-alt"></i></button>
+            <button class="header-btn" id="videoCallBtn" title="Видеозвонок"><i class="fas fa-video"></i></button>
+            <button class="header-btn" id="infoBtn" title="Информация"><i class="fas fa-info-circle"></i></button>
+          </div>
+        </div>
+
+        <div class="messages hidden" id="messagesContainer"></div>
+
+        <div class="typing-indicator hidden" id="typingIndicator">
+          <div class="typing-dots"><span></span><span></span><span></span></div>
+          <span id="typingText">печатает...</span>
+        </div>
+
+        <div class="chat-input-area hidden" id="chatInputArea">
+          <button class="input-btn" id="attachBtn" title="Прикрепить файл"><i class="fas fa-paperclip"></i></button>
+          <input type="file" id="fileInput" class="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.zip">
+          <textarea id="messageInput" placeholder="Введите сообщение..." rows="1"></textarea>
+          <button class="input-btn" id="voiceBtn" title="Голосовое сообщение"><i class="fas fa-microphone"></i></button>
+          <button class="send-btn" id="sendBtn" title="Отправить"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </main>
+
+      <aside class="profile-panel" id="profilePanel">
+        <button class="header-btn" id="closeProfileBtn" style="position:absolute;top:8px;right:8px;z-index:10;">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <!-- Профиль собеседника -->
+        <div id="contactProfile" class="hidden">
+          <div class="profile-head">
+            <div class="avatar lg" id="contactAvatar">?</div>
+            <div class="name" id="contactName">—</div>
+            <div class="status" id="contactStatus">—</div>
+          </div>
+          <div class="profile-section">
+            <h4>Flype ID</h4>
+            <div class="profile-id" id="contactFlypeId">—</div>
+          </div>
+          <div class="profile-section">
+            <h4>Действия</h4>
+            <button class="profile-action danger" id="deleteContactBtn"><i class="fas fa-user-minus"></i> Удалить контакт</button>
+            <button class="profile-action danger" id="blockContactBtn"><i class="fas fa-ban"></i> Заблокировать</button>
+          </div>
+        </div>
+
+        <!-- Мой профиль -->
+        <div id="myProfile">
+          <div class="profile-head">
+            <div class="avatar lg" id="profileAvatar">?</div>
+            <div class="name" id="profileName">—</div>
+            <div class="status" id="profileStatus">—</div>
+          </div>
+          <div class="profile-section">
+            <h4>Flype ID</h4>
+            <div class="profile-id" id="profileFlypeId">—</div>
+          </div>
+          <div class="profile-section">
+            <h4>Действия</h4>
+            <button class="profile-action" id="editProfileBtn"><i class="fas fa-user-edit"></i> Редактировать профиль</button>
+            <button class="profile-action" id="muteChatBtn"><i class="fas fa-bell-slash"></i> Отключить уведомления</button>
+            <button class="profile-action danger" id="clearChatBtn"><i class="fas fa-trash-alt"></i> Очистить историю</button>
+            <button class="profile-action danger" id="deleteAccountBtn"><i class="fas fa-user-times"></i> Удалить аккаунт</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Модалка "Мой Flype ID" -->
+  <div class="modal-overlay" id="myIdOverlay">
+    <div class="modal">
+      <button class="modal-close-x" data-close="myIdOverlay"><i class="fas fa-times"></i></button>
+      <h3>Мой Flype ID</h3>
+      <p style="text-align:center;color:var(--text-secondary);font-size:13.5px;line-height:1.5;margin-bottom:16px;">
+        Поделитесь этим ID с друзьями, чтобы они могли вам написать.
+      </p>
+      <div class="profile-id" id="myIdValue" style="font-size:18px;padding:14px;margin-bottom:16px;">—</div>
+      <div class="modal-actions" style="margin-top:0;">
+        <button class="btn btn-secondary" id="myIdCloseBtn2">Закрыть</button>
+        <button class="btn btn-primary" id="myIdCopyBtn"><i class="fas fa-copy"></i> Скопировать ID</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка настроек -->
+  <div class="modal-overlay" id="settingsOverlay">
+    <div class="modal">
+      <button class="modal-close-x" data-close="settingsOverlay"><i class="fas fa-times"></i></button>
+      <h3>Настройки</h3>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:14.5px;">Тёмная тема</span>
+          <label class="switch"><input type="checkbox" id="darkThemeToggle"><span class="slider"></span></label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:14.5px;">Звуки</span>
+          <label class="switch"><input type="checkbox" id="soundToggle" checked><span class="slider"></span></label>
+        </div>
+        <hr style="border:none;border-top:1px solid var(--border-light);margin:4px 0;">
+        <div class="input-group"><label>Имя</label><input type="text" id="settingsFirstName"></div>
+        <div class="input-group"><label>Фамилия</label><input type="text" id="settingsLastName"></div>
+
+        <div class="input-group">
+          <label>Аватарка</label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="avatar lg" id="settingsAvatarPreview" style="width:64px;height:64px;font-size:22px;flex-shrink:0;">?</div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+              <button type="button" class="btn btn-secondary" id="settingsAvatarBtn" style="padding:10px 14px;font-size:13.5px;">
+                <i class="fas fa-upload"></i> Загрузить фото
+              </button>
+              <button type="button" class="btn btn-secondary" id="settingsAvatarRemoveBtn" style="padding:10px 14px;font-size:13.5px;color:var(--danger);border-color:var(--danger);">
+                <i class="fas fa-trash-alt"></i> Удалить фото
+              </button>
+              <input type="file" id="settingsAvatarFile" accept="image/*" class="hidden">
+            </div>
+          </div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-top:6px;">JPG, PNG или GIF. Максимум ~1 МБ.</div>
+        </div>
+
+        <div class="profile-id" id="settingsFlypeId" style="margin-top:4px;">—</div>
+
+        <hr style="border:none;border-top:1px solid var(--border-light);margin:8px 0;">
+
+        <button type="button" class="profile-action danger" id="settingsDeleteProfileBtn" style="justify-content:center;">
+          <i class="fas fa-user-times"></i> Удалить профиль
+        </button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="settingsCancel">Отмена</button>
+        <button class="btn btn-primary" id="settingsSave">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка нового чата -->
+  <div class="modal-overlay" id="newChatOverlay">
+    <div class="modal">
+      <button class="modal-close-x" data-close="newChatOverlay"><i class="fas fa-times"></i></button>
+      <h3>Новый чат</h3>
+      <div class="input-group">
+        <label>Поиск по Flype ID или имени</label>
+        <input type="text" id="newChatSearch" placeholder="Например: 123-456-789.fye или Иван">
+      </div>
+      <div id="newChatResults" style="max-height:220px;overflow-y:auto;margin-top:12px;"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="newChatCancel">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка группы -->
+  <div class="modal-overlay" id="newGroupOverlay">
+    <div class="modal">
+      <button class="modal-close-x" data-close="newGroupOverlay"><i class="fas fa-times"></i></button>
+      <h3>Создать группу</h3>
+      <div class="input-group"><label>Название группы</label><input type="text" id="groupName" placeholder="Например: Друзья"></div>
+      <div class="input-group" style="margin-top:10px;"><label>Участники (через запятую)</label><input type="text" id="groupMembers" placeholder="Иван, Мария, Пётр"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="newGroupCancel">Отмена</button>
+        <button class="btn btn-primary" id="newGroupCreate">Создать</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка статуса -->
+  <div class="modal-overlay" id="addStatusOverlay">
+    <div class="modal">
+      <button class="modal-close-x" data-close="addStatusOverlay"><i class="fas fa-times"></i></button>
+      <h3>Новый статус</h3>
+      <div class="input-group"><label>Текст статуса</label><input type="text" id="statusText" placeholder="Что нового?"></div>
+      <div class="input-group" style="margin-top:10px;"><label>Или URL картинки</label><input type="text" id="statusImage" placeholder="https://..."></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="addStatusCancel">Отмена</button>
+        <button class="btn btn-primary" id="addStatusCreate">Опубликовать</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка просмотра статуса -->
+  <div class="modal-overlay" id="statusViewOverlay">
+    <div class="modal status-view-modal">
+      <button class="modal-close-x" data-close="statusViewOverlay" style="color:#fff;"><i class="fas fa-times"></i></button>
+      <div class="sv-header">
+        <div class="avatar sm" id="svAvatar">?</div>
+        <div>
+          <div class="name" id="svName">—</div>
+          <div class="time" id="svTime">—</div>
+        </div>
+      </div>
+      <div class="sv-body" id="svBody">—</div>
+    </div>
+  </div>
+
+  <!-- Модалка удаления аккаунта (вторая ступень) -->
+  <div class="modal-overlay" id="deleteAccountOverlay">
+    <div class="modal">
+      <button class="modal-close-x" data-close="deleteAccountOverlay"><i class="fas fa-times"></i></button>
+      <h3 style="color:var(--danger);">⚠️ Удалить аккаунт?</h3>
+      <p style="text-align:center;color:var(--text-secondary);font-size:14px;line-height:1.5;margin-bottom:16px;">
+        Это действие <strong>необратимо</strong>. Все ваши чаты, сообщения и профиль будут удалены из облака.
+      </p>
+      <div class="input-group">
+        <label>Введите пароль для подтверждения</label>
+        <input type="password" id="deleteAccountPassword" placeholder="Ваш пароль">
+      </div>
+      <div class="input-group" style="margin-top:10px;">
+        <label>Введите слово <strong>УДАЛИТЬ</strong> заглавными буквами</label>
+        <input type="text" id="deleteAccountConfirm" placeholder="УДАЛИТЬ" autocomplete="off">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="deleteAccountCancel">Отмена</button>
+        <button class="btn btn-danger" id="deleteAccountConfirmBtn">Удалить навсегда</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка подтверждения удаления профиля (первая ступень, с таймером) -->
+  <div class="modal-overlay" id="confirmDeleteProfileOverlay">
+    <div class="modal">
+      <button class="modal-close-x" data-close="confirmDeleteProfileOverlay"><i class="fas fa-times"></i></button>
+      <h3 style="color:var(--danger);">⚠️ Удалить профиль?</h3>
+      <p style="text-align:center;color:var(--text-secondary);font-size:14px;line-height:1.6;margin-bottom:20px;">
+        Это действие <strong>необратимо</strong>. Будут удалены:
+      </p>
+      <ul style="color:var(--text-secondary);font-size:13.5px;line-height:1.8;padding-left:24px;margin-bottom:20px;">
+        <li>Ваш профиль и Flype ID</li>
+        <li>Все ваши чаты (личные и группы)</li>
+        <li>Вся история сообщений</li>
+        <li>Ключи шифрования</li>
+      </ul>
+
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:12px;background:var(--bg);border-radius:var(--radius);margin-bottom:8px;">
+        <input type="checkbox" id="deleteProfileCheck" disabled style="margin-top:2px;width:18px;height:18px;cursor:pointer;flex-shrink:0;">
+        <span style="font-size:13.5px;color:var(--text);line-height:1.4;">
+          Я знаю, что делаю. Понимаю, что восстановить данные будет невозможно.
+        </span>
+      </label>
+
+      <div id="deleteProfileTimer" style="text-align:center;font-size:12.5px;color:var(--text-muted);margin-bottom:16px;">
+        Подождите <span id="deleteProfileTimerValue">5</span> сек...
+      </div>
+
+      <div class="modal-actions" style="margin-top:0;">
+        <button class="btn btn-secondary" id="deleteProfileCancelBtn">Отмена</button>
+        <button class="btn btn-danger" id="deleteProfileConfirmBtn" disabled style="opacity:0.5;">
+          <i class="fas fa-user-times"></i> Удалить профиль
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <div class="auth-footer" id="authFooter">© 2026 Flype. Все права защищены.</div>
+
+  <!-- ==================== ОСНОВНОЙ СКРИПТ ==================== -->
+  <script>
+    const STORAGE_KEYS = {
+      users: 'flype_users',
+      currentUserId: 'flype_current_user',
+      chats: 'flype_chats',
+      messages: 'flype_messages',
+      statuses: 'flype_statuses',
+      settings: 'flype_settings'
+    };
+
+    // ============================================================
+    // КРИПТОГРАФИЯ — ECDH + AES-GCM
+    // ============================================================
+    async function generateKeyPair() {
+      return await crypto.subtle.generateKey(
+        { name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey', 'deriveBits']
+      );
+    }
+    async function exportPublicKey(publicKey) {
+      const exported = await crypto.subtle.exportKey('raw', publicKey);
+      return btoa(String.fromCharCode(...new Uint8Array(exported)));
+    }
+    async function importPublicKey(base64Key) {
+      const binary = atob(base64Key);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return await crypto.subtle.importKey('raw', bytes, { name: 'ECDH', namedCurve: 'P-256' }, true, []);
+    }
+    async function exportPrivateKey(privateKey) {
+      const exported = await crypto.subtle.exportKey('pkcs8', privateKey);
+      return btoa(String.fromCharCode(...new Uint8Array(exported)));
+    }
+    async function importPrivateKey(base64Key) {
+      const binary = atob(base64Key);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return await crypto.subtle.importKey('pkcs8', bytes, { name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey', 'deriveBits']);
+    }
+    async function deriveSharedSecret(myPrivateKey, theirPublicKey) {
+      return await crypto.subtle.deriveKey(
+        { name: 'ECDH', public: theirPublicKey }, myPrivateKey,
+        { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+      );
+    }
+    async function encryptMessage(text, sharedKey) {
+      const enc = new TextEncoder();
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, sharedKey, enc.encode(text));
+      const combined = new Uint8Array(iv.length + encrypted.byteLength);
+      combined.set(iv, 0);
+      combined.set(new Uint8Array(encrypted), iv.length);
+      return btoa(String.fromCharCode(...combined));
+    }
+    async function decryptMessage(encodedText, sharedKey) {
+      const combined = Uint8Array.from(atob(encodedText), c => c.charCodeAt(0));
+      const iv = combined.slice(0, 12);
+      const encrypted = combined.slice(12);
+      const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, sharedKey, encrypted);
+      return new TextDecoder().decode(decrypted);
+    }
+
+    // ============================================================
+    // УТИЛИТЫ
+    // ============================================================
+    function loadData(key, fallback = []) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) { return fallback; }
+    }
+    function saveData(key, data) {
+      try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+    }
+
+    let state = {
+      currentUser: null, users: [], chats: [], messages: [], statuses: [],
+      settings: { darkTheme: false, sounds: true },
+      activeChatId: null, activeTab: 'chats',
+      searchQuery: ''
+    };
+
+    function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
+    function generateFlypeId() {
+      const part = () => String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+      return `${part()}-${part()}-${part()}.fye`;
+    }
+    function formatTime(ts) { return new Date(ts).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }); }
+    function formatDate(ts) {
+      const d = new Date(ts); const now = new Date();
+      if (d.toDateString() === now.toDateString()) return 'Сегодня';
+      const y = new Date(now); y.setDate(y.getDate() - 1);
+      if (d.toDateString() === y.toDateString()) return 'Вчера';
+      return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+    }
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' Б';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' КБ';
+      return (bytes / 1048576).toFixed(1) + ' МБ';
+    }
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+    }
+    function initial(name) { return name ? name.trim().charAt(0).toUpperCase() : '?'; }
+
+    // ---------- ЗВУКИ ----------
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+      }
+      return audioCtx;
+    }
+    function playTone(freq, duration, type = 'sine', volume = 0.15) {
+      if (!state.settings.sounds) return;
+      const ctx = getAudioCtx(); if (!ctx) return;
+      try {
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.type = type; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration);
+      } catch (e) {}
+    }
+    const Sound = {
+      messageIn() { playTone(880, 0.08); setTimeout(() => playTone(1174, 0.12), 80); },
+      messageOut() { playTone(659, 0.07); setTimeout(() => playTone(880, 0.1), 60); },
+      error() { playTone(220, 0.15, 'square'); setTimeout(() => playTone(180, 0.2, 'square'), 160); },
+      send() { playTone(1200, 0.06); }
+    };
+
+    // ---------- УВЕДОМЛЕНИЯ ----------
+    function showToast(title, text, icon = 'fa-comment', duration = 3500) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<i class="fas ${icon}"></i><div class="toast-text"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(text)}</span></div>`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.classList.add('fade-out'); setTimeout(() => toast.remove(), 300); }, duration);
+    }
+
+    // ---------- ТЕМА ----------
+    function applyTheme() { document.body.classList.toggle('dark-theme', state.settings.darkTheme); }
+    function applySettings() {
+      applyTheme();
+      const st = document.getElementById('soundToggle'); if (st) st.checked = state.settings.sounds;
+      const dt = document.getElementById('darkThemeToggle'); if (dt) dt.checked = state.settings.darkTheme;
+    }
+
+    // ---------- АВТОРИЗАЦИЯ ----------
+    function checkAuth() {
+      const userId = localStorage.getItem(STORAGE_KEYS.currentUserId);
+      if (userId) {
+        const users = loadData(STORAGE_KEYS.users, []);
+        const user = users.find(u => u.id === userId);
+        if (user) { state.currentUser = user; state.users = users; showMainScreen(); return true; }
+      }
+      showAuthScreen(); return false;
+    }
+    function showAuthScreen() {
+      document.getElementById('authScreen').classList.add('active');
+      document.getElementById('mainScreen').classList.remove('active');
+      document.getElementById('authFooter').style.display = 'block';
+    }
+    function showMainScreen() {
+      document.getElementById('authScreen').classList.remove('active');
+      document.getElementById('mainScreen').classList.add('active');
+      document.getElementById('authFooter').style.display = 'none';
+      loadState(); renderAll();
+      listenToUsers(); listenToChats();
+      if (state.currentUser) {
+        const hour = new Date().getHours();
+        let g = 'Добрый день';
+        if (hour < 12) g = 'Доброе утро'; else if (hour >= 18) g = 'Добрый вечер';
+        setTimeout(() => showToast('Flype', `${g}, ${state.currentUser.firstName}!`, 'fa-hand-wave', 4000), 600);
+      }
+    }
+    function loadState() {
+      const userId = state.currentUser.id;
+      state.users = loadData(STORAGE_KEYS.users, []);
+      state.currentUser = state.users.find(u => u.id === userId) || state.currentUser;
+      state.chats = loadData(STORAGE_KEYS.chats, []);
+      state.messages = loadData(STORAGE_KEYS.messages, []);
+      state.statuses = loadData(STORAGE_KEYS.statuses, []);
+      const s = loadData(STORAGE_KEYS.settings, null);
+      if (s) state.settings = { ...state.settings, ...s };
+      applySettings();
+      state.chats = state.chats.filter(c => c.participants.includes(userId));
+    }
+    function persistChats() {
+      const all = loadData(STORAGE_KEYS.chats, []);
+      const others = all.filter(c => !c.participants.includes(state.currentUser.id));
+      saveData(STORAGE_KEYS.chats, [...others, ...state.chats]);
+    }
+    function persistMessages() {
+      const all = loadData(STORAGE_KEYS.messages, []);
+      const ids = new Set(state.chats.map(c => c.id));
+      const others = all.filter(m => !ids.has(m.chatId));
+      saveData(STORAGE_KEYS.messages, [...others, ...state.messages]);
+    }
+    function persistUsers() { saveData(STORAGE_KEYS.users, state.users); }
+    function persistStatuses() {
+      const all = loadData(STORAGE_KEYS.statuses, []);
+      const others = all.filter(s => s.userId !== state.currentUser.id);
+      saveData(STORAGE_KEYS.statuses, [...others, ...state.statuses]);
+    }
+    function persistSettings() { saveData(STORAGE_KEYS.settings, state.settings); }
+
+    // ============================================================
+    // FIREBASE
+    // ============================================================
+    function listenToUsers() {
+      if (!window.flypeFirebase) { setTimeout(listenToUsers, 500); return; }
+      const { database, ref, onValue } = window.flypeFirebase;
+      onValue(ref(database, 'users'), (snapshot) => {
+        const data = snapshot.val() || {};
+        const cloudUsers = Object.values(data);
+        const localUsers = loadData(STORAGE_KEYS.users, []);
+        const merged = [...localUsers];
+        cloudUsers.forEach(cu => {
+          const idx = merged.findIndex(u => u.id === cu.id);
+          if (idx === -1) merged.push(cu);
+          else merged[idx] = { ...merged[idx], ...cu };
+        });
+        state.users = merged;
+        renderChatList();
+        const overlay = document.getElementById('newChatOverlay');
+        if (overlay && overlay.classList.contains('open')) {
+          renderNewChatResults(document.getElementById('newChatSearch').value);
+        }
+      });
+    }
+
+    let chatsUnsubscribe = null;
+    function listenToChats() {
+      if (!window.flypeFirebase) { setTimeout(listenToChats, 500); return; }
+      const { database, ref, onValue } = window.flypeFirebase;
+      if (chatsUnsubscribe) chatsUnsubscribe();
+      chatsUnsubscribe = onValue(ref(database, 'chats'), (snapshot) => {
+        const data = snapshot.val() || {};
+        const allChats = Object.values(data);
+        const myChats = allChats.filter(c => c.participants && c.participants.includes(state.currentUser.id));
+        const localChats = loadData(STORAGE_KEYS.chats, []).filter(c => c.participants.includes(state.currentUser.id));
+        const merged = [...myChats];
+        localChats.forEach(lc => { if (!merged.find(c => c.id === lc.id)) merged.push(lc); });
+        state.chats = merged;
+        persistChats();
+        renderChatList();
+        if (state.activeChatId && !state.chats.find(c => c.id === state.activeChatId)) {
+          state.activeChatId = null; renderActiveChat();
+        }
+      });
+    }
+
+    let messagesUnsubscribe = null;
+    function listenToMessages(chatId) {
+      if (!window.flypeFirebase) { setTimeout(() => listenToMessages(chatId), 500); return; }
+      const { database, ref, onValue, update } = window.flypeFirebase;
+      if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
+      const messagesRef = ref(database, 'messages');
+      messagesUnsubscribe = onValue(messagesRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        const all = Object.entries(data).map(([id, m]) => ({ id, ...m }));
+        const chatMessages = all.filter(m => m.chatId === chatId).sort((a, b) => a.timestamp - b.timestamp);
+        state.messages = state.messages.filter(m => m.chatId !== chatId);
+        state.messages.push(...chatMessages);
+        if (state.activeChatId === chatId) renderMessages(chatId);
+        renderChatList();
+        chatMessages.forEach(m => {
+          if (m.senderId !== state.currentUser.id && !m.read) {
+            m.read = true;
+            update(ref(database, 'messages/' + m.id), { read: true }).catch(() => {});
+          }
+        });
+      });
+    }
+
+    // ---------- РЕГИСТРАЦИЯ ----------
+    async function handleRegister(e) {
+      e.preventDefault();
+      const firstName = document.getElementById('regFirstName').value.trim();
+      const lastName = document.getElementById('regLastName').value.trim();
+      const password = document.getElementById('regPassword').value;
+      let valid = true;
+      if (!firstName) { showError('regFirstName', true); valid = false; } else showError('regFirstName', false);
+      if (!lastName) { showError('regLastName', true); valid = false; } else showError('regLastName', false);
+      if (password.length < 6) { showError('regPassword', true); valid = false; } else showError('regPassword', false);
+      if (!valid) { Sound.error(); return; }
+
+      const flypeId = generateFlypeId();
+      const newUser = {
+        id: genId(), flypeId, firstName, lastName, password,
+        avatar: '', online: true, lastSeen: Date.now(), blocked: []
+      };
+
+      try {
+        const keyPair = await generateKeyPair();
+        const publicKeyStr = await exportPublicKey(keyPair.publicKey);
+        const privateKeyStr = await exportPrivateKey(keyPair.privateKey);
+        newUser.publicKey = publicKeyStr;
+        localStorage.setItem('flype_private_key_' + newUser.id, privateKeyStr);
+      } catch (err) {
+        console.error('❌ Ошибка генерации ключей:', err);
+        showToast('Ошибка', 'Не удалось создать ключи шифрования', 'fa-exclamation-circle');
+      }
+
+      const users = loadData(STORAGE_KEYS.users, []);
+      users.push(newUser);
+      saveData(STORAGE_KEYS.users, users);
+      document.getElementById('generatedFlypeId').textContent = flypeId;
+      document.getElementById('flypeIdBlock').classList.remove('hidden');
+      localStorage.setItem(STORAGE_KEYS.currentUserId, newUser.id);
+      state.currentUser = newUser; state.users = users;
+      createWelcomeChat(newUser);
+
+      try {
+        if (window.flypeFirebase) {
+          const { database, ref, set } = window.flypeFirebase;
+          await set(ref(database, 'users/' + newUser.id), newUser);
+        }
+      } catch (err) { console.error('❌ Ошибка сохранения:', err); }
+
+      Sound.send();
+      showToast('Регистрация успешна!', `Ваш Flype ID: ${flypeId}`, 'fa-check-circle', 5000);
+      setTimeout(() => showMainScreen(), 1200);
+    }
+
+    function createWelcomeChat(user) {
+      const botUser = {
+        id: 'flype_bot', flypeId: '000-000-000.fye',
+        firstName: 'Flype', lastName: 'Команда',
+        password: '', avatar: '', online: true, lastSeen: Date.now()
+      };
+      const users = loadData(STORAGE_KEYS.users, []);
+      if (!users.find(u => u.id === botUser.id)) { users.push(botUser); saveData(STORAGE_KEYS.users, users); }
+      const chatId = 'chat_welcome_' + user.id;
+      const chats = loadData(STORAGE_KEYS.chats, []);
+      if (!chats.find(c => c.id === chatId)) {
+        chats.push({ id: chatId, type: 'private', participants: [user.id, botUser.id], createdAt: Date.now(), lastMessageAt: Date.now() });
+        saveData(STORAGE_KEYS.chats, chats);
+      }
+      const messages = loadData(STORAGE_KEYS.messages, []);
+      if (!messages.find(m => m.chatId === chatId)) {
+        const welcome = [
+          `Привет, ${user.firstName}! 👋 Добро пожаловать в Flype!`,
+          'Это ваш первый чат. Здесь вы можете общаться и отправлять файлы.',
+          'Попробуйте создать новый чат или добавить статус. Приятного общения! ✨'
+        ];
+        welcome.forEach((text, i) => {
+          messages.push({
+            id: genId(), chatId, senderId: botUser.id, text,
+            timestamp: Date.now() - (welcome.length - i) * 60000, read: true, type: 'text'
+          });
+        });
+        saveData(STORAGE_KEYS.messages, messages);
+      }
+    }
+
+    // ---------- ВХОД ----------
+    function handleLogin(e) {
+      e.preventDefault();
+      const flypeId = document.getElementById('loginId').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      let valid = true;
+      const idPattern = /^\d{3}-\d{3}-\d{3}\.fye$/;
+      if (!idPattern.test(flypeId)) { showError('loginId', true); valid = false; } else showError('loginId', false);
+      if (password.length < 6) { showError('loginPassword', true); valid = false; } else showError('loginPassword', false);
+      if (!valid) { Sound.error(); return; }
+
+      const localUsers = loadData(STORAGE_KEYS.users, []);
+      const allUsers = [...localUsers];
+      state.users.forEach(u => { if (!allUsers.find(x => x.id === u.id)) allUsers.push(u); });
+      const user = allUsers.find(u => u.flypeId === flypeId && u.password === password);
+      if (!user) { Sound.error(); showToast('Ошибка входа', 'Неверный Flype ID или пароль', 'fa-exclamation-circle'); return; }
+      localStorage.setItem(STORAGE_KEYS.currentUserId, user.id);
+      state.currentUser = user; state.users = allUsers;
+      Sound.send();
+      showToast('Добро пожаловать!', `${user.firstName}, рады видеть вас снова!`, 'fa-check-circle');
+      showMainScreen();
+    }
+    function showError(fieldId, show) {
+      const input = document.getElementById(fieldId);
+      const error = document.getElementById(fieldId + 'Error');
+      if (input) input.classList.toggle('error', show);
+      if (error) error.classList.toggle('visible', show);
+    }
+
+    // ---------- ВЫХОД ----------
+    function handleLogout() {
+      if (!confirm('Вы уверены, что хотите выйти?')) return;
+      localStorage.removeItem(STORAGE_KEYS.currentUserId);
+      state.currentUser = null; state.activeChatId = null;
+      if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
+      showAuthScreen();
+      document.getElementById('loginForm').reset();
+      document.getElementById('registerForm').reset();
+      document.getElementById('flypeIdBlock').classList.add('hidden');
+      Sound.send();
+    }
+
+    // ---------- УДАЛЕНИЕ АККАУНТА (полное) ----------
+    async function deleteAccount() {
+      const user = state.currentUser;
+      if (!user) return;
+      const pwd = document.getElementById('deleteAccountPassword').value;
+      if (pwd !== user.password) {
+        Sound.error(); showToast('Неверный пароль', 'Проверьте раскладку', 'fa-exclamation-circle'); return;
+      }
+      const confirmWord = document.getElementById('deleteAccountConfirm').value.trim();
+      if (confirmWord !== 'УДАЛИТЬ') {
+        Sound.error(); showToast('Подтверждение неверно', 'Введите слово УДАЛИТЬ заглавными буквами', 'fa-exclamation-circle'); return;
+      }
+      if (!window.flypeFirebase) { showToast('Ошибка', 'Firebase не подключён', 'fa-exclamation-circle'); return; }
+
+      const { database, ref, remove, get, update } = window.flypeFirebase;
+      const userId = user.id;
+
+      try {
+        await remove(ref(database, 'users/' + userId));
+        const chatsSnapshot = await get(ref(database, 'chats'));
+        const allChats = chatsSnapshot.val() || {};
+        const myChatIds = [];
+        Object.entries(allChats).forEach(([chatId, chat]) => {
+          if (chat.participants && chat.participants.includes(userId)) myChatIds.push(chatId);
+        });
+        for (const chatId of myChatIds) {
+          const chat = allChats[chatId];
+          if (chat.type === 'group' && chat.participants.length > 2) {
+            const newParticipants = chat.participants.filter(p => p !== userId);
+            await update(ref(database, 'chats/' + chatId), { participants: newParticipants });
+          } else {
+            await remove(ref(database, 'chats/' + chatId));
+          }
+        }
+        const messagesSnapshot = await get(ref(database, 'messages'));
+        const allMessages = messagesSnapshot.val() || {};
+        const deletePromises = [];
+        Object.entries(allMessages).forEach(([msgId, msg]) => {
+          if (myChatIds.includes(msg.chatId) || msg.senderId === userId) {
+            deletePromises.push(remove(ref(database, 'messages/' + msgId)));
+          }
+        });
+        await Promise.all(deletePromises);
+
+        localStorage.removeItem(STORAGE_KEYS.currentUserId);
+        localStorage.removeItem('flype_private_key_' + userId);
+        const localUsers = loadData(STORAGE_KEYS.users, []).filter(u => u.id !== userId);
+        saveData(STORAGE_KEYS.users, localUsers);
+        const localChats = loadData(STORAGE_KEYS.chats, []).filter(c => !c.participants.includes(userId));
+        saveData(STORAGE_KEYS.chats, localChats);
+        const localMessages = loadData(STORAGE_KEYS.messages, []).filter(m => !myChatIds.includes(m.chatId) && m.senderId !== userId);
+        saveData(STORAGE_KEYS.messages, localMessages);
+
+        state.currentUser = null; state.activeChatId = null;
+        state.users = []; state.chats = []; state.messages = [];
+        if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
+
+        document.getElementById('deleteAccountOverlay').classList.remove('open');
+        showAuthScreen();
+        Sound.error();
+        showToast('Аккаунт удалён', 'Все данные удалены из облака', 'fa-user-times', 5000);
+        document.getElementById('loginForm').reset();
+        document.getElementById('registerForm').reset();
+        document.getElementById('flypeIdBlock').classList.add('hidden');
+      } catch (err) {
+        console.error('❌ Ошибка удаления аккаунта:', err);
+        showToast('Ошибка удаления', err.message || 'Не удалось удалить', 'fa-exclamation-circle');
+      }
+    }
+
+    // ---------- РЕНДЕР ----------
+    function renderAll() { renderChatList(); renderStatusList(); renderActiveChat(); renderProfile(); }
+
+    function isBlockedChat(chat) {
+      if (!chat || chat.type !== 'private') return false;
+      const otherId = chat.participants.find(p => p !== state.currentUser.id);
+      return state.currentUser.blocked && state.currentUser.blocked.includes(otherId);
+    }
+
+    function renderChatList() {
+      const container = document.getElementById('chatList'); if (!container) return;
+      let chats = [...state.chats];
+      const q = state.searchQuery.toLowerCase();
+      if (q) chats = chats.filter(c => getChatInfo(c).name.toLowerCase().includes(q));
+      chats.sort((a, b) => (b.lastMessageAt || b.createdAt) - (a.lastMessageAt || a.createdAt));
+      if (chats.length === 0) {
+        container.innerHTML = `<div style="padding:30px 16px;text-align:center;color:var(--text-secondary);font-size:14px;">
+          У вас пока нет чатов.<br><br>Найдите пользователя через поиск и добавьте его в друзья (связь должна быть взаимной), чтобы начать общение.
+        </div>`;
+        return;
+      }
+      container.innerHTML = chats.map(chat => {
+        const info = getChatInfo(chat);
+        const lastMsg = getLastMessage(chat.id);
+        const unread = getUnreadCount(chat.id);
+        const isActive = chat.id === state.activeChatId;
+        const lastText = lastMsg ? getMessagePreview(lastMsg) : 'Нет сообщений';
+        const lastTime = lastMsg ? formatTime(lastMsg.timestamp) : '';
+        return `
+          <div class="chat-item ${isActive ? 'active' : ''}" data-chat-id="${chat.id}">
+            <div class="avatar">${info.avatar ? `<img src="${escapeHtml(info.avatar)}">` : initial(info.name)}${info.online ? '<span class="online-dot"></span>' : ''}</div>
+            <div class="chat-info">
+              <div class="name">${escapeHtml(info.name)}${isBlockedChat(chat) ? ' <i class="fas fa-ban" style="color:var(--danger);font-size:11px;"></i>' : ''}</div>
+              <div class="last-msg">${escapeHtml(lastText)}</div>
+            </div>
+            <div class="chat-meta">
+              <span class="time">${lastTime}</span>
+              ${unread > 0 ? `<span class="unread-badge">${unread}</span>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+      container.querySelectorAll('.chat-item').forEach(el => {
+        el.addEventListener('click', () => {
+          state.activeChatId = el.dataset.chatId;
+          renderAll();
+          listenToMessages(state.activeChatId);
+          if (window.innerWidth <= 900) document.getElementById('sidebar').classList.add('hidden');
+        });
+      });
+    }
+
+    function getChatInfo(chat) {
+      if (!chat) return { name: 'Чат', avatar: '', online: false };
+      if (chat.type === 'group') return { name: chat.name || 'Группа', avatar: chat.avatar || '', online: false };
+      const otherId = chat.participants.find(p => p !== state.currentUser.id);
+      const other = state.users.find(u => u.id === otherId);
+      if (other) return {
+        name: `${other.firstName} ${other.lastName}`.trim(),
+        avatar: other.avatar || '',
+        online: other.online !== false,
+        flypeId: other.flypeId
+      };
+      return { name: 'Пользователь', avatar: '', online: false, flypeId: '—' };
+    }
+    function getLastMessage(chatId) {
+      const msgs = state.messages.filter(m => m.chatId === chatId);
+      if (msgs.length === 0) return null;
+      return msgs.sort((a, b) => b.timestamp - a.timestamp)[0];
+    }
+    function getUnreadCount(chatId) {
+      return state.messages.filter(m => m.chatId === chatId && m.senderId !== state.currentUser.id && !m.read).length;
+    }
+    function getMessagePreview(msg) {
+      if (msg.type === 'image') return '📷 Фото';
+      if (msg.type === 'file') return `📎 ${msg.fileName || 'Файл'}`;
+      if (msg.type === 'voice') return '🎤 Голосовое сообщение';
+      if (msg.encrypted) return '🔒 Зашифрованное сообщение';
+      return msg.text || '';
+    }
+
+    function renderActiveChat() {
+      const emptyChat = document.getElementById('emptyChat');
+      const chatHeader = document.getElementById('chatHeader');
+      const messagesContainer = document.getElementById('messagesContainer');
+      const chatInputArea = document.getElementById('chatInputArea');
+      const typingIndicator = document.getElementById('typingIndicator');
+      if (!state.activeChatId) {
+        emptyChat.classList.remove('hidden');
+        chatHeader.classList.add('hidden');
+        messagesContainer.classList.add('hidden');
+        chatInputArea.classList.add('hidden');
+        typingIndicator.classList.add('hidden');
+        return;
+      }
+      const chat = state.chats.find(c => c.id === state.activeChatId);
+      if (!chat) { state.activeChatId = null; renderActiveChat(); return; }
+      emptyChat.classList.add('hidden');
+      chatHeader.classList.remove('hidden');
+      messagesContainer.classList.remove('hidden');
+      chatInputArea.classList.remove('hidden');
+      const info = getChatInfo(chat);
+      document.getElementById('chatHeaderName').textContent = info.name;
+      const statusEl = document.getElementById('chatHeaderStatus');
+      if (info.online) { statusEl.textContent = 'в сети'; statusEl.className = 'status online'; }
+      else { statusEl.textContent = 'был(а) недавно'; statusEl.className = 'status'; }
+      const avatarEl = document.getElementById('chatHeaderAvatar');
+      if (info.avatar) avatarEl.innerHTML = `<img src="${escapeHtml(info.avatar)}">`;
+      else avatarEl.textContent = initial(info.name);
+      let changed = false;
+      state.messages.forEach(m => {
+        if (m.chatId === chat.id && m.senderId !== state.currentUser.id && !m.read) { m.read = true; changed = true; }
+      });
+      if (changed) persistMessages();
+      listenToMessages(chat.id);
+      renderMessages(chat.id);
+      renderChatList();
+    }
+
+    async function renderMessages(chatId) {
+      const container = document.getElementById('messagesContainer');
+      const hiddenKey = 'flype_hidden_msgs_' + state.currentUser.id;
+      const hidden = loadData(hiddenKey, []);
+      const blocked = state.currentUser.blocked || [];
+      const msgs = state.messages
+        .filter(m => {
+          if (m.chatId !== chatId) return false;
+          if (hidden.includes(m.id)) return false;
+          if (blocked.includes(m.senderId)) return false;
+          return true;
+        })
+        .sort((a, b) => a.timestamp - b.timestamp);
+      if (msgs.length === 0) {
+        container.innerHTML = `<div style="text-align:center;color:var(--text-secondary);font-size:14px;padding:40px 0;">Нет сообщений. Начните общение!</div>`;
+        return;
+      }
+      let html = ''; let lastDate = '';
+      for (const msg of msgs) {
+        const msgDate = formatDate(msg.timestamp);
+        if (msgDate !== lastDate) {
+          html += `<div style="text-align:center;font-size:12px;color:var(--text-muted);margin:12px 0 4px;">${msgDate}</div>`;
+          lastDate = msgDate;
+        }
+        html += await renderMessageBubble(msg, chatId);
+      }
+      container.innerHTML = html;
+      container.scrollTop = container.scrollHeight;
+
+      container.querySelectorAll('.msg-image').forEach(img => {
+        img.addEventListener('click', () => window.open(img.src, '_blank'));
+      });
+      container.querySelectorAll('.message-bubble').forEach((bubble, index) => {
+        const msg = msgs[index];
+        if (!msg) return;
+        bubble.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          showMessageMenu(e.clientX, e.clientY, msg, chatId);
+        });
+        let pressTimer = null;
+        bubble.addEventListener('touchstart', (e) => {
+          pressTimer = setTimeout(() => {
+            const touch = e.touches[0];
+            showMessageMenu(touch.clientX, touch.clientY, msg, chatId);
+            if (navigator.vibrate) navigator.vibrate(30);
+          }, 500);
+        }, { passive: true });
+        bubble.addEventListener('touchend', () => clearTimeout(pressTimer));
+        bubble.addEventListener('touchmove', () => clearTimeout(pressTimer));
+      });
+    }
+
+    async function renderMessageBubble(msg, chatId) {
+      const isOut = msg.senderId === state.currentUser.id;
+      const chat = state.chats.find(c => c.id === chatId);
+      const sender = state.users.find(u => u.id === msg.senderId);
+      const senderName = sender ? `${sender.firstName} ${sender.lastName}` : 'Неизвестный';
+
+      let displayText = msg.text;
+      if (msg.encrypted && msg.type === 'text') {
+        try {
+          const otherId = chat.participants.find(p => p !== state.currentUser.id);
+          const other = state.users.find(u => u.id === otherId);
+          if (other && other.publicKey) {
+            const myPrivateStr = localStorage.getItem('flype_private_key_' + state.currentUser.id);
+            if (myPrivateStr) {
+              const myPrivate = await importPrivateKey(myPrivateStr);
+              const theirPublic = await importPublicKey(other.publicKey);
+              const sharedKey = await deriveSharedSecret(myPrivate, theirPublic);
+              displayText = await decryptMessage(msg.text, sharedKey);
+            }
+          }
+        } catch (err) {
+          console.error('❌ Ошибка расшифровки:', err);
+          displayText = '🔒 Не удалось расшифровать';
+        }
+      }
+
+      let content = '';
+      if (msg.type === 'image') content = `<div>${escapeHtml(msg.text || '')}</div><img class="msg-image" src="${msg.imageUrl}">`;
+      else if (msg.type === 'file') content = `<div class="file-attach"><i class="fas fa-file"></i><div style="flex:1;min-width:0;"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(msg.fileName)}</div><div style="font-size:11px;opacity:0.7;">${formatFileSize(msg.fileSize || 0)}</div></div></div>`;
+      else if (msg.type === 'voice') content = `<div class="voice-msg"><button class="play-btn" data-duration="${msg.duration || 5}"><i class="fas fa-play"></i></button><div class="wave"></div><span class="dur">${formatDuration(msg.duration || 5)}</span></div>`;
+      else content = `<div>${escapeHtml(displayText || '')}</div>`;
+
+      let checks = '';
+      if (isOut) checks = msg.read
+        ? '<span class="checks"><i class="fas fa-check-double" style="color:#a8e6ff;"></i></span>'
+        : '<span class="checks"><i class="fas fa-check" style="color:rgba(255,255,255,0.6);"></i></span>';
+      let senderHtml = '';
+      if (chat && chat.type === 'group' && !isOut) senderHtml = `<div class="sender-name">${escapeHtml(senderName)}</div>`;
+      const lockIcon = msg.encrypted ? '<span class="encrypted-badge" title="Зашифровано end-to-end"><i class="fas fa-lock"></i></span>' : '';
+
+      return `<div class="message-row ${isOut ? 'out' : 'in'}"><div class="message-bubble">${senderHtml}${content}<div class="msg-time">${lockIcon}${formatTime(msg.timestamp)} ${checks}</div></div></div>`;
+    }
+    function formatDuration(sec) {
+      const m = Math.floor(sec / 60); const s = sec % 60;
+      return `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    // ============================================================
+    // МЕНЮ И УДАЛЕНИЕ СООБЩЕНИЯ (ТОЛЬКО У СЕБЯ)
+    // ============================================================
+    function showMessageMenu(x, y, msg, chatId) {
+      const old = document.getElementById('msgMenu');
+      if (old) old.remove();
+      const menu = document.createElement('div');
+      menu.className = 'message-menu';
+      menu.id = 'msgMenu';
+      menu.style.left = Math.min(x, window.innerWidth - 220) + 'px';
+      menu.style.top = Math.min(y, window.innerHeight - 200) + 'px';
+      menu.innerHTML = `
+        <button data-action="copy"><i class="fas fa-copy"></i> Копировать текст</button>
+        <button data-action="delete-me" class="danger"><i class="fas fa-eye-slash"></i> Удалить у себя</button>
+        <button data-action="close"><i class="fas fa-times"></i> Отмена</button>
+      `;
+      document.body.appendChild(menu);
+      menu.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const action = btn.dataset.action;
+          menu.remove();
+          if (action === 'copy') {
+            const text = msg.encrypted ? '🔒 Зашифрованное сообщение' : (msg.text || '');
+            if (text) navigator.clipboard?.writeText(text).then(() => showToast('Скопировано', 'Текст скопирован', 'fa-copy', 1500)).catch(() => {});
+          } else if (action === 'delete-me') {
+            hideMessageForMe(msg.id, chatId);
+          }
+        });
+      });
+      setTimeout(() => {
+        const closeHandler = (e) => {
+          if (!menu.contains(e.target)) {
+            menu.remove(); document.removeEventListener('click', closeHandler);
+          }
+        };
+        document.addEventListener('click', closeHandler);
+      }, 50);
+    }
+
+    function hideMessageForMe(msgId, chatId) {
+      const hiddenKey = 'flype_hidden_msgs_' + state.currentUser.id;
+      const hidden = loadData(hiddenKey, []);
+      if (!hidden.includes(msgId)) { hidden.push(msgId); saveData(hiddenKey, hidden); }
+      renderMessages(chatId);
+      renderChatList();
+      Sound.send();
+      showToast('Удалено', 'Сообщение скрыто только у вас', 'fa-eye-slash', 2000);
+    }
+
+    // ---------- СТАТУСЫ ----------
+    function renderStatusList() {
+      const container = document.getElementById('statusList'); if (!container) return;
+      const now = Date.now(); const day = 86400000;
+      let statuses = state.statuses.filter(s => now - s.timestamp < day);
+      const byUser = {};
+      statuses.forEach(s => { if (!byUser[s.userId] || s.timestamp > byUser[s.userId].timestamp) byUser[s.userId] = s; });
+      statuses = Object.values(byUser).sort((a, b) => b.timestamp - a.timestamp);
+      if (statuses.length === 0) {
+        container.innerHTML = `<div style="padding:30px 16px;text-align:center;color:var(--text-secondary);font-size:14px;">Нет статусов за 24 часа</div>`;
+        return;
+      }
+      container.innerHTML = statuses.map(s => {
+        const u = state.users.find(x => x.id === s.userId); if (!u) return '';
+        const name = `${u.firstName} ${u.lastName}`.trim();
+        const viewed = s.viewedBy && s.viewedBy.includes(state.currentUser.id);
+        return `<div class="status-item" data-status-id="${s.id}"><div class="status-avatar ${viewed ? 'viewed' : ''}"><div class="inner">${u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : initial(name)}</div></div><div class="status-info"><div class="name">${escapeHtml(name)}</div><div class="time">${getTimeAgo(s.timestamp)}</div></div></div>`;
+      }).join('');
+      container.querySelectorAll('.status-item').forEach(el => {
+        el.addEventListener('click', () => openStatusView(el.dataset.statusId));
+      });
+    }
+    function getTimeAgo(ts) {
+      const d = Date.now() - ts; const m = Math.floor(d / 60000);
+      if (m < 1) return 'только что';
+      if (m < 60) return `${m} мин назад`;
+      const h = Math.floor(m / 60);
+      if (h < 24) return `${h} ч назад`;
+      return 'давно';
+    }
+    function openStatusView(id) {
+      const s = state.statuses.find(x => x.id === id); if (!s) return;
+      const u = state.users.find(x => x.id === s.userId);
+      const name = u ? `${u.firstName} ${u.lastName}`.trim() : 'Неизвестный';
+      document.getElementById('svName').textContent = name;
+      document.getElementById('svTime').textContent = getTimeAgo(s.timestamp);
+      const av = document.getElementById('svAvatar');
+      if (u && u.avatar) av.innerHTML = `<img src="${escapeHtml(u.avatar)}">`;
+      else av.textContent = initial(name);
+      const body = document.getElementById('svBody');
+      if (s.imageUrl) body.innerHTML = `<img src="${escapeHtml(s.imageUrl)}">`;
+      else body.innerHTML = escapeHtml(s.text || '');
+      if (!s.viewedBy) s.viewedBy = [];
+      if (!s.viewedBy.includes(state.currentUser.id)) { s.viewedBy.push(state.currentUser.id); persistStatuses(); renderStatusList(); }
+      document.getElementById('statusViewOverlay').classList.add('open');
+      Sound.messageIn();
+    }
+
+    // ---------- ПРОФИЛЬ ----------
+    function renderProfile() {
+      const u = state.currentUser; if (!u) return;
+      const name = `${u.firstName} ${u.lastName}`.trim();
+      document.getElementById('profileName').textContent = name;
+      document.getElementById('profileStatus').textContent = 'в сети';
+      document.getElementById('profileFlypeId').textContent = u.flypeId;
+      const av = document.getElementById('profileAvatar');
+      if (u.avatar) av.innerHTML = `<img src="${escapeHtml(u.avatar)}">`;
+      else av.textContent = initial(name);
+    }
+
+    // ---------- УДАЛЕНИЕ КОНТАКТА ----------
+    async function deleteContact() {
+      if (!state.activeChatId) return;
+      const chat = state.chats.find(c => c.id === state.activeChatId);
+      if (!chat || chat.type !== 'private') { showToast('Недоступно', 'Только для личных чатов', 'fa-info-circle'); return; }
+      const info = getChatInfo(chat);
+      if (!confirm(`Удалить контакт «${info.name}»?\n\nВся история переписки будет удалена у обоих.`)) return;
+      try {
+        const chatId = chat.id;
+        if (window.flypeFirebase) {
+          const { database, ref, remove, get } = window.flypeFirebase;
+          await remove(ref(database, 'chats/' + chatId));
+          const messagesSnapshot = await get(ref(database, 'messages'));
+          const data = messagesSnapshot.val() || {};
+          const toDelete = [];
+          Object.entries(data).forEach(([id, m]) => {
+            if (m.chatId === chatId) toDelete.push(remove(ref(database, 'messages/' + id)));
+          });
+          await Promise.all(toDelete);
+        }
+        state.chats = state.chats.filter(c => c.id !== chatId);
+        state.messages = state.messages.filter(m => m.chatId !== chatId);
+        persistChats(); persistMessages();
+        state.activeChatId = null;
+        document.getElementById('profilePanel').classList.remove('open');
+        renderAll();
+        Sound.send();
+        showToast('Контакт удалён', `Чат с ${info.name} удалён`, 'fa-user-minus', 3000);
+      } catch (err) {
+        console.error('❌ Ошибка удаления контакта:', err);
+        showToast('Ошибка', 'Не удалось удалить контакт', 'fa-exclamation-circle');
+      }
+    }
+
+    // ---------- БЛОКИРОВКА ----------
+    async function toggleBlockContact() {
+      if (!state.activeChatId) return;
+      const chat = state.chats.find(c => c.id === state.activeChatId);
+      if (!chat || chat.type !== 'private') { showToast('Недоступно', 'Только для личных чатов', 'fa-info-circle'); return; }
+      const otherId = chat.participants.find(p => p !== state.currentUser.id);
+      const other = state.users.find(u => u.id === otherId);
+      if (!other) return;
+      if (!state.currentUser.blocked) state.currentUser.blocked = [];
+      const isBlocked = state.currentUser.blocked.includes(otherId);
+      if (isBlocked) {
+        state.currentUser.blocked = state.currentUser.blocked.filter(id => id !== otherId);
+        showToast('Разблокирован', `${other.firstName} снова может писать`, 'fa-unlock', 2500);
+      } else {
+        if (!confirm(`Заблокировать ${other.firstName}?\n\nВы не будете видеть его сообщения.`)) return;
+        state.currentUser.blocked.push(otherId);
+        showToast('Заблокирован', `${other.firstName} больше не может вам писать`, 'fa-ban', 3000);
+      }
+      try {
+        if (window.flypeFirebase) {
+          const { database, ref, set } = window.flypeFirebase;
+          await set(ref(database, 'users/' + state.currentUser.id), state.currentUser);
+        }
+        persistUsers();
+      } catch (err) { console.error('❌ Ошибка сохранения блокировки:', err); }
+      updateBlockButton();
+      renderChatList();
+      renderMessages(state.activeChatId);
+    }
+
+    function updateBlockButton() {
+      if (!state.activeChatId) return;
+      const chat = state.chats.find(c => c.id === state.activeChatId);
+      if (!chat || chat.type !== 'private') return;
+      const otherId = chat.participants.find(p => p !== state.currentUser.id);
+      const isBlocked = state.currentUser.blocked && state.currentUser.blocked.includes(otherId);
+      const btn = document.getElementById('blockContactBtn');
+      if (!btn) return;
+      btn.innerHTML = isBlocked
+        ? '<i class="fas fa-unlock"></i> Разблокировать'
+        : '<i class="fas fa-ban"></i> Заблокировать';
+    }
+
+    // ---------- СООБЩЕНИЯ ----------
+    async function sendMessage(text, type = 'text', extra = {}) {
+      if (!state.activeChatId) return;
+      if (type === 'text' && !text.trim()) return;
+      const chat = state.chats.find(c => c.id === state.activeChatId);
+      if (!chat) return;
+
+      if (chat.type === 'private') {
+        const otherId = chat.participants.find(p => p !== state.currentUser.id);
+        if (state.currentUser.blocked && state.currentUser.blocked.includes(otherId)) {
+          showToast('Заблокирован', 'Разблокируйте пользователя, чтобы писать', 'fa-ban');
+          return;
+        }
+      }
+
+      let encryptedText = text.trim();
+      let isEncrypted = false;
+      if (chat.type === 'private' && type === 'text' && text.trim()) {
+        try {
+          const otherId = chat.participants.find(p => p !== state.currentUser.id);
+          const other = state.users.find(u => u.id === otherId);
+          if (other && other.publicKey) {
+            const myPrivateStr = localStorage.getItem('flype_private_key_' + state.currentUser.id);
+            if (myPrivateStr) {
+              const myPrivate = await importPrivateKey(myPrivateStr);
+              const theirPublic = await importPublicKey(other.publicKey);
+              const sharedKey = await deriveSharedSecret(myPrivate, theirPublic);
+              encryptedText = await encryptMessage(text.trim(), sharedKey);
+              isEncrypted = true;
+            }
+          }
+        } catch (err) { console.error('❌ Ошибка шифрования:', err); }
+      }
+
+      const msg = {
+        chatId: state.activeChatId, senderId: state.currentUser.id,
+        text: encryptedText, encrypted: isEncrypted,
+        timestamp: Date.now(), read: false, type, ...extra
+      };
+      const localId = genId();
+      state.messages.push({ id: localId, ...msg });
+      if (chat) {
+        chat.lastMessageAt = Date.now();
+        chat.lastMessage = type === 'text' ? (isEncrypted ? '🔒 Зашифрованное сообщение' : text) : getMessagePreview(msg);
+      }
+      persistMessages(); persistChats();
+      renderMessages(state.activeChatId); renderChatList();
+      Sound.send();
+      const container = document.getElementById('messagesContainer');
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        if (window.flypeFirebase) {
+          const { database, ref, push, set, update } = window.flypeFirebase;
+          const newMsgRef = push(ref(database, 'messages'));
+          await set(newMsgRef, msg);
+          if (chat) {
+            await update(ref(database, 'chats/' + chat.id), {
+              lastMessageAt: msg.timestamp, lastMessage: chat.lastMessage
+            });
+          }
+        }
+      } catch (err) {
+        console.error('❌ Ошибка отправки:', err);
+        showToast('Ошибка', 'Сообщение не доставлено', 'fa-exclamation-circle');
+      }
+    }
+
+    // ============================================================
+    // ЗАГРУЗКА АВАТАРКИ ЧЕРЕЗ ФАЙЛ
+    // ============================================================
+    let pendingAvatarData = null;
+
+    document.getElementById('settingsAvatarBtn').addEventListener('click', () => {
+      document.getElementById('settingsAvatarFile').click();
+    });
+
+    document.getElementById('settingsAvatarFile').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 1024 * 1024) {
+        Sound.error();
+        showToast('Файл слишком большой', 'Максимум 1 МБ. Сожмите фото.', 'fa-exclamation-circle', 4000);
+        e.target.value = '';
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        Sound.error();
+        showToast('Не картинка', 'Выберите JPG, PNG или GIF.', 'fa-exclamation-circle');
+        e.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        pendingAvatarData = ev.target.result;
+        const preview = document.getElementById('settingsAvatarPreview');
+        preview.innerHTML = `<img src="${pendingAvatarData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        Sound.send();
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    });
+
+    document.getElementById('settingsAvatarRemoveBtn').addEventListener('click', () => {
+      pendingAvatarData = '';
+      const preview = document.getElementById('settingsAvatarPreview');
+      preview.textContent = initial(`${state.currentUser.firstName} ${state.currentUser.lastName}`);
+      Sound.send();
+    });
+
+    // ============================================================
+    // УДАЛЕНИЕ ПРОФИЛЯ ИЗ НАСТРОЕК (с таймером 5 сек)
+    // ============================================================
+    let deleteProfileTimerInterval = null;
+    let deleteProfileSecondsLeft = 5;
+
+    function openConfirmDeleteProfile() {
+      const check = document.getElementById('deleteProfileCheck');
+      const btn = document.getElementById('deleteProfileConfirmBtn');
+      const timerBox = document.getElementById('deleteProfileTimer');
+      const timerVal = document.getElementById('deleteProfileTimerValue');
+
+      check.checked = false;
+      check.disabled = true;
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      timerBox.style.display = 'block';
+      timerVal.textContent = '5';
+      deleteProfileSecondsLeft = 5;
+
+      document.getElementById('confirmDeleteProfileOverlay').classList.add('open');
+
+      if (deleteProfileTimerInterval) clearInterval(deleteProfileTimerInterval);
+
+      deleteProfileTimerInterval = setInterval(() => {
+        deleteProfileSecondsLeft--;
+        timerVal.textContent = deleteProfileSecondsLeft;
+
+        if (deleteProfileSecondsLeft <= 0) {
+          clearInterval(deleteProfileTimerInterval);
+          deleteProfileTimerInterval = null;
+          check.disabled = false;
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          timerBox.style.display = 'none';
+          Sound.send();
+        }
+      }, 1000);
+    }
+
+    function closeConfirmDeleteProfile() {
+      if (deleteProfileTimerInterval) {
+        clearInterval(deleteProfileTimerInterval);
+        deleteProfileTimerInterval = null;
+      }
+      deleteProfileSecondsLeft = 5;
+      document.getElementById('confirmDeleteProfileOverlay').classList.remove('open');
+    }
+
+    document.getElementById('settingsDeleteProfileBtn').addEventListener('click', openConfirmDeleteProfile);
+    document.getElementById('deleteProfileCancelBtn').addEventListener('click', closeConfirmDeleteProfile);
+
+    document.getElementById('deleteProfileConfirmBtn').addEventListener('click', async () => {
+      const check = document.getElementById('deleteProfileCheck');
+      if (!check.checked) {
+        Sound.error();
+        showToast('Подтвердите', 'Поставьте галочку «Я знаю, что делаю»', 'fa-exclamation-circle');
+        return;
+      }
+      closeConfirmDeleteProfile();
+      document.getElementById('settingsOverlay').classList.remove('open');
+      setTimeout(() => {
+        document.getElementById('deleteAccountPassword').value = '';
+        document.getElementById('deleteAccountConfirm').value = '';
+        document.getElementById('deleteAccountOverlay').classList.add('open');
+        showToast('Введите пароль', 'Для подтверждения удаления нужен пароль', 'fa-info-circle', 3500);
+      }, 200);
+    });
+
+    // Сброс таймера при закрытии
+    document.getElementById('confirmDeleteProfileOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('confirmDeleteProfileOverlay')) {
+        closeConfirmDeleteProfile();
+      }
+    });
+
+    // ============================================================
+    // ОБРАБОТЧИКИ ОБЩИЕ
+    // ============================================================
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.dataset.tab;
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        document.getElementById(target === 'login' ? 'loginForm' : 'registerForm').classList.add('active');
+        document.querySelectorAll('.error-text').forEach(e => e.classList.remove('visible'));
+        document.querySelectorAll('.input-group input').forEach(i => i.classList.remove('error'));
+      });
+    });
+
+    ['regFirstName', 'regLastName'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        const f = document.getElementById('regFirstName').value.trim();
+        const l = document.getElementById('regLastName').value.trim();
+        if (f && l) {
+          const el = document.getElementById('generatedFlypeId');
+          if (el.textContent === '—') {
+            el.textContent = generateFlypeId();
+            document.getElementById('flypeIdBlock').classList.remove('hidden');
+          }
+        }
+      });
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', handleRegister);
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+    document.querySelectorAll('.sidebar-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.dataset.stab;
+        state.activeTab = target;
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(target === 'chats' ? 'tabChats' : 'tabStatuses').classList.add('active');
+      });
+    });
+
+    document.getElementById('globalSearch').addEventListener('input', e => {
+      state.searchQuery = e.target.value; renderChatList();
+    });
+
+    document.getElementById('sendBtn').addEventListener('click', () => {
+      const input = document.getElementById('messageInput');
+      if (input.value.trim()) { sendMessage(input.value); input.value = ''; input.style.height = 'auto'; }
+    });
+
+    document.getElementById('messageInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('sendBtn').click(); }
+    });
+    document.getElementById('messageInput').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    document.getElementById('attachBtn').addEventListener('click', () => document.getElementById('fileInput').click());
+    document.getElementById('fileInput').addEventListener('change', e => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        if (file.type.startsWith('image/')) sendMessage('', 'image', { imageUrl: ev.target.result, fileName: file.name, fileSize: file.size });
+        else sendMessage('', 'file', { fileName: file.name, fileSize: file.size });
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    });
+
+    // Заглушки
+    document.getElementById('voiceBtn').addEventListener('click', () => {
+      showToast('Функция недоступна', 'Извините, голосовые сообщения пока не работают. Мы работаем над этим.', 'fa-microphone-slash', 4000);
+      Sound.error();
+    });
+    document.getElementById('callBtn').addEventListener('click', () => {
+      showToast('Функция недоступна', 'Извините, звонки пока не работают. Мы работаем над этим.', 'fa-phone-slash', 4000);
+      Sound.error();
+    });
+    document.getElementById('videoCallBtn').addEventListener('click', () => {
+      showToast('Функция недоступна', 'Извините, видеозвонки пока не работают. Мы работаем над этим.', 'fa-video-slash', 4000);
+      Sound.error();
+    });
+
+    // Информация о собеседнике
+    document.getElementById('infoBtn').addEventListener('click', () => {
+      if (!state.activeChatId) return;
+      const chat = state.chats.find(c => c.id === state.activeChatId);
+      if (!chat) return;
+      const info = getChatInfo(chat);
+      document.getElementById('contactName').textContent = info.name;
+      document.getElementById('contactStatus').textContent = info.online ? 'в сети' : 'был(а) недавно';
+      document.getElementById('contactFlypeId').textContent =
+        chat.type === 'group'
+          ? `Группа · ${chat.participants.length} участников`
+          : (info.flypeId || '—');
+      const av = document.getElementById('contactAvatar');
+      if (info.avatar) av.innerHTML = `<img src="${escapeHtml(info.avatar)}">`;
+      else av.textContent = initial(info.name);
+      document.getElementById('contactProfile').classList.remove('hidden');
+      document.getElementById('myProfile').classList.add('hidden');
+      document.getElementById('profilePanel').classList.add('open');
+      updateBlockButton();
+    });
+
+    document.getElementById('closeProfileBtn').addEventListener('click', () => {
+      document.getElementById('profilePanel').classList.remove('open');
+    });
+
+    document.getElementById('deleteContactBtn').addEventListener('click', deleteContact);
+    document.getElementById('blockContactBtn').addEventListener('click', toggleBlockContact);
+
+    // Мой Flype ID
+    document.getElementById('myIdBtn').addEventListener('click', () => {
+      const u = state.currentUser;
+      if (!u) return;
+      document.getElementById('myIdValue').textContent = u.flypeId;
+      document.getElementById('myIdOverlay').classList.add('open');
+    });
+    document.getElementById('myIdCloseBtn2').addEventListener('click', () => {
+      document.getElementById('myIdOverlay').classList.remove('open');
+    });
+    document.getElementById('myIdCopyBtn').addEventListener('click', async () => {
+      const u = state.currentUser;
+      if (!u) return;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(u.flypeId);
+          showToast('Скопировано', 'Flype ID в буфере обмена', 'fa-copy', 2000);
+        } else {
+          const textarea = document.createElement('textarea');
+          textarea.value = u.flypeId;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          showToast('Скопировано', 'Flype ID в буфере обмена', 'fa-copy', 2000);
+        }
+        Sound.send();
+      } catch (err) {
+        console.error('❌ Ошибка копирования:', err);
+        showToast('Ошибка', 'Не удалось скопировать. Скопируйте вручную.', 'fa-exclamation-circle');
+      }
+    });
+
+    // Настройки
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+      const u = state.currentUser;
+      document.getElementById('settingsFirstName').value = u.firstName;
+      document.getElementById('settingsLastName').value = u.lastName;
+      document.getElementById('settingsFlypeId').textContent = u.flypeId;
+      document.getElementById('darkThemeToggle').checked = state.settings.darkTheme;
+      document.getElementById('soundToggle').checked = state.settings.sounds;
+
+      pendingAvatarData = u.avatar || '';
+      const preview = document.getElementById('settingsAvatarPreview');
+      if (u.avatar) {
+        preview.innerHTML = `<img src="${escapeHtml(u.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      } else {
+        preview.textContent = initial(`${u.firstName} ${u.lastName}`);
+      }
+
+      document.getElementById('settingsOverlay').classList.add('open');
+    });
+    document.getElementById('settingsCancel').addEventListener('click', () => {
+      document.getElementById('settingsOverlay').classList.remove('open');
+    });
+    document.getElementById('settingsSave').addEventListener('click', async () => {
+      const fn = document.getElementById('settingsFirstName').value.trim();
+      const ln = document.getElementById('settingsLastName').value.trim();
+      const av = pendingAvatarData || '';
+      const dt = document.getElementById('darkThemeToggle').checked;
+      const sd = document.getElementById('soundToggle').checked;
+
+      if (!fn || !ln) {
+        Sound.error();
+        showToast('Ошибка', 'Имя и фамилия не могут быть пустыми', 'fa-exclamation-circle');
+        return;
+      }
+
+      state.currentUser.firstName = fn;
+      state.currentUser.lastName = ln;
+      state.currentUser.avatar = av;
+
+      const idx = state.users.findIndex(u => u.id === state.currentUser.id);
+      if (idx !== -1) state.users[idx] = state.currentUser;
+
+      state.settings.darkTheme = dt;
+      state.settings.sounds = sd;
+
+      persistUsers(); persistSettings(); applySettings(); renderAll();
+
+      try {
+        if (window.flypeFirebase) {
+          const { database, ref, set } = window.flypeFirebase;
+          await set(ref(database, 'users/' + state.currentUser.id), state.currentUser);
+        }
+      } catch (err) { console.error('❌ Ошибка синхронизации профиля:', err); }
+
+      pendingAvatarData = null;
+      document.getElementById('settingsOverlay').classList.remove('open');
+      Sound.send();
+      showToast('Сохранено', 'Настройки обновлены', 'fa-check-circle');
+    });
+
+    // Новый чат
+    document.getElementById('newChatBtn').addEventListener('click', () => {
+      document.getElementById('newChatSearch').value = '';
+      renderNewChatResults('');
+      document.getElementById('newChatOverlay').classList.add('open');
+    });
+    document.getElementById('newChatCancel').addEventListener('click', () => {
+      document.getElementById('newChatOverlay').classList.remove('open');
+    });
+    document.getElementById('newChatSearch').addEventListener('input', e => renderNewChatResults(e.target.value));
+    function renderNewChatResults(query) {
+      const container = document.getElementById('newChatResults');
+      const q = query.trim().toLowerCase();
+      let users = state.users.filter(u => u.id !== state.currentUser.id && u.id !== 'flype_bot');
+      if (q) users = users.filter(u => {
+        const n = `${u.firstName} ${u.lastName}`.toLowerCase();
+        return n.includes(q) || u.flypeId.toLowerCase().includes(q);
+      });
+      if (users.length === 0) {
+        container.innerHTML = `<div style="text-align:center;color:var(--text-secondary);font-size:13.5px;padding:16px;">${q ? 'Ничего не найдено' : 'Нет других пользователей'}</div>`;
+        return;
+      }
+      container.innerHTML = users.map(u => {
+        const n = `${u.firstName} ${u.lastName}`.trim();
+        return `<div class="chat-item" data-user-id="${u.id}" style="border-radius:8px;margin:4px 0;border-left:none;"><div class="avatar sm">${u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : initial(n)}</div><div class="chat-info"><div class="name">${escapeHtml(n)}</div><div class="last-msg" style="font-family:monospace;font-size:11px;">${u.flypeId}</div></div></div>`;
+      }).join('');
+      container.querySelectorAll('.chat-item').forEach(el => {
+        el.addEventListener('click', () => {
+          openChatWithUser(el.dataset.userId);
+          document.getElementById('newChatOverlay').classList.remove('open');
+        });
+      });
+    }
+
+    async function openChatWithUser(userId) {
+      let chat = state.chats.find(c => c.type === 'private' && c.participants.includes(state.currentUser.id) && c.participants.includes(userId));
+      if (!chat && window.flypeFirebase) {
+        try {
+          const { database, ref, get } = window.flypeFirebase;
+          const snapshot = await get(ref(database, 'chats'));
+          const all = snapshot.val() || {};
+          const found = Object.values(all).find(c => c.type === 'private' && c.participants && c.participants.includes(state.currentUser.id) && c.participants.includes(userId));
+          if (found) {
+            chat = found;
+            if (!state.chats.find(c => c.id === chat.id)) state.chats.push(chat);
+            persistChats();
+          }
+        } catch (err) { console.error('Ошибка поиска чата:', err); }
+      }
+      if (!chat) {
+        chat = {
+          id: genId(), type: 'private',
+          participants: [state.currentUser.id, userId],
+          createdAt: Date.now(), lastMessageAt: Date.now(),
+          createdBy: state.currentUser.id
+        };
+        state.chats.push(chat); persistChats();
+        try {
+          if (window.flypeFirebase) {
+            const { database, ref, set } = window.flypeFirebase;
+            await set(ref(database, 'chats/' + chat.id), chat);
+          }
+        } catch (err) { console.error('Ошибка создания чата:', err); }
+      }
+      state.activeChatId = chat.id;
+      renderAll();
+      listenToMessages(chat.id);
+      if (window.innerWidth <= 900) document.getElementById('sidebar').classList.add('hidden');
+    }
+
+    document.getElementById('newGroupBtn').addEventListener('click', () => {
+      document.getElementById('groupName').value = '';
+      document.getElementById('groupMembers').value = '';
+      document.getElementById('newGroupOverlay').classList.add('open');
+    });
+    document.getElementById('newGroupCancel').addEventListener('click', () => {
+      document.getElementById('newGroupOverlay').classList.remove('open');
+    });
+    document.getElementById('newGroupCreate').addEventListener('click', async () => {
+      const name = document.getElementById('groupName').value.trim();
+      const members = document.getElementById('groupMembers').value.trim();
+      if (!name) { Sound.error(); showToast('Ошибка', 'Введите название группы', 'fa-exclamation-circle'); return; }
+      const names = members.split(',').map(s => s.trim()).filter(Boolean);
+      const ids = [state.currentUser.id];
+      names.forEach(nm => {
+        const u = state.users.find(x => `${x.firstName} ${x.lastName}`.toLowerCase().includes(nm.toLowerCase()));
+        if (u && !ids.includes(u.id)) ids.push(u.id);
+      });
+      const chat = {
+        id: genId(), type: 'group', name, avatar: '',
+        participants: ids, createdAt: Date.now(),
+        lastMessageAt: Date.now(), createdBy: state.currentUser.id
+      };
+      state.chats.push(chat); persistChats();
+      try {
+        if (window.flypeFirebase) {
+          const { database, ref, set } = window.flypeFirebase;
+          await set(ref(database, 'chats/' + chat.id), chat);
+        }
+      } catch (err) { console.error('Ошибка создания группы:', err); }
+      state.activeChatId = chat.id; renderAll();
+      listenToMessages(chat.id);
+      document.getElementById('newGroupOverlay').classList.remove('open');
+      Sound.send(); showToast('Группа создана', `"${name}" · ${ids.length} участников`, 'fa-users');
+    });
+
+    document.getElementById('addStatusBtn').addEventListener('click', () => {
+      document.getElementById('statusText').value = '';
+      document.getElementById('statusImage').value = '';
+      document.getElementById('addStatusOverlay').classList.add('open');
+    });
+    document.getElementById('addStatusCancel').addEventListener('click', () => {
+      document.getElementById('addStatusOverlay').classList.remove('open');
+    });
+    document.getElementById('addStatusCreate').addEventListener('click', () => {
+      const text = document.getElementById('statusText').value.trim();
+      const img = document.getElementById('statusImage').value.trim();
+      if (!text && !img) { Sound.error(); showToast('Ошибка', 'Введите текст или URL картинки', 'fa-exclamation-circle'); return; }
+      state.statuses.push({ id: genId(), userId: state.currentUser.id, text, imageUrl: img, timestamp: Date.now(), viewedBy: [state.currentUser.id] });
+      persistStatuses(); renderStatusList();
+      document.getElementById('addStatusOverlay').classList.remove('open');
+      Sound.send(); showToast('Статус опубликован', 'Виден 24 часа', 'fa-check-circle');
+    });
+
+    document.getElementById('backToSidebar').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('hidden');
+    });
+    document.getElementById('clearChatBtn').addEventListener('click', () => {
+      if (!state.activeChatId) return;
+      if (!confirm('Очистить историю сообщений?')) return;
+      const chatId = state.activeChatId;
+      state.messages = state.messages.filter(m => m.chatId !== chatId);
+      persistMessages(); renderMessages(chatId); renderChatList();
+      if (window.flypeFirebase) {
+        const { database, ref, remove, get } = window.flypeFirebase;
+        get(ref(database, 'messages')).then(snapshot => {
+          const data = snapshot.val() || {};
+          Object.entries(data).forEach(([id, m]) => {
+            if (m.chatId === chatId) remove(ref(database, 'messages/' + id)).catch(() => {});
+          });
+        }).catch(() => {});
+      }
+      Sound.send(); showToast('История очищена', '', 'fa-trash-alt');
+    });
+    document.getElementById('muteChatBtn').addEventListener('click', () => {
+      showToast('Уведомления отключены', 'Для этого чата', 'fa-bell-slash'); Sound.messageOut();
+    });
+    document.getElementById('editProfileBtn').addEventListener('click', () => {
+      document.getElementById('myProfile').classList.remove('hidden');
+      document.getElementById('contactProfile').classList.add('hidden');
+      document.getElementById('profilePanel').classList.remove('open');
+      document.getElementById('settingsBtn').click();
+    });
+
+    document.getElementById('deleteAccountBtn').addEventListener('click', () => {
+      document.getElementById('deleteAccountPassword').value = '';
+      document.getElementById('deleteAccountConfirm').value = '';
+      document.getElementById('deleteAccountOverlay').classList.add('open');
+    });
+    document.getElementById('deleteAccountCancel').addEventListener('click', () => {
+      document.getElementById('deleteAccountOverlay').classList.remove('open');
+    });
+    document.getElementById('deleteAccountConfirmBtn').addEventListener('click', deleteAccount);
+
+    // Универсальное закрытие модалок
+    document.querySelectorAll('.modal-close-x').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const overlayId = btn.dataset.close;
+        if (overlayId === 'confirmDeleteProfileOverlay') {
+          closeConfirmDeleteProfile();
+          return;
+        }
+        if (overlayId) {
+          document.getElementById(overlayId).classList.remove('open');
+        } else {
+          btn.closest('.modal-overlay')?.classList.remove('open');
+        }
+      });
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          if (overlay.id === 'confirmDeleteProfileOverlay') {
+            closeConfirmDeleteProfile();
+            return;
+          }
+          overlay.classList.remove('open');
+        }
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.open').forEach(o => {
+          if (o.id === 'confirmDeleteProfileOverlay') {
+            closeConfirmDeleteProfile();
+          } else {
+            o.classList.remove('open');
+          }
+        });
+      }
+    });
+
+    function init() { checkAuth(); }
+    document.addEventListener('DOMContentLoaded', init);
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900) document.getElementById('sidebar').classList.remove('hidden');
+    });
+
+    document.addEventListener('dblclick', e => {
+      const b = e.target.closest('.message-bubble');
+      if (b) {
+        const t = b.textContent.trim();
+        if (t) navigator.clipboard?.writeText(t).then(() => showToast('Скопировано', 'Текст скопирован', 'fa-copy', 1500)).catch(() => {});
+      }
+    });
+
+    if ('Notification' in window && Notification.permission === 'default') {
+      document.addEventListener('click', function rn() {
+        Notification.requestPermission();
+        document.removeEventListener('click', rn);
+      }, { once: true });
+    }
+  </script>
+
+  <!-- ============================================================
+       FIREBASE — подключение
+       ============================================================ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import {
+      getDatabase, ref, set, onValue, get, child,
+      push, update, remove, query, orderByChild, equalTo
+    } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-database.js";
+    import {
+      getAuth, signInAnonymously, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAIbeepIF2GPcXQUZAt2cr2r54JNM6jMLM",
+      authDomain: "flype-d8034.firebaseapp.com",
+      databaseURL: "https://flype-d8034-default-rtdb.firebaseio.com",
+      projectId: "flype-d8034",
+      storageBucket: "flype-d8034.firebasestorage.app",
+      messagingSenderId: "928586015641",
+      appId: "1:928586015641:web:1fd2c85c48d49694e9e908",
+      measurementId: "G-1RRG5QFNC7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth(app);
+
+    signInAnonymously(auth)
+      .then((userCredential) => console.log('🔐 Анонимный вход выполнен. UID:', userCredential.user.uid))
+      .catch((error) => console.error('❌ Ошибка анонимного входа:', error.code, error.message));
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) console.log('✅ Пользователь авторизован. UID:', user.uid);
+      else console.log('⚠️ Пользователь не авторизован');
+    });
+
+    window.flypeFirebase = {
+      database, ref, set, onValue, get, child,
+      push, update, remove, query, orderByChild, equalTo,
+      auth, signInAnonymously, onAuthStateChanged
+    };
+
+    console.log('✅ Firebase подключён. databaseURL:', firebaseConfig.databaseURL);
+  </script>
+</body>
+</html>
