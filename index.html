@@ -1816,7 +1816,7 @@
         document.getElementById('mainScreen').classList.add('active');
         document.getElementById('authFooter').style.display = 'none';
         loadState(); renderAll();
-        listenToUsers(); listenToChats(); listenToCalls(); listenToMaintenance();
+        listenToUsers(); listenToChats(); listenToCalls(); listenToMaintenance(); listenToStatuses();
         startBanChecker();
         updateSidebarProfile();
         updateAdminPanel();
@@ -2843,11 +2843,12 @@
         container.innerHTML = `<div style="padding:20px 16px;text-align:center;color:var(--text-secondary);font-size:12.5px;">Нет статусов за 24 часа</div>`;
         return;
       }
-      container.innerHTML = statuses.map(s => {
-        const u = state.users.find(x => x.id === s.userId); if (!u) return '';
-        const name = `${u.firstName} ${u.lastName}`.trim();
+           container.innerHTML = statuses.map(s => {
+        const u = state.users.find(x => x.id === s.userId);
+        const name = u ? `${u.firstName} ${u.lastName}`.trim() : (s.userName || 'Неизвестный');
+        const avatar = u ? u.avatar : (s.avatar || '');
         const viewed = s.viewedBy && s.viewedBy.includes(state.currentUser.id);
-        return `<div class="status-item" data-status-id="${s.id}"><div class="status-avatar ${viewed ? 'viewed' : ''}"><div class="inner">${u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : initial(name)}</div></div><div class="status-info"><div class="name">${escapeHtml(name)}</div><div class="time">${getTimeAgo(s.timestamp)}</div></div></div>`;
+        return `<div class="status-item" data-status-id="${s.id}"><div class="status-avatar ${viewed ? 'viewed' : ''}"><div class="inner">${avatar ? `<img src="${escapeHtml(avatar)}">` : initial(name)}</div></div>...
       }).join('');
       container.querySelectorAll('.status-item').forEach(el => {
         el.addEventListener('click', () => openStatusView(el.dataset.statusId));
@@ -2865,8 +2866,17 @@
       const body = document.getElementById('svBody');
       if (s.imageUrl) body.innerHTML = `<img src="${escapeHtml(s.imageUrl)}">`;
       else body.innerHTML = escapeHtml(s.text || '');
-      if (!s.viewedBy) s.viewedBy = [];
-      if (!s.viewedBy.includes(state.currentUser.id)) { s.viewedBy.push(state.currentUser.id); persistStatuses(); renderStatusList(); }
+           if (!s.viewedBy) s.viewedBy = [];
+      if (!s.viewedBy.includes(state.currentUser.id)) {
+        s.viewedBy.push(state.currentUser.id);
+        persistStatuses();
+        renderStatusList();
+        // Обновляем в Firebase
+        if (window.flypeFirebase) {
+          const { database, ref, update } = window.flypeFirebase;
+          update(ref(database, 'statuses/' + s.id), { viewedBy: s.viewedBy }).catch(() => {});
+        }
+      }
       document.getElementById('statusViewOverlay').classList.add('open');
       Sound.messageIn();
     }
@@ -4029,14 +4039,42 @@
     document.getElementById('addStatusCancel').addEventListener('click', () => {
       document.getElementById('addStatusOverlay').classList.remove('open');
     });
-    document.getElementById('addStatusCreate').addEventListener('click', () => {
+        document.getElementById('addStatusCreate').addEventListener('click', async () => {
       const text = document.getElementById('statusText').value.trim();
       const img = document.getElementById('statusImage').value.trim();
       if (!text && !img) { Sound.error(); showToast('Ошибка', 'Введите текст или URL', 'fa-exclamation-circle'); return; }
-      state.statuses.push({ id: genId(), userId: state.currentUser.id, text, imageUrl: img, timestamp: Date.now(), viewedBy: [state.currentUser.id] });
-      persistStatuses(); renderStatusList();
+
+      const status = {
+        id: genId(),
+        userId: state.currentUser.id,
+        userName: `${state.currentUser.firstName} ${state.currentUser.lastName}`.trim(),
+        avatar: state.currentUser.avatar || '',
+        text: text,
+        imageUrl: img,
+        timestamp: Date.now(),
+        viewedBy: [state.currentUser.id]
+      };
+
+      // Локально
+      state.statuses.push(status);
+      persistStatuses();
+      renderStatusList();
       document.getElementById('addStatusOverlay').classList.remove('open');
-      Sound.send(); showToast('Опубликован', '', 'fa-check-circle');
+      Sound.send();
+
+      // В Firebase
+      try {
+        if (window.flypeFirebase) {
+          const { database, ref, set } = window.flypeFirebase;
+          await set(ref(database, 'statuses/' + status.id), status);
+          showToast('Опубликован', 'Статус виден всем', 'fa-check-circle');
+        } else {
+          showToast('Опубликован', 'Только локально (нет Firebase)', 'fa-exclamation-triangle');
+        }
+      } catch (err) {
+        console.error('❌ Ошибка статуса:', err);
+        showToast('Ошибка', 'Не удалось отправить в облако', 'fa-exclamation-circle');
+      }
     });
 
     document.getElementById('backToSidebar').addEventListener('click', () => {
@@ -4081,12 +4119,50 @@
       }
     });
 
-    function init() {
+       function init() {
       checkAuth();
       updateLoginBlockUI();
       setInterval(updateLoginBlockUI, 1000);
       ensureAdminExists();
       listenToMaintenance();
+
+      // Автоочистка статусов старше 24 часов
+      setInterval(async () => {
+        if (!window.flypeFirebase || !state.statuses.length) return;
+        const day = 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        const expired = state.statuses.filter(s => now - s.timestamp >= day);
+        if (expired.length === 0) return;
+        const { database, ref, remove } = window.flypeFirebase;
+        for (const s of expired) {
+          try { await remove(ref(database, 'statuses/' + s.id)); } catch (e) {}
+        }
+        state.statuses = state.statuses.filter(s => now - s.timestamp < day);
+        persistStatuses();
+        renderStatusList();
+      }, 5 * 60 * 1000); // проверка раз в 5 минут
+    }
+        // ============================================================
+    // СИНХРОНИЗАЦИЯ СТАТУСОВ
+    // ============================================================
+    let statusesUnsubscribe = null;
+    function listenToStatuses() {
+      if (!window.flypeFirebase) { setTimeout(listenToStatuses, 500); return; }
+      const { database, ref, onValue } = window.flypeFirebase;
+      if (statusesUnsubscribe) statusesUnsubscribe();
+      statusesUnsubscribe = onValue(ref(database, 'statuses'), (snapshot) => {
+        const data = snapshot.val() || {};
+        const all = Object.values(data);
+        // Объединяем с локальными (на случай офлайна)
+        const local = loadData(STORAGE_KEYS.statuses, []);
+        const merged = [...all];
+        local.forEach(ls => {
+          if (!merged.find(s => s.id === ls.id)) merged.push(ls);
+        });
+        state.statuses = merged;
+        persistStatuses();
+        renderStatusList();
+      });
     }
     document.addEventListener('DOMContentLoaded', init);
 
