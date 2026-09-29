@@ -8,6 +8,38 @@
   <link rel="apple-touch-icon" href="favicon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://8x8.vc/external_api.js"></script>
+  <!-- FIREBASE SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+  import { getDatabase, ref, onValue, get, set, update, push, remove, query, orderByChild, limitToLast }
+    from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAIbeepIF2GPcXQUZAt2cr2r54JNM6jMLM",
+    authDomain: "flype-d8034.firebaseapp.com",
+    databaseURL: "https://flype-d8034-default-rtdb.firebaseio.com",
+    projectId: "flype-d8034",
+    storageBucket: "flype-d8034.firebasestorage.app",
+    messagingSenderId: "928586015641",
+    appId: "1:928586015641:web:1fd2c85c48d49694e9e908"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+  const auth = getAuth(app);
+
+  // Анонимный вход
+  signInAnonymously(auth).catch(err => console.error('Auth error:', err));
+  onAuthStateChanged(auth, user => {
+    if (user) console.log('✅ Firebase Auth OK, uid:', user.uid);
+  });
+
+  // Экспортируем в window — чтобы работал остальной скрипт
+  window.flypeFirebase = { database, ref, onValue, get, set, update, push, remove, query, orderByChild, limitToLast, auth };
+  console.log('✅ Firebase подключён');
+</script>
   <style>
     :root {
       --accent: #00AFF0; --accent-hover: #0098D6; --accent-darker: #0078A8;
