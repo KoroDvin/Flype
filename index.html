@@ -1207,22 +1207,62 @@
       });
     }
     let chatsUnsubscribe = null;
-    function listenToChats() { if (!window.flypeFirebase) { setTimeout(listenToChats, 500); return; } const { database, ref, onValue } = window.flypeFirebase; if (chatsUnsubscribe) chatsUnsubscribe(); chatsUnsubscribe = onValue(ref(database, 'chats'), (snapshot) => { const data = snapshot.val() || {}; const allChats = Object.values(data); const myChats = allChats.filter(c => c.participants && c.participants.includes(state.currentUser.id)); const localChats = loadData(STORAGE_KEYS.chats, []).filter(c => c.participants.includes(state.currentUser.id)); const merged = [...myChats]; localChats.forEach(lc => { if (!merged.find(c => c.id === lc.id)) merged.push(lc); }); state.chats = merged; persistChats(); renderChatList(); if (state.activeChatId && !state.chats.find(c => c.id === state.activeChatId)) { state.activeChatId = null; renderActiveChat(); } }); }
-    let messagesUnsubscribe = null;
-    function listenToMessages(chatId) {
-      if (!window.flypeFirebase) { setTimeout(() => listenToMessages(chatId), 500); return; }
-      const { database, ref, onValue, update } = window.flypeFirebase;
-      if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
-      messagesUnsubscribe = onValue(ref(database, 'messages'), (snapshot) => {
+    function listenToChats() {
+      if (!window.flypeFirebase) { setTimeout(listenToChats, 500); return; }
+      const { database, ref, onValue, remove } = window.flypeFirebase;
+      if (chatsUnsubscribe) chatsUnsubscribe();
+      chatsUnsubscribe = onValue(ref(database, 'chats'), async (snapshot) => {
         const data = snapshot.val() || {};
-        const all = Object.entries(data).map(([id, m]) => ({ id, ...m }));
-        const chatMessages = all.filter(m => m.chatId === chatId).sort((a, b) => a.timestamp - b.timestamp);
-        state.messages = state.messages.filter(m => m.chatId !== chatId); state.messages.push(...chatMessages);
-        const newInc = chatMessages.filter(m => m.senderId !== state.currentUser.id && !m.read && m.timestamp > (window.__lastMsgTs || 0));
-        if (newInc.length > 0) { window.__lastMsgTs = Date.now(); if (state.activeChatId !== chatId) Sound.messageIn(); }
-        if (state.activeChatId === chatId) renderMessages(chatId);
+        const allChats = Object.values(data);
+        const myChats = allChats.filter(c => c.participants && c.participants.includes(state.currentUser.id));
+        const localChats = loadData(STORAGE_KEYS.chats, []).filter(c => c.participants.includes(state.currentUser.id));
+        
+        // Объединяем
+        const merged = [...myChats];
+        localChats.forEach(lc => { if (!merged.find(c => c.id === lc.id)) merged.push(lc); });
+        
+        // ⚠️ Схлопываем дубли приватных чатов (по participants)
+        const seen = new Map();
+        const unique = [];
+        const toDelete = [];
+        merged.forEach(c => {
+          if (c.type === 'private' && c.participants && c.participants.length === 2) {
+            const key = [...c.participants].sort().join('|');
+            if (seen.has(key)) {
+              // Дубль — оставляем более старый, этот удаляем
+              const existing = seen.get(key);
+              if ((c.createdAt || 0) < (existing.createdAt || 0)) {
+                toDelete.push(existing);
+                seen.set(key, c);
+                const idx = unique.indexOf(existing);
+                if (idx !== -1) unique[idx] = c;
+              } else {
+                toDelete.push(c);
+              }
+            } else {
+              seen.set(key, c);
+              unique.push(c);
+            }
+          } else {
+            unique.push(c);
+          }
+        });
+        
+        // Удаляем дубли из Firebase
+        if (toDelete.length > 0 && window.flypeFirebase) {
+          for (const dup of toDelete) {
+            try { await remove(ref(database, 'chats/' + dup.id)); } catch (e) {}
+          }
+          console.log('🗑️ Удалено дублей:', toDelete.length);
+        }
+        
+        state.chats = unique;
+        persistChats();
         renderChatList();
-        chatMessages.forEach(m => { if (m.senderId !== state.currentUser.id && !m.read) { m.read = true; update(ref(database, 'messages/' + m.id), { read: true }).catch(() => {}); } });
+        
+        if (state.activeChatId && !state.chats.find(c => c.id === state.activeChatId)) {
+          state.activeChatId = null; renderActiveChat();
+        }
       });
     }
     let currentCall = null, callListenerUnsubscribe = null, ringtoneAudio = null, outgoingCallTimer = null, outgoingCallRef = null, outgoingCallTimerInterval = null;
