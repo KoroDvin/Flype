@@ -1279,6 +1279,29 @@
         }
       });
     }
+        let messagesUnsubscribe = null;
+    function listenToMessages(chatId) {
+      if (!window.flypeFirebase) { setTimeout(() => listenToMessages(chatId), 500); return; }
+      const { database, ref, onValue, update } = window.flypeFirebase;
+      if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
+      messagesUnsubscribe = onValue(ref(database, 'messages'), (snapshot) => {
+        const data = snapshot.val() || {};
+        const all = Object.entries(data).map(([id, m]) => ({ id, ...m }));
+        const chatMessages = all.filter(m => m.chatId === chatId).sort((a, b) => a.timestamp - b.timestamp);
+        state.messages = state.messages.filter(m => m.chatId !== chatId);
+        state.messages.push(...chatMessages);
+        const newInc = chatMessages.filter(m => m.senderId !== state.currentUser.id && !m.read && m.timestamp > (window.__lastMsgTs || 0));
+        if (newInc.length > 0) { window.__lastMsgTs = Date.now(); if (state.activeChatId !== chatId) Sound.messageIn(); }
+        if (state.activeChatId === chatId) renderMessages(chatId);
+        renderChatList();
+        chatMessages.forEach(m => {
+          if (m.senderId !== state.currentUser.id && !m.read) {
+            m.read = true;
+            update(ref(database, 'messages/' + m.id), { read: true }).catch(() => {});
+          }
+        });
+      });
+    }
     let currentCall = null, callListenerUnsubscribe = null, ringtoneAudio = null, outgoingCallTimer = null, outgoingCallRef = null, outgoingCallTimerInterval = null;
     function startRingtone() { stopRingtone(); if (!state.settings.sounds) return; try { ringtoneAudio = new Audio(SOUND_FILES.ringtone); ringtoneAudio.loop = true; ringtoneAudio.volume = 0.7; ringtoneAudio.play().catch(() => {}); } catch (e) {} }
     function stopRingtone() { if (ringtoneAudio) { try { ringtoneAudio.pause(); ringtoneAudio.currentTime = 0; } catch (e) {} ringtoneAudio = null; } }
