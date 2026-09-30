@@ -315,11 +315,24 @@
     .swatch-blue { background: linear-gradient(135deg, #1565C0, #0A3880); }
     .swatch-white { background: linear-gradient(135deg, #F4F6F8, #8A939B); }
     @media (max-width: 900px) {
-      .sidebar { width: 100%; min-width: 0; position: absolute; inset: 0; z-index: 30; transition: transform 0.25s ease; }
+      .sidebar {
+        width: 100%; min-width: 0;
+        position: absolute; inset: 0; z-index: 30;
+        transition: transform 0.25s ease;
+      }
       .sidebar.hidden { transform: translateX(-100%); }
-      .chat-area { width: 100%; }
+      .chat-area {
+        width: 100%;
+        position: absolute; inset: 0; z-index: 20;
+        transform: translateX(0);
+        transition: transform 0.25s ease;
+      }
+      .sidebar.hidden ~ .chat-area { transform: translateX(0); }
       .chat-header .back-btn { display: flex; }
-      .profile-panel { position: absolute; top: 0; right: 0; bottom: 0; z-index: 40; width: 300px; box-shadow: var(--shadow-lg); }
+      .profile-panel {
+        position: absolute; top: 0; right: 0; bottom: 0;
+        z-index: 40; width: 300px; box-shadow: var(--shadow-lg);
+      }
     }
     @media (max-width: 500px) {
       .chat-header { padding: 8px 12px; }
