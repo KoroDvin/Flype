@@ -461,10 +461,10 @@
       </div>
 
       <form class="auth-form active" id="loginForm" novalidate>
-        <div class="input-group">
-          <label for="loginId">Flype ID</label>
-          <input type="text" id="loginId" placeholder="123-456-789.fye" autocomplete="off">
-          <div class="error-text" id="loginIdError">Введите корректный Flype ID</div>
+          <div class="input-group">
+          <label for="loginEmail">Gmail</label>
+          <input type="email" id="loginEmail" placeholder="example@gmail.com" autocomplete="email">
+          <div class="error-text" id="loginEmailError">Введите корректный email</div>
         </div>
         <div class="input-group">
           <label for="loginPassword">Пароль</label>
@@ -1441,15 +1441,18 @@
     }
 
     // РЕГИСТРАЦИЯ
-    async function handleRegister(e) {
+      async function handleRegister(e) {
       e.preventDefault();
       const firstName = document.getElementById('regFirstName').value.trim();
       const lastName = document.getElementById('regLastName').value.trim();
+      const email = document.getElementById('regEmail').value.trim().toLowerCase();
       const password = document.getElementById('regPassword').value;
       const digits = document.getElementById('regIdDigits').value.replace(/\D/g, '');
       let valid = true;
       if (!firstName) { showError('regFirstName', true); valid = false; } else showError('regFirstName', false);
       if (!lastName) { showError('regLastName', true); valid = false; } else showError('regLastName', false);
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email)) { showError('regEmail', true); valid = false; } else showError('regEmail', false);
       if (password.length < 6) { showError('regPassword', true); valid = false; } else showError('regPassword', false);
       const idError = document.getElementById('regIdError');
       idError.classList.remove('visible');
@@ -1481,10 +1484,44 @@
           }
         }
       }
-      if (!valid) { Sound.error(); return; }
+           if (!valid) { Sound.error(); return; }
       const flypeId = formatFlypeIdFromDigits(digits);
+      
+      // Создаём пользователя в Firebase Auth
+      let firebaseUser = null;
+      if (window.flypeFirebase && window.flypeFirebase.createUserWithEmailAndPassword) {
+        try {
+          const userCredential = await window.flypeFirebase.createUserWithEmailAndPassword(window.flypeFirebase.auth, email, password);
+          firebaseUser = userCredential.user;
+          console.log('✅ Firebase Auth: пользователь создан, UID:', firebaseUser.uid);
+        } catch (err) {
+          console.error('❌ Ошибка создания в Firebase Auth:', err);
+          if (err.code === 'auth/email-already-in-use') {
+            showError('regEmail', true);
+            document.getElementById('regEmailError').textContent = 'Этот Gmail уже зарегистрирован.';
+            Sound.error();
+            return;
+          }
+          if (err.code === 'auth/weak-password') {
+            showError('regPassword', true);
+            document.getElementById('regPasswordError').textContent = 'Пароль слишком простой.';
+            Sound.error();
+            return;
+          }
+          if (err.code === 'auth/invalid-email') {
+            showError('regEmail', true);
+            Sound.error();
+            return;
+          }
+          Sound.error();
+          showToast('Ошибка', 'Не удалось создать аккаунт', 'fa-exclamation-circle');
+          return;
+        }
+      }
+      
       const newUser = {
-        id: genId(), flypeId, firstName, lastName, password,
+        id: firebaseUser ? firebaseUser.uid : genId(),
+        flypeId, firstName, lastName, email, password,
         avatar: '', about: '', online: true, lastSeen: Date.now(), blocked: [],
         idChangedAt: Date.now(), isAdmin: false, banned: false, bannedUntil: 0, banReason: ''
       };
@@ -1543,30 +1580,38 @@
       e.preventDefault();
       const block = checkLoginBlock();
       if (block.blocked) { Sound.error(); showToast('Заблокировано', block.message, 'fa-clock', 5000); return; }
-      const flypeId = document.getElementById('loginId').value.trim();
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
       const password = document.getElementById('loginPassword').value;
       let valid = true;
-      const idPattern = /^\d{3}-\d{3}-\d{3}\.fye$/;
-      if (!idPattern.test(flypeId)) { showError('loginId', true); valid = false; } else showError('loginId', false);
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email)) { showError('loginEmail', true); valid = false; } else showError('loginEmail', false);
       if (password.length < 6) { showError('loginPassword', true); valid = false; } else showError('loginPassword', false);
       if (!valid) { Sound.error(); return; }
+      
       let allUsers = loadData(STORAGE_KEYS.users, []);
-      const seen = new Set(allUsers.map(u => u.id));
-      let foundUser = allUsers.find(u => u.flypeId === flypeId && u.password === password);
-      if (!foundUser && window.flypeFirebase) {
+      let foundUser = null;
+      
+      // Вход через Firebase Auth
+      if (window.flypeFirebase && window.flypeFirebase.signInWithEmailAndPassword) {
         try {
+          const userCredential = await window.flypeFirebase.signInWithEmailAndPassword(window.flypeFirebase.auth, email, password);
+          const uid = userCredential.user.uid;
+          console.log('✅ Firebase Auth: вход выполнен, UID:', uid);
+          
+          // Подтягиваем данные пользователя из Firebase RTDB по UID
           const { database, ref, get } = window.flypeFirebase;
-          const snap = await get(ref(database, 'users'));
-          const cloudUsers = snap.val() || {};
-          Object.values(cloudUsers).forEach(cu => {
-            if (!seen.has(cu.id)) { allUsers.push(cu); seen.add(cu.id); }
-            else { const i = allUsers.findIndex(u => u.id === cu.id); if (i !== -1) allUsers[i] = { ...allUsers[i], ...cu }; }
-          });
-          foundUser = allUsers.find(u => u.flypeId === flypeId && u.password === password);
-        } catch (err) { console.error('❌ Ошибка Firebase:', err); }
-      } else if (!window.flypeFirebase) {
-        await new Promise(r => setTimeout(r, 1000));
-        return handleLogin(e);
+          const snap = await get(ref(database, 'users/' + uid));
+          if (snap.exists()) {
+            foundUser = { id: uid, ...snap.val() };
+          }
+        } catch (err) {
+          console.error('❌ Ошибка входа в Firebase Auth:', err);
+        }
+      }
+      
+      // Fallback: локальный поиск (для старых аккаунтов)
+      if (!foundUser) {
+        foundUser = allUsers.find(u => u.email === email && u.password === password);
       }
       if (!foundUser) {
         Sound.error(); registerFailedLogin();
@@ -1597,9 +1642,12 @@
       if (input) input.classList.toggle('error', show);
       if (error) error.classList.toggle('visible', show);
     }
-    function handleLogout() {
+    async function handleLogout() {
       if (!confirm('Вы уверены, что хотите выйти?')) return;
       Sound.logout();
+      if (window.flypeFirebase && window.flypeFirebase.signOut) {
+        try { await window.flypeFirebase.signOut(window.flypeFirebase.auth); } catch (e) {}
+      }
       localStorage.removeItem(STORAGE_KEYS.currentUserId);
       stopPresenceHeartbeat();
       state.currentUser = null; state.activeChatId = null;
@@ -3180,7 +3228,8 @@
       push, update, remove, query, orderByChild, equalTo
     } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-database.js";
     import {
-      getAuth, signInAnonymously, onAuthStateChanged
+      getAuth, signInAnonymously, onAuthStateChanged,
+      createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut
     } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -3198,19 +3247,16 @@
     const database = getDatabase(app);
     const auth = getAuth(app);
 
-    signInAnonymously(auth)
-      .then((uc) => console.log('🔐 Анонимный вход выполнен. UID:', uc.user.uid))
-      .catch((e) => console.error('❌ Ошибка анонимного входа:', e.code, e.message));
-
     onAuthStateChanged(auth, (user) => {
-      if (user) console.log('✅ Пользователь авторизован. UID:', user.uid);
-      else console.log('⚠️ Пользователь не авторизован');
+      if (user) console.log('✅ Firebase Auth: пользователь авторизован. UID:', user.uid);
+      else console.log('⚠️ Firebase Auth: пользователь не авторизован');
     });
 
     window.flypeFirebase = {
       database, ref, set, onValue, get, child,
       push, update, remove, query, orderByChild, equalTo,
-      auth, signInAnonymously, onAuthStateChanged
+      auth, signInAnonymously, onAuthStateChanged,
+      createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut
     };
 
     console.log('✅ Firebase подключён. databaseURL:', firebaseConfig.databaseURL);
