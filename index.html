@@ -1629,10 +1629,52 @@
       c.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => { openChatWithUser(el.dataset.userId); document.getElementById('newChatOverlay').classList.remove('open'); }));
     }
     async function openChatWithUser(userId) {
+      // Ищем существующий чат (по participants)
       let chat = state.chats.find(c => c.type === 'private' && c.participants.includes(state.currentUser.id) && c.participants.includes(userId));
-      if (!chat && window.flypeFirebase) { try { const { database, ref, get } = window.flypeFirebase; const sn = await get(ref(database, 'chats')); const all = sn.val() || {}; const found = Object.values(all).find(c => c.type === 'private' && c.participants && c.participants.includes(state.currentUser.id) && c.participants.includes(userId)); if (found) { chat = found; if (!state.chats.find(c => c.id === chat.id)) state.chats.push(chat); persistChats(); } } catch (err) {} }
-      if (!chat) { chat = { id: genId(), type: 'private', participants: [state.currentUser.id, userId], createdAt: Date.now(), lastMessageAt: Date.now(), createdBy: state.currentUser.id }; state.chats.push(chat); persistChats(); try { if (window.flypeFirebase) { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'chats/' + chat.id), chat); } } catch (err) {} }
-      state.activeChatId = chat.id; renderAll(); listenToMessages(chat.id);
+      
+      // Если не нашли — ищем в Firebase
+      if (!chat && window.flypeFirebase) {
+        try {
+          const { database, ref, get } = window.flypeFirebase;
+          const sn = await get(ref(database, 'chats'));
+          const all = sn.val() || {};
+          // Ищем ВСЕ подходящие чаты
+          const matches = Object.values(all).filter(c => c.type === 'private' && c.participants && c.participants.includes(state.currentUser.id) && c.participants.includes(userId));
+          
+          if (matches.length > 0) {
+            // Берём самый старый
+            matches.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+            chat = matches[0];
+            
+            // ⚠️ Если дублей несколько — удаляем лишние
+            if (matches.length > 1) {
+              const { remove } = window.flypeFirebase;
+              for (let i = 1; i < matches.length; i++) {
+                try { await remove(ref(database, 'chats/' + matches[i].id)); } catch (e) {}
+              }
+            }
+            
+            if (!state.chats.find(c => c.id === chat.id)) state.chats.push(chat);
+            persistChats();
+          }
+        } catch (err) { console.error('❌ openChatWithUser:', err); }
+      }
+      
+      // Если совсем не нашли — создаём новый
+      if (!chat) {
+        chat = { id: genId(), type: 'private', participants: [state.currentUser.id, userId], createdAt: Date.now(), lastMessageAt: Date.now(), createdBy: state.currentUser.id };
+        state.chats.push(chat); persistChats();
+        try {
+          if (window.flypeFirebase) {
+            const { database, ref, set } = window.flypeFirebase;
+            await set(ref(database, 'chats/' + chat.id), chat);
+          }
+        } catch (err) { console.error(err); }
+      }
+      
+      state.activeChatId = chat.id;
+      renderAll();
+      listenToMessages(chat.id);
       if (window.innerWidth <= 900) document.getElementById('sidebar').classList.add('hidden');
     }
     document.getElementById('newGroupAvatarBtn').addEventListener('click', () => document.getElementById('newGroupAvatarFile').click());
