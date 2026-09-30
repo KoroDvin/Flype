@@ -223,7 +223,7 @@
     .message-row { display: flex; margin-top: 6px; }
     .message-row.out { justify-content: flex-end; animation: messageEnterRight 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
     .message-row.in { justify-content: flex-start; animation: messageEnterLeft 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
-    .message-bubble { max-width: 65%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.45; word-wrap: break-word; position: relative; }
+    .message-bubble { max-width: 65%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.45; word-wrap: break-word; word-break: break-word; overflow-wrap: anywhere; position: relative; }
     .message-row.out .message-bubble { background: var(--accent-light); color: var(--text); border: 1px solid var(--accent-border); }
     .message-row.in .message-bubble { background: #F4F6F8; color: var(--text); border: 1px solid var(--border-light); }
     body.dark .message-row.in .message-bubble { background: #2E353B; border-color: #3A4248; }
