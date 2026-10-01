@@ -1335,23 +1335,46 @@ function openConfirmDeleteProfile() { const check = document.getElementById('del
 function closeConfirmDeleteProfile() { if (deleteProfileTimerInterval) { clearInterval(deleteProfileTimerInterval); deleteProfileTimerInterval = null; } deleteProfileSecondsLeft = 5; document.getElementById('confirmDeleteProfileOverlay').classList.remove('open'); }
 function canChangeId() { if (!state.currentUser.idChangedAt) return true; return Date.now() - state.currentUser.idChangedAt >= ID_CHANGE_COOLDOWN; }
 function updateChangeIdButton() { const btn = document.getElementById('changeUsernameBtn'); const timer = document.getElementById('changeIdTimer'); if (!btn) return; if (canChangeId()) { btn.disabled = false; btn.style.opacity = '1'; timer.style.display = 'none'; } else { btn.disabled = true; btn.style.opacity = '0.5'; const left = ID_CHANGE_COOLDOWN - (Date.now() - state.currentUser.idChangedAt); const days = Math.ceil(left/(24*60*60*1000)); timer.textContent = `Следующая смена через ${days} дн.`; timer.style.display = 'block'; } }
-async function deleteAccount() {
-  const user = state.currentUser; if (!user) return;
-  if (user.isAdmin) { Sound.error(); showToast('Недоступно', 'Нельзя удалить аккаунт админа', 'fa-shield-alt', 3000); return; }
-  const pwd = document.getElementById('deleteAccountPassword').value;
-  if (pwd !== user.password) { Sound.error(); showToast('Неверный пароль', '', 'fa-exclamation-circle'); return; }
-  const cw = document.getElementById('deleteAccountConfirm').value.trim();
-  if (cw !== 'УДАЛИТЬ') { Sound.error(); showToast('Подтверждение неверно', 'Введите УДАЛИТЬ', 'fa-exclamation-circle'); return; }
-  await deleteUserForever(user.id, `${user.firstName} ${user.lastName}`.trim());
-  if (window.flypeFirebase && window.flypeFirebase.signOut) { try { await window.flypeFirebase.signOut(window.flypeFirebase.auth); } catch (e) {} }
-  localStorage.removeItem(STORAGE_KEYS.currentUserId); localStorage.removeItem('flype_private_key_' + user.id); localStorage.removeItem('flype_sync_unlock_until'); localStorage.removeItem('flype_is_primary');
-  stopPresenceHeartbeat(); state.currentUser = null; state.activeChatId = null; state.users = []; state.chats = []; state.messages = [];
-  if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
-  if (callListenerUnsubscribe) { callListenerUnsubscribe(); callListenerUnsubscribe = null; }
-  if (syncKeysListener) { syncKeysListener(); syncKeysListener = null; }
-  document.getElementById('deleteAccountOverlay').classList.remove('open');
-  showAuthScreen(); document.getElementById('loginForm').reset(); document.getElementById('registerForm').reset();
-}
+    async function deleteAccount() {
+      const user = state.currentUser; if (!user) return;
+      if (user.isAdmin) { Sound.error(); showToast('Недоступно', 'Нельзя удалить аккаунт админа', 'fa-shield-alt', 3000); return; }
+      const pwd = document.getElementById('deleteAccountPassword').value;
+      if (pwd !== user.password) { Sound.error(); showToast('Неверный пароль', '', 'fa-exclamation-circle'); return; }
+      const cw = document.getElementById('deleteAccountConfirm').value.trim();
+      if (cw !== 'УДАЛИТЬ') { Sound.error(); showToast('Подтверждение неверно', 'Введите УДАЛИТЬ', 'fa-exclamation-circle'); return; }
+      
+      // 1. Удаляем данные из Realtime Database
+      await deleteUserForever(user.id, `${user.firstName} ${user.lastName}`.trim());
+      
+      // 2. Удаляем аккаунт из Firebase Auth (с переавторизацией)
+      const authDeleted = await deleteAuthUser(pwd);
+      if (!authDeleted) {
+        console.warn('⚠️ Firebase Auth НЕ удалён — удали вручную в Firebase Console');
+      }
+      
+      // 3. Выходим из аккаунта
+      if (window.flypeFirebase && window.flypeFirebase.signOut) { try { await window.flypeFirebase.signOut(window.flypeFirebase.auth); } catch (e) {} }
+      
+      // 4. Чистим localStorage
+      localStorage.removeItem(STORAGE_KEYS.currentUserId);
+      localStorage.removeItem('flype_private_key_' + user.id);
+      localStorage.removeItem('flype_sync_unlock_until');
+      localStorage.removeItem('flype_is_primary');
+      
+      // 5. Сбрасываем состояние
+      stopPresenceHeartbeat();
+      state.currentUser = null; state.activeChatId = null;
+      state.users = []; state.chats = []; state.messages = [];
+      if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
+      if (callListenerUnsubscribe) { callListenerUnsubscribe(); callListenerUnsubscribe = null; }
+      if (syncKeysListener) { syncKeysListener(); syncKeysListener = null; }
+      
+      // 6. Закрываем модалку и показываем экран входа
+      document.getElementById('deleteAccountOverlay').classList.remove('open');
+      showAuthScreen();
+      document.getElementById('loginForm').reset();
+      document.getElementById('registerForm').reset();
+    }
 
 document.querySelectorAll('.auth-tab').forEach(tab => { tab.addEventListener('click', () => { document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const target = tab.dataset.tab; document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active')); document.getElementById(target === 'login' ? 'loginForm' : 'registerForm').classList.add('active'); document.querySelectorAll('.error-text').forEach(e => e.classList.remove('visible')); document.querySelectorAll('.input-group input').forEach(i => i.classList.remove('error')); }); });
 document.getElementById('regUsername').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20); document.getElementById('regUsernameError').classList.remove('visible'); e.target.classList.remove('error'); });
