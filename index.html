@@ -906,7 +906,7 @@ async function requestKeyFromOtherDevice() {
         document.getElementById('syncWaitingOverlay').classList.remove('open');
         if (syncKeysListener) { syncKeysListener(); syncKeysListener = null; }
         setTimeout(async () => {
-          const code = prompt('Введите код с основного устройства:');
+          const code = prompt('Введите код с основного устройства с включённым Caps Lock:');
           if (code) { try { await tryDecryptSyncKey(data.encryptedKey, code.trim().toUpperCase()); } catch (err) { Sound.error(); showToast('Ошибка', 'Неверный код', 'fa-exclamation-circle'); } }
         }, 300);
       }
