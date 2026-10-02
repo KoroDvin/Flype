@@ -123,9 +123,9 @@ body.theme-white:not(.theme-oldflype) .btn{color:#FFFFFF!important;}
 .auth-form.active{display:flex;}
 .input-group{display:flex;flex-direction:column;gap:5px;}
 .input-group label{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;}
-.input-group input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;transition:border-color 0.15s,box-shadow 0.15s;}
-.input-group input::placeholder{color:var(--text-muted);}
-.input-group input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-shadow);}
+.input-group input,.input-group select,.input-group textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;transition:border-color 0.15s,box-shadow 0.15s;}
+.input-group input::placeholder,.input-group textarea::placeholder{color:var(--text-muted);}
+.input-group input:focus,.input-group select:focus,.input-group textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-shadow);}
 .input-group input.error{border-color:var(--danger);}
 .error-text{color:var(--danger);font-size:11.5px;display:none;}
 .error-text.visible{display:block;}
@@ -383,6 +383,30 @@ input:checked+.slider:before{transform:translateX(18px);}
 .report-message{background:#FFF8E1!important;border:1px solid #FFD54F!important;color:#1C1C1C!important;font-size:13px;line-height:1.5;}
 body.dark .report-message{background:#3A2F1C!important;border-color:#7A6520!important;color:#F5E6B8!important;}
 .hidden{display:none!important;}
+/* ============ ГОСУСЛУГИ ЕСДС ============ */
+.gosbot-admin-panel{display:flex;gap:6px;padding:8px 16px;background:var(--bg);border-top:1px solid var(--border-light);flex-wrap:wrap;flex-shrink:0;}
+.gos-panel-btn{padding:6px 12px;border-radius:16px;border:1px solid var(--accent-border);background:var(--accent-light);color:var(--accent-darker);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;transition:transform 0.1s,background 0.15s;font-family:var(--font);}
+.gos-panel-btn:hover{transform:scale(1.05);background:var(--accent-hover-light);}
+.gos-panel-btn:active{transform:scale(0.97);}
+.gos-panel-btn.danger{border-color:#FFB3B3;background:#FFEBEE;color:#D93025;}
+.gos-panel-btn.warn{border-color:#FFE082;background:#FFF8E1;color:#B8860B;}
+.message-row.in .message-bubble.emergency-bubble{background:#FFEBEE!important;border:2px solid #D93025!important;}
+body.dark .message-row.in .message-bubble.emergency-bubble{background:#3A1C1C!important;border-color:#D93025!important;color:#FFD9D9!important;}
+.message-row.in .message-bubble.tax-bubble{background:#FFF8E1!important;border:2px solid #F4B400!important;}
+body.dark .message-row.in .message-bubble.tax-bubble{background:#3A2F1C!important;border-color:#F4B400!important;color:#F5E6B8!important;}
+.message-row.in .message-bubble.election-bubble{background:#E3F2FD!important;border:2px solid #1565C0!important;}
+body.dark .message-row.in .message-bubble.election-bubble{background:#1A2A3D!important;border-color:#1565C0!important;color:#D9E8FF!important;}
+.message-row.in .message-bubble.announce-bubble{background:#E8F5E9!important;border:2px solid #34A853!important;}
+body.dark .message-row.in .message-bubble.announce-bubble{background:#1C2E1F!important;border-color:#34A853!important;color:#D9F5DD!important;}
+.gov-action-btn{margin-top:8px;padding:8px 14px;border-radius:8px;border:none;font-weight:600;cursor:pointer;font-family:var(--font);font-size:13px;transition:transform 0.1s;}
+.gov-action-btn:hover{transform:scale(1.03);}
+.gov-action-btn:active{transform:scale(0.97);}
+.gov-action-btn.pay{background:#F4B400;color:#fff;}
+.gov-action-btn.vote{background:#1565C0;color:#fff;display:block;width:100%;text-align:left;margin-bottom:4px;}
+.candidate-picker-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;}
+.candidate-picker-row input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13px;}
+.candidate-picker-row button{padding:6px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--white);color:var(--text);cursor:pointer;font-size:12px;}
+.candidate-picker-row button:hover{background:var(--bg);}
 </style>
 </head>
 <body class="theme-standard">
@@ -805,6 +829,277 @@ body.dark .report-message{background:#3A2F1C!important;border-color:#7A6520!impo
 </div>
 </div>
 
+<!-- ============ ГОСУСЛУГИ ЕСДС: МОДАЛКИ ============ -->
+<div class="modal-overlay" id="gosEmergencyOverlay">
+  <div class="modal">
+    <button class="modal-close-x" data-close="gosEmergencyOverlay"><i class="fas fa-times"></i></button>
+    <h3 style="color:#D93025;"><i class="fas fa-exclamation-triangle"></i> Объявить ЧС</h3>
+    <div class="input-group">
+      <label>Регион</label>
+      <select id="emRegion" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+        <option value="all">🌍 Вся страна (все регионы)</option>
+        <option value="Австрия">Австрия</option>
+        <option value="Бельгия">Бельгия</option>
+        <option value="Болгария">Болгария</option>
+        <option value="Венгрия">Венгрия</option>
+        <option value="Великобритания">Великобритания</option>
+        <option value="Германия">Германия</option>
+        <option value="Греция">Греция</option>
+        <option value="Дания">Дания</option>
+        <option value="Ирландия">Ирландия</option>
+        <option value="Испания">Испания</option>
+        <option value="Италия">Италия</option>
+        <option value="Кипр">Кипр</option>
+        <option value="Латвия">Латвия</option>
+        <option value="Литва">Литва</option>
+        <option value="Лихтенштейн">Лихтенштейн</option>
+        <option value="Люксембург">Люксембург</option>
+        <option value="Мальта">Мальта</option>
+        <option value="Нидерланды">Нидерланды</option>
+        <option value="Норвегия">Норвегия</option>
+        <option value="Польша">Польша</option>
+        <option value="Португалия">Португалия</option>
+        <option value="Румыния">Румыния</option>
+        <option value="Словакия">Словакия</option>
+        <option value="Словения">Словения</option>
+        <option value="Финляндия">Финляндия</option>
+        <option value="Франция">Франция</option>
+        <option value="Хорватия">Хорватия</option>
+        <option value="Чехия">Чехия</option>
+        <option value="Швеция">Швеция</option>
+        <option value="Эстония">Эстония</option>
+      </select>
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Тип ЧС</label>
+      <select id="emType" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+        <option value="fire">🔥 Пожар</option>
+        <option value="flood">🌊 Наводнение</option>
+        <option value="earthquake">🌍 Землетрясение</option>
+        <option value="war">⚔️ Военное положение</option>
+        <option value="epidemic">🦠 Эпидемия</option>
+        <option value="other">⚠️ Другое</option>
+      </select>
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Уровень</label>
+      <select id="emLevel" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+        <option value="low">🟢 Низкий</option>
+        <option value="medium">🟡 Средний</option>
+        <option value="high">🟠 Высокий</option>
+        <option value="critical">🔴 Критический</option>
+      </select>
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Описание</label>
+      <textarea id="emDescription" rows="3" placeholder="Что произошло, что делать гражданам..." style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;resize:vertical;outline:none;"></textarea>
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Действует до</label>
+      <input type="date" id="emUntil" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" data-close="gosEmergencyOverlay">Отмена</button>
+      <button class="btn btn-danger" id="emSend">🚨 Объявить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="gosElectionOverlay">
+  <div class="modal">
+    <button class="modal-close-x" data-close="gosElectionOverlay"><i class="fas fa-times"></i></button>
+    <h3><i class="fas fa-vote-yea" style="color:#1565C0;"></i> Объявить выборы</h3>
+    <div class="input-group">
+      <label>Тип выборов</label>
+      <select id="elType" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+        <option value="president">👤 Президентские</option>
+        <option value="parliament">🏛️ Парламентские</option>
+        <option value="regional">📍 Региональные</option>
+        <option value="referendum">📊 Референдум</option>
+      </select>
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Охват</label>
+      <select id="elScope" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+        <option value="all">🌍 Вся страна</option>
+        <option value="Австрия">Австрия</option>
+        <option value="Бельгия">Бельгия</option>
+        <option value="Болгария">Болгария</option>
+        <option value="Венгрия">Венгрия</option>
+        <option value="Великобритания">Великобритания</option>
+        <option value="Германия">Германия</option>
+        <option value="Греция">Греция</option>
+        <option value="Дания">Дания</option>
+        <option value="Ирландия">Ирландия</option>
+        <option value="Испания">Испания</option>
+        <option value="Италия">Италия</option>
+        <option value="Кипр">Кипр</option>
+        <option value="Латвия">Латвия</option>
+        <option value="Литва">Литва</option>
+        <option value="Лихтенштейн">Лихтенштейн</option>
+        <option value="Люксембург">Люксембург</option>
+        <option value="Мальта">Мальта</option>
+        <option value="Нидерланды">Нидерланды</option>
+        <option value="Норвегия">Норвегия</option>
+        <option value="Польша">Польша</option>
+        <option value="Португалия">Португалия</option>
+        <option value="Румыния">Румыния</option>
+        <option value="Словакия">Словакия</option>
+        <option value="Словения">Словения</option>
+        <option value="Финляндия">Финляндия</option>
+        <option value="Франция">Франция</option>
+        <option value="Хорватия">Хорватия</option>
+        <option value="Чехия">Чехия</option>
+        <option value="Швеция">Швеция</option>
+        <option value="Эстония">Эстония</option>
+      </select>
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Дата начала</label>
+      <input type="datetime-local" id="elStart" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Дата конца</label>
+      <input type="datetime-local" id="elEnd" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+    </div>
+    <div style="margin-top:10px;">
+      <label style="font-size:12px;color:var(--text-secondary);text-transform:uppercase;font-weight:600;">Кандидаты</label>
+      <div id="elCandidates" style="margin-top:6px;"></div>
+      <button class="btn btn-secondary" id="elAddCandidate" style="margin-top:6px;font-size:12px;width:100%;"><i class="fas fa-plus"></i> Добавить кандидата</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" data-close="gosElectionOverlay">Отмена</button>
+      <button class="btn" id="elSend" style="background:#1565C0;">🗳️ Объявить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="gosTaxOverlay">
+  <div class="modal">
+    <button class="modal-close-x" data-close="gosTaxOverlay"><i class="fas fa-times"></i></button>
+    <h3 style="color:#F4B400;"><i class="fas fa-euro-sign"></i> Выписать налог</h3>
+    <div class="input-group">
+      <label>Гражданин</label>
+      <input type="text" id="taxCitizenSearch" placeholder="Поиск: Иван или @ivan" autocomplete="off">
+      <div id="taxCitizenResults" style="max-height:160px;overflow-y:auto;margin-top:6px;border-radius:var(--radius);"></div>
+      <div id="taxSelectedCitizen" style="display:none;padding:8px;background:var(--accent-light);border-radius:var(--radius);margin-top:6px;font-size:13px;"></div>
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Тип налога</label>
+      <select id="taxType" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+        <option value="income">💼 Подоходный</option>
+        <option value="transport">🚗 Транспортный</option>
+        <option value="land">🏞️ Земельный</option>
+        <option value="property">🏠 Имущественный</option>
+        <option value="fine">⚠️ Штраф</option>
+        <option value="other">📄 Другой</option>
+      </select>
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Сумма (€)</label>
+      <input type="number" id="taxAmount" min="1" placeholder="5000">
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Основание</label>
+      <input type="text" id="taxReason" placeholder="Например: владение ТС AB123CD">
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Оплатить до</label>
+      <input type="date" id="taxDueDate">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" data-close="gosTaxOverlay">Отмена</button>
+      <button class="btn" id="taxSend" style="background:#F4B400;">💰 Выписать</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="gosAnnounceOverlay">
+  <div class="modal">
+    <button class="modal-close-x" data-close="gosAnnounceOverlay"><i class="fas fa-times"></i></button>
+    <h3><i class="fas fa-bullhorn" style="color:#34A853;"></i> Официальное объявление</h3>
+    <div class="input-group">
+      <label>Заголовок</label>
+      <input type="text" id="anTitle" placeholder="Важное объявление">
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Текст</label>
+      <textarea id="anText" rows="4" placeholder="Текст объявления..." style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;resize:vertical;outline:none;"></textarea>
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Аудитория</label>
+      <select id="anAudience" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+        <option value="all">🌍 Все граждане</option>
+        <option value="Австрия">Австрия</option>
+        <option value="Бельгия">Бельгия</option>
+        <option value="Болгария">Болгария</option>
+        <option value="Венгрия">Венгрия</option>
+        <option value="Великобритания">Великобритания</option>
+        <option value="Германия">Германия</option>
+        <option value="Греция">Греция</option>
+        <option value="Дания">Дания</option>
+        <option value="Ирландия">Ирландия</option>
+        <option value="Испания">Испания</option>
+        <option value="Италия">Италия</option>
+        <option value="Кипр">Кипр</option>
+        <option value="Латвия">Латвия</option>
+        <option value="Литва">Литва</option>
+        <option value="Лихтенштейн">Лихтенштейн</option>
+        <option value="Люксембург">Люксембург</option>
+        <option value="Мальта">Мальта</option>
+        <option value="Нидерланды">Нидерланды</option>
+        <option value="Норвегия">Норвегия</option>
+        <option value="Польша">Польша</option>
+        <option value="Португалия">Португалия</option>
+        <option value="Румыния">Румыния</option>
+        <option value="Словакия">Словакия</option>
+        <option value="Словения">Словения</option>
+        <option value="Финляндия">Финляндия</option>
+        <option value="Франция">Франция</option>
+        <option value="Хорватия">Хорватия</option>
+        <option value="Чехия">Чехия</option>
+        <option value="Швеция">Швеция</option>
+        <option value="Эстония">Эстония</option>
+      </select>
+    </div>
+    <div class="input-group" style="margin-top:8px;">
+      <label>Важность</label>
+      <select id="anImportance" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+        <option value="normal">📘 Обычное</option>
+        <option value="important">📙 Важное</option>
+        <option value="critical">📕 Критическое</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" data-close="gosAnnounceOverlay">Отмена</button>
+      <button class="btn" id="anSend" style="background:#34A853;">📢 Отправить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="taxPaidOverlay">
+  <div class="modal" style="text-align:center;max-width:380px;">
+    <button class="modal-close-x" data-close="taxPaidOverlay"><i class="fas fa-times"></i></button>
+    <div style="font-size:56px;color:#34A853;margin-bottom:14px;"><i class="fas fa-check-circle"></i></div>
+    <h3>Налог оплачен</h3>
+    <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">Информация об оплате отправлена в налоговую службу ЕСДС.</p>
+    <div id="taxPaidDetails" style="font-size:12.5px;color:var(--text-muted);padding:10px;background:var(--bg);border-radius:var(--radius);margin-bottom:16px;"></div>
+    <button class="btn" id="taxPaidClose" style="width:100%;">Понятно</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="voteConfirmOverlay">
+  <div class="modal" style="text-align:center;max-width:380px;">
+    <button class="modal-close-x" data-close="voteConfirmOverlay"><i class="fas fa-times"></i></button>
+    <div style="font-size:56px;color:#1565C0;margin-bottom:14px;"><i class="fas fa-vote-yea"></i></div>
+    <h3>Ваш голос учтён</h3>
+    <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;">Вы проголосовали за:</p>
+    <div id="voteConfirmName" style="font-size:18px;font-weight:600;color:var(--accent-darker);padding:14px;background:var(--accent-light);border-radius:var(--radius);margin-bottom:16px;">—</div>
+    <p style="font-size:11.5px;color:var(--text-muted);margin-bottom:16px;">Результаты будут опубликованы после окончания выборов.</p>
+    <button class="btn" id="voteConfirmClose" style="width:100%;background:#1565C0;">Понятно</button>
+  </div>
+</div>
+
 <div class="toast-container" id="toastContainer"></div>
 <div class="auth-footer" id="authFooter">© 2026 Flype. Все права защищены.</div>
 
@@ -917,7 +1212,7 @@ function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>"']/g, m
 function initial(name) { return name ? name.trim().charAt(0).toUpperCase() : '?'; }
 function senderColor(sid) { let h = 0; for (let i = 0; i < sid.length; i++) h = (h*31 + sid.charCodeAt(i)) % 5; return `color-${Math.abs(h)}`; }
 function getTimeAgo(ts) { const d = Date.now() - ts; const m = Math.floor(d/60000); if (m < 1) return 'только что'; if (m < 60) return `${m} мин назад`; const h = Math.floor(m/60); if (h < 24) return `${h} ч назад`; return 'давно'; }
-function isUserOnline(u) { if (!u) return false; if (u.isAdmin === true) return true; if (!u.lastSeen) return false; return (Date.now() - u.lastSeen) < 60000; }
+function isUserOnline(u) { if (!u) return false; if (u.isAdmin === true) return true; if (u.isBot === true) return true; if (!u.lastSeen) return false; return (Date.now() - u.lastSeen) < 60000; }
 
 function showToast(title, text, icon = 'fa-comment', duration = 3500) { const c = document.getElementById('toastContainer'); const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `<i class="fas ${icon}"></i><div class="toast-text"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(text)}</span></div>`; c.appendChild(t); setTimeout(() => { t.classList.add('fade-out'); setTimeout(() => t.remove(), 300); }, duration); }
 function applyTheme() { const themes = ['theme-standard', 'theme-green', 'theme-red', 'theme-blue', 'theme-white', 'theme-orange', 'theme-purple', 'theme-pink', 'theme-turquoise', 'theme-gold']; document.body.classList.remove(...themes, 'theme-oldflype'); const theme = state.settings.theme || 'standard'; document.body.classList.add('theme-' + theme); if (state.settings.oldFlype === true) document.body.classList.add('theme-oldflype'); document.body.classList.toggle('dark', state.settings.darkTheme === true); document.querySelectorAll('.theme-swatch').forEach(sw => { sw.classList.toggle('selected', sw.dataset.theme === theme); }); }
@@ -1045,7 +1340,7 @@ async function handleRegister(e) {
   const uErr = document.getElementById('regUsernameError');
   uErr.classList.remove('visible'); document.getElementById('regUsername').classList.remove('error');
   if (!isValidUsername(usernameInput)) { uErr.textContent = 'Ник: 4–20 символов, латиница/цифры/_, начинается с буквы.'; uErr.classList.add('visible'); document.getElementById('regUsername').classList.add('error'); valid = false; }
-  else if (['flype','admin','support','root','system'].includes(normalizeUsername(usernameInput))) { uErr.textContent = 'Этот ник зарезервирован.'; uErr.classList.add('visible'); document.getElementById('regUsername').classList.add('error'); valid = false; }
+  else if (['flype','admin','support','root','system','gosbot'].includes(normalizeUsername(usernameInput))) { uErr.textContent = 'Этот ник зарезервирован.'; uErr.classList.add('visible'); document.getElementById('regUsername').classList.add('error'); valid = false; }
   else { const taken = await isUsernameTaken(usernameInput); if (taken) { uErr.textContent = 'Такой ник уже занят.'; uErr.classList.add('visible'); document.getElementById('regUsername').classList.add('error'); valid = false; } }
   if (!valid) { Sound.error(); return; }
   const flypeId = normalizeUsername(usernameInput);
@@ -1062,6 +1357,7 @@ async function handleRegister(e) {
   createWelcomeChat(newUser);
   try { if (window.flypeFirebase) { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'users/' + newUser.id), newUser); } } catch (err) {}
   Sound.statusSent(); showToast('Регистрация успешна!', `Ваш ник: @${flypeId}`, 'fa-check-circle', 5000);
+  ensureGosBot().then(() => createGosBotChat(newUser));
   setTimeout(() => showMainScreen(), 1500);
 }
 function createWelcomeChat(user) {
@@ -1091,7 +1387,9 @@ async function handleLogin(e) {
   if (!window.flypeFirebase) { await new Promise(r => setTimeout(r, 1000)); return handleLogin(e); }
   if (!foundUser) { Sound.error(); registerFailedLogin(); const b = getLoginBlock(); if (b.blockedUntil > Date.now()) { const left = Math.ceil((b.blockedUntil - Date.now())/1000); showToast('Заблокировано', `Подождите ${Math.ceil(left/60)} мин.`, 'fa-clock', 5000); } else { showToast('Ошибка входа', `Неверный Gmail или пароль. Попыток: ${3 - b.attempts}`, 'fa-exclamation-circle'); } updateLoginBlockUI(); return; }
   if (foundUser.banned) { if (foundUser.bannedUntil === 0 || Date.now() < foundUser.bannedUntil) { showBannedScreen(foundUser); return; } else { foundUser.banned = false; foundUser.bannedUntil = 0; } }
-  resetLoginBlock(); localStorage.setItem(STORAGE_KEYS.currentUserId, foundUser.id); state.currentUser = foundUser; state.users = allUsers; saveData(STORAGE_KEYS.users, allUsers); Sound.statusSent(); showToast('Добро пожаловать!', `${foundUser.firstName}, рады видеть вас!`, 'fa-check-circle'); showMainScreen();
+  resetLoginBlock(); localStorage.setItem(STORAGE_KEYS.currentUserId, foundUser.id); state.currentUser = foundUser; state.users = allUsers; saveData(STORAGE_KEYS.users, allUsers); Sound.statusSent(); showToast('Добро пожаловать!', `${foundUser.firstName}, рады видеть вас!`, 'fa-check-circle');
+  ensureGosBot().then(() => createGosBotChat(foundUser));
+  showMainScreen();
 }
 function showError(id, show) { const i = document.getElementById(id); const e = document.getElementById(id + 'Error'); if (i) i.classList.toggle('error', show); if (e) e.classList.toggle('visible', show); }
 async function handleLogout() {
@@ -1113,7 +1411,7 @@ function listenToUsers() {
     const cloud = Object.values(data);
     const cloudIds = new Set(cloud.map(cu => cu.id));
     const local = loadData(STORAGE_KEYS.users, []);
-    const fixedIds = new Set(['flype_bot', ADMIN_UID]);
+    const fixedIds = new Set(['flype_bot', 'gosbot', ADMIN_UID]);
     const merged = local.filter(u => fixedIds.has(u.id) || cloudIds.has(u.id));
     cloud.forEach(cu => { const idx = merged.findIndex(u => u.id === cu.id); if (idx === -1) merged.push(cu); else merged[idx] = { ...merged[idx], ...cu }; });
     state.users = merged;
@@ -1142,7 +1440,7 @@ function listenToChats() {
     localChats.forEach(lc => { if (!merged.find(c => c.id === lc.id)) merged.push(lc); });
     const seen = new Map(); const unique = []; const toDelete = [];
     merged.forEach(c => {
-      if (c.type === 'private' && c.participants && c.participants.length === 2) {
+      if (c.type === 'private' && c.participants && c.participants.length === 2 && !c.isGovChat) {
         const key = [...c.participants].sort().join('|');
         if (seen.has(key)) { const existing = seen.get(key); if ((c.createdAt || 0) < (existing.createdAt || 0)) { toDelete.push(existing); seen.set(key, c); const idx = unique.indexOf(existing); if (idx !== -1) unique[idx] = c; } else { toDelete.push(c); } }
         else { seen.set(key, c); unique.push(c); }
@@ -1222,26 +1520,33 @@ function renderChatList() {
   if (chats.length === 0) { c.innerHTML = `<div style="padding:20px 16px;text-align:center;color:var(--text-secondary);font-size:12.5px;">Нет чатов.<br>Нажмите «Новый» или «Группа».</div>`; return; }
   const groups = {}; chats.forEach(x => { const k = formatContactGroup(x.lastMessageAt || x.createdAt); if (!groups[k]) groups[k] = []; groups[k].push(x); });
   const order = ['Сегодня', 'Вчера', 'На этой неделе', 'Раньше']; let html = '';
-  order.forEach(key => { if (!groups[key]) return; html += `<div class="contacts-group-title">${key}</div>`; html += groups[key].map(chat => { const info = getChatInfo(chat); const lastMsg = getLastMessage(chat.id); const unread = getUnreadCount(chat.id); const isActive = chat.id === state.activeChatId; const lastText = lastMsg ? getMessagePreview(lastMsg) : 'Нет сообщений'; const lastTime = lastMsg ? formatTime(lastMsg.timestamp) : ''; const online = chat.type === 'private' && isUserOnline(state.users.find(u => u.id === chat.participants.find(p => p !== state.currentUser.id))); return `<div class="chat-item ${isActive ? 'active' : ''}" data-chat-id="${chat.id}"><div class="avatar">${info.avatar ? `<img src="${escapeHtml(info.avatar)}">` : initial(info.name)}${online ? '<span class="online-dot"></span>' : ''}</div><div class="chat-info"><div class="name">${escapeHtml(info.name)}${isBlockedChat(chat) ? ' <i class="fas fa-ban" style="color:var(--danger);font-size:10px;"></i>' : ''}${info.isAdmin ? ' <i class="fas fa-shield-alt" style="color:var(--accent);font-size:10px;"></i>' : ''}</div><div class="last-msg">${escapeHtml(lastText)}</div></div><div class="chat-meta"><span class="time">${lastTime}</span>${unread > 0 ? `<span class="unread-badge">${unread}</span>` : ''}</div></div>`; }).join(''); });
+  order.forEach(key => { if (!groups[key]) return; html += `<div class="contacts-group-title">${key}</div>`; html += groups[key].map(chat => { const info = getChatInfo(chat); const lastMsg = getLastMessage(chat.id); const unread = getUnreadCount(chat.id); const isActive = chat.id === state.activeChatId; const lastText = lastMsg ? getMessagePreview(lastMsg) : 'Нет сообщений'; const lastTime = lastMsg ? formatTime(lastMsg.timestamp) : ''; const online = chat.type === 'private' && isUserOnline(state.users.find(u => u.id === chat.participants.find(p => p !== state.currentUser.id))); const isGov = chat.isGovChat === true; return `<div class="chat-item ${isActive ? 'active' : ''}" data-chat-id="${chat.id}"><div class="avatar">${info.avatar ? `<img src="${escapeHtml(info.avatar)}">` : (isGov ? '<i class="fas fa-landmark"></i>' : initial(info.name))}${online ? '<span class="online-dot"></span>' : ''}</div><div class="chat-info"><div class="name">${escapeHtml(info.name)}${isGov ? ' <i class="fas fa-check-circle" style="color:var(--accent);font-size:10px;" title="Официальный"></i>' : ''}${isBlockedChat(chat) ? ' <i class="fas fa-ban" style="color:var(--danger);font-size:10px;"></i>' : ''}${info.isAdmin ? ' <i class="fas fa-shield-alt" style="color:var(--accent);font-size:10px;"></i>' : ''}</div><div class="last-msg">${escapeHtml(lastText)}</div></div><div class="chat-meta"><span class="time">${lastTime}</span>${unread > 0 ? `<span class="unread-badge">${unread}</span>` : ''}</div></div>`; }).join(''); });
   c.innerHTML = html;
   c.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => { state.activeChatId = el.dataset.chatId; renderAll(); listenToMessages(state.activeChatId); if (window.innerWidth <= 900) document.getElementById('sidebar').classList.add('hidden'); }));
 }
-function getChatInfo(chat) { if (!chat) return { name: 'Чат', avatar: '', online: false }; if (chat.type === 'group') return { name: chat.name || 'Группа', avatar: chat.avatar || '', online: false }; const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (other) return { name: `${other.firstName} ${other.lastName}`.trim(), avatar: other.avatar || '', online: isUserOnline(other), flypeId: other.flypeId, isAdmin: other.isAdmin === true }; return { name: 'Пользователь', avatar: '', online: false, flypeId: '—' }; }
+function getChatInfo(chat) { if (!chat) return { name: 'Чат', avatar: '', online: false }; if (chat.type === 'group') return { name: chat.name || 'Группа', avatar: chat.avatar || '', online: false }; const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (other) return { name: other.isBot && other.id === 'gosbot' ? '🏛️ ' + `${other.firstName} ${other.lastName}`.trim() : `${other.firstName} ${other.lastName}`.trim(), avatar: other.avatar || '', online: isUserOnline(other), flypeId: other.flypeId, isAdmin: other.isAdmin === true, isBot: other.isBot === true }; return { name: 'Пользователь', avatar: '', online: false, flypeId: '—' }; }
 function getLastMessage(chatId) { const msgs = state.messages.filter(m => m.chatId === chatId); if (msgs.length === 0) return null; return msgs.sort((a, b) => b.timestamp - a.timestamp)[0]; }
 function getUnreadCount(chatId) { return state.messages.filter(m => m.chatId === chatId && m.senderId !== state.currentUser.id && !m.read).length; }
-function getMessagePreview(msg) { if (msg.type === 'image') return '📷 Фото'; if (msg.type === 'file') return `📎 ${msg.fileName || 'Файл'}`; if (msg.type === 'report') return '🚩 Жалоба'; if (msg.encrypted) return '🔒 Сообщение'; return msg.text || ''; }
+function getMessagePreview(msg) { if (msg.type === 'image') return '📷 Фото'; if (msg.type === 'file') return `📎 ${msg.fileName || 'Файл'}`; if (msg.type === 'report') return '🚩 Жалоба'; if (msg.type === 'emergency') return '🚨 ' + (msg.text || '').split('\n')[0]; if (msg.type === 'tax') return '💰 Налог'; if (msg.type === 'election') return '🗳️ Выборы'; if (msg.type === 'announcement') return '📢 Объявление'; if (msg.encrypted) return '🔒 Сообщение'; return msg.text || ''; }
 function renderActiveChat() {
   const emptyChat = document.getElementById('emptyChat'); const chatHeader = document.getElementById('chatHeader'); const messagesContainer = document.getElementById('messagesContainer'); const chatInputArea = document.getElementById('chatInputArea'); const typingIndicator = document.getElementById('typingIndicator'); const groupBar = document.getElementById('groupMembersBar');
+  const oldPanel = document.querySelector('.gosbot-admin-panel'); if (oldPanel) oldPanel.remove();
   if (!state.activeChatId) { emptyChat.classList.remove('hidden'); chatHeader.classList.add('hidden'); messagesContainer.classList.add('hidden'); chatInputArea.classList.add('hidden'); typingIndicator.classList.add('hidden'); groupBar.classList.add('hidden'); return; }
   const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) { state.activeChatId = null; renderActiveChat(); return; }
   emptyChat.classList.add('hidden'); chatHeader.classList.remove('hidden'); messagesContainer.classList.remove('hidden'); chatInputArea.classList.remove('hidden');
   const info = getChatInfo(chat); document.getElementById('chatHeaderName').textContent = info.name;
   const statusEl = document.getElementById('chatHeaderStatus');
-  if (chat.type === 'group') { statusEl.textContent = `${chat.participants.length} участников`; statusEl.className = 'status'; } else if (info.online) { statusEl.textContent = 'В сети'; statusEl.className = 'status online'; } else { statusEl.textContent = 'Был(а) недавно'; statusEl.className = 'status'; }
-  const ae = document.getElementById('chatHeaderAvatar'); if (info.avatar) ae.innerHTML = `<img src="${escapeHtml(info.avatar)}">`; else ae.textContent = initial(info.name);
+  if (chat.isGovChat) { statusEl.textContent = 'Официальный канал Госуслуг ЕСДС'; statusEl.className = 'status online'; }
+  else if (chat.type === 'group') { statusEl.textContent = `${chat.participants.length} участников`; statusEl.className = 'status'; } else if (info.online) { statusEl.textContent = 'В сети'; statusEl.className = 'status online'; } else { statusEl.textContent = 'Был(а) недавно'; statusEl.className = 'status'; }
+  const ae = document.getElementById('chatHeaderAvatar'); if (info.avatar) ae.innerHTML = `<img src="${escapeHtml(info.avatar)}">`; else if (chat.isGovChat) ae.innerHTML = '<i class="fas fa-landmark"></i>'; else ae.textContent = initial(info.name);
   if (chat.type === 'group') { groupBar.classList.remove('hidden'); groupBar.innerHTML = chat.participants.map(uid => { const u = state.users.find(x => x.id === uid); if (!u) return ''; const n = `${u.firstName} ${u.lastName}`.trim(); const sn = u.firstName || n; return `<div class="group-member"><i class="fas fa-check-circle"></i><div class="avatar sm">${u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : initial(n)}</div><span>${escapeHtml(sn)}</span></div>`; }).join(''); } else groupBar.classList.add('hidden');
   let changed = false; state.messages.forEach(m => { if (m.chatId === chat.id && m.senderId !== state.currentUser.id && !m.read) { m.read = true; changed = true; } }); if (changed) persistMessages();
   listenToMessages(chat.id); renderMessages(chat.id); renderChatList();
+  // Админ-панель для @gosbot
+  if (chat.isGovChat && state.currentUser.isAdmin) {
+    const panelHtml = renderGosBotAdminPanel(chat.id);
+    if (panelHtml) document.getElementById('chatInputArea').insertAdjacentHTML('beforebegin', panelHtml);
+  }
 }
 async function renderMessages(chatId) {
   const c = document.getElementById('messagesContainer'); const hk = 'flype_hidden_msgs_' + state.currentUser.id; const hidden = loadData(hk, []); const blocked = state.currentUser.blocked || [];
@@ -1265,7 +1570,7 @@ async function renderMessageBubble(msg, chatId) {
   if (msg.type === 'image') content = `<div>${escapeHtml(msg.text || '')}</div><img class="msg-image" src="${msg.imageUrl}">`;
   else if (msg.type === 'file') content = `<div class="file-attach"><i class="fas fa-file"></i><div style="flex:1;min-width:0;"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(msg.fileName)}</div><div style="font-size:11px;opacity:0.7;">${formatFileSize(msg.fileSize || 0)}</div></div></div>`;
   else if (msg.type === 'report') { content = `<div style="white-space:pre-wrap;">${escapeHtml(msg.text || '')}</div>`; if (msg.evidence) content += `<div class="file-attach" style="margin-top:8px;"><i class="fas fa-paperclip"></i><div style="flex:1;min-width:0;"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(msg.evidence.name)}</div><div style="font-size:11px;opacity:0.7;">${formatFileSize(msg.evidence.size || 0)}</div></div></div>`; }
-  else content = `<div>${escapeHtml(displayText || '')}</div>`;
+  else content = `<div style="white-space:pre-wrap;">${escapeHtml(displayText || '')}</div>`;
   let checks = ''; if (isOut) checks = msg.read ? '<span class="checks"><i class="fas fa-check-double" style="color:var(--accent);"></i></span>' : '<span class="checks"><i class="fas fa-check" style="color:var(--text-muted);"></i></span>';
   let senderHtml = ''; if (chat && chat.type === 'group' && !isOut) { const cc = senderColor(msg.senderId); senderHtml = `<div class="sender-name ${cc}">${escapeHtml(senderName)}${sender && sender.isAdmin ? ' <i class="fas fa-shield-alt" style="font-size:9px;"></i>' : ''}</div>`; }
   const lockIcon = msg.encrypted ? '<span class="encrypted-badge" title="E2E"><i class="fas fa-lock"></i></span>' : '';
@@ -1276,9 +1581,21 @@ async function renderMessageBubble(msg, chatId) {
     reactionsHtml = '<div class="reactions">' + Object.entries(grouped).map(([emoji, users]) => { const mine = users.includes(state.currentUser.id); return `<span class="reaction-badge ${mine ? 'mine' : ''}" data-reaction="${emoji}" data-msg-id="${msg.id}" data-chat-id="${chatId}">${emoji} <span class="count">${users.length}</span></span>`; }).join('') + '</div>';
   }
   let adminButtons = ''; if (msg.type === 'report' && state.currentUser.isAdmin === true) { adminButtons = `<div class="admin-actions-row"><button class="admin-action-btn warn" data-report-id="${msg.reportId}" data-action="warn"><i class="fas fa-exclamation-triangle"></i> Предупреждение</button><button class="admin-action-btn temp-ban" data-report-id="${msg.reportId}" data-action="temp-ban"><i class="fas fa-clock"></i> Забанить на срок</button><button class="admin-action-btn perm-ban" data-report-id="${msg.reportId}" data-action="perm-ban"><i class="fas fa-user-times"></i> Удалить аккаунт</button></div>`; }
-  const bc = msg.type === 'report' ? 'message-bubble report-message' : 'message-bubble';
+  let bc = 'message-bubble';
+  if (msg.type === 'report') bc += ' report-message';
+  if (msg.type === 'emergency') bc += ' emergency-bubble';
+  if (msg.type === 'tax') bc += ' tax-bubble';
+  if (msg.type === 'election') bc += ' election-bubble';
+  if (msg.type === 'announcement') bc += ' announce-bubble';
+  let govButtons = '';
+  if (msg.type === 'tax' && msg.meta && msg.meta.taxId) {
+    govButtons = `<button class="gov-action-btn pay pay-tax-btn" data-tax-id="${msg.meta.taxId}">💳 Оплатить</button>`;
+  }
+  if (msg.type === 'election' && msg.meta && msg.meta.candidates) {
+    govButtons = '<div style="margin-top:8px;">' + msg.meta.candidates.map(c => `<button class="gov-action-btn vote vote-btn" data-election="${msg.meta.electionId}" data-candidate="${c.id}">🗳️ ${escapeHtml(c.name)}</button>`).join('') + '</div>';
+  }
   const editedMark = msg.editedAt ? '<span class="msg-edited">(изменено)</span>' : '';
-  return `<div class="message-row ${isOut ? 'out' : 'in'}"><div class="${bc}">${senderHtml}${content}${reactionsHtml}${adminButtons}<div class="msg-time">${lockIcon}${formatTime(msg.timestamp)}${editedMark} ${checks}</div></div></div>`;
+  return `<div class="message-row ${isOut ? 'out' : 'in'}"><div class="${bc}">${senderHtml}${content}${govButtons}${reactionsHtml}${adminButtons}<div class="msg-time">${lockIcon}${formatTime(msg.timestamp)}${editedMark} ${checks}</div></div></div>`;
 }
 
 function showMessageMenu(x, y, msg, chatId) {
@@ -1407,7 +1724,8 @@ function openStatusView(id) { const s = state.statuses.find(x => x.id === id); i
 async function deleteContact() {
   if (!state.activeChatId) return;
   const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) return;
-  if (chat.type === 'private') { const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (other && other.isAdmin) { Sound.error(); showToast('Недоступно', 'Администратора нельзя удалить', 'fa-shield-alt', 3000); return; } }
+  if (chat.isGovChat) { Sound.error(); showToast('Недоступно', 'Чат с Госуслугами нельзя удалить', 'fa-landmark', 3000); return; }
+  if (chat.type === 'private') { const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (other && (other.isAdmin || other.isOfficial)) { Sound.error(); showToast('Недоступно', 'Этот аккаунт нельзя удалить', 'fa-shield-alt', 3000); return; } }
   let message, label;
   if (chat.type === 'group') { message = `Удалить группу «${chat.name}»?`; label = 'Группа удалена'; } else { const info = getChatInfo(chat); message = `Удалить контакт «${info.name}»?`; label = 'Контакт удалён'; }
   if (!confirm(message)) return;
@@ -1417,7 +1735,7 @@ async function toggleBlockContact() {
   if (!state.activeChatId) return;
   const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat || chat.type !== 'private') return;
   const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (!other) return;
-  if (other.isAdmin === true) { Sound.error(); showToast('Недоступно', 'Администратора нельзя заблокировать', 'fa-shield-alt', 3000); return; }
+  if (other.isAdmin === true || other.isOfficial === true) { Sound.error(); showToast('Недоступно', 'Этот аккаунт нельзя заблокировать', 'fa-shield-alt', 3000); return; }
   if (!state.currentUser.blocked) state.currentUser.blocked = [];
   const isB = state.currentUser.blocked.includes(oid);
   if (isB) { state.currentUser.blocked = state.currentUser.blocked.filter(id => id !== oid); showToast('Разблокирован', '', 'fa-unlock', 2500); }
@@ -1430,9 +1748,10 @@ async function sendMessage(text, type = 'text', extra = {}) {
   if (!state.activeChatId) return;
   if (type === 'text' && !text.trim()) return;
   const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) return;
+  if (chat.isGovChat && !state.currentUser.isAdmin) { Sound.error(); showToast('Только для чтения', 'Чат с Госуслугами ЕСДС — только для чтения', 'fa-landmark', 3000); return; }
   if (chat.type === 'private') { const oid = chat.participants.find(p => p !== state.currentUser.id); if (state.currentUser.blocked && state.currentUser.blocked.includes(oid)) { Sound.error(); showToast('Заблокирован', 'Разблокируйте, чтобы писать', 'fa-ban'); return; } }
   let encText = text.trim(); let isEnc = false;
-  if (chat.type === 'private' && type === 'text' && text.trim()) { try { const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (other && other.publicKey) { const myPr = localStorage.getItem('flype_private_key_' + state.currentUser.id); if (myPr) { const mp = await importPrivateKey(myPr); const tp = await importPublicKey(other.publicKey); const sk = await deriveSharedSecret(mp, tp); encText = await encryptMessage(text.trim(), sk); isEnc = true; } } } catch (err) {} }
+  if (chat.type === 'private' && type === 'text' && text.trim() && !chat.isGovChat) { try { const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (other && other.publicKey) { const myPr = localStorage.getItem('flype_private_key_' + state.currentUser.id); if (myPr) { const mp = await importPrivateKey(myPr); const tp = await importPublicKey(other.publicKey); const sk = await deriveSharedSecret(mp, tp); encText = await encryptMessage(text.trim(), sk); isEnc = true; } } } catch (err) {} }
   const msg = { chatId: state.activeChatId, senderId: state.currentUser.id, text: encText, encrypted: isEnc, timestamp: Date.now(), read: false, type, ...extra };
   state.messages.push({ id: genId(), ...msg });
   if (chat) { chat.lastMessageAt = Date.now(); chat.lastMessage = type === 'text' ? (isEnc ? '🔒 Сообщение' : text) : getMessagePreview(msg); }
@@ -1459,8 +1778,9 @@ async function sendMessage(text, type = 'text', extra = {}) {
   } catch (err) { Sound.statusFailed(); showToast('Ошибка', 'Не удалось отправить', 'fa-exclamation-circle'); }
 }
 let pendingReportTargetId = null, pendingReportEvidence = null, adminActionReportId = null;
-document.getElementById('reportUserBtn').addEventListener('click', () => { if (!state.activeChatId) return; const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat || chat.type !== 'private') return; const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (!other) return; if (other.isAdmin) { Sound.error(); showToast('Недоступно', 'На администратора нельзя пожаловаться', 'fa-shield-alt', 3000); return; } openReportModal(other); });
+document.getElementById('reportUserBtn').addEventListener('click', () => { if (!state.activeChatId) return; const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat || chat.type !== 'private') return; const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (!other) return; if (other.isAdmin || other.isOfficial) { Sound.error(); showToast('Недоступно', 'На этот аккаунт нельзя пожаловаться', 'fa-shield-alt', 3000); return; } openReportModal(other); });
 async function openReportModal(targetUser) {
+  if (targetUser && targetUser.isOfficial) { Sound.error(); showToast('Недоступно', 'На официальный аккаунт нельзя пожаловаться', 'fa-landmark', 3000); return; }
   pendingReportTargetId = targetUser.id; pendingReportEvidence = null;
   document.getElementById('reportReason').value = ''; document.getElementById('reportDescription').value = ''; document.getElementById('reportDescCounter').textContent = '0';
   document.getElementById('reportEvidenceFile').value = ''; document.getElementById('reportEvidencePreview').innerHTML = '';
@@ -1526,7 +1846,7 @@ async function deleteAuthUser(password) {
 let newGroupAvatarData = null; let selectedGroupContacts = new Set();
 function renderNewGroupContacts() {
   const c = document.getElementById('newGroupContacts');
-  const users = state.users.filter(u => u.id !== state.currentUser.id && u.id !== 'flype_bot' && u.id !== ADMIN_UID);
+  const users = state.users.filter(u => u.id !== state.currentUser.id && u.id !== 'flype_bot' && u.id !== 'gosbot' && u.id !== ADMIN_UID);
   if (users.length === 0) { c.innerHTML = `<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:12.5px;">Нет других</div>`; return; }
   c.innerHTML = users.map(u => { const name = `${u.firstName} ${u.lastName}`.trim(); const checked = selectedGroupContacts.has(u.id); return `<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-light);"><input type="checkbox" data-uid="${u.id}" ${checked ? 'checked' : ''} style="width:16px;height:16px;cursor:pointer;"><div class="avatar sm">${u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : initial(name)}</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(name)}</div><div style="font-size:10.5px;font-family:monospace;color:var(--text-muted);">@${escapeHtml(u.flypeId || '')}</div></div></label>`; }).join('');
   c.querySelectorAll('input[type=checkbox]').forEach(cb => { cb.addEventListener('change', (e) => { if (e.target.checked) selectedGroupContacts.add(e.target.dataset.uid); else selectedGroupContacts.delete(e.target.dataset.uid); }); });
@@ -1536,7 +1856,7 @@ async function removeGroupMember(chatId, uid) { const chat = state.chats.find(c 
 function renderAddMemberResults(query) {
   const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) return;
   const c = document.getElementById('addMemberResults'); const q = query.trim().toLowerCase();
-  let users = state.users.filter(u => u.id !== state.currentUser.id && u.id !== 'flype_bot' && !chat.participants.includes(u.id));
+  let users = state.users.filter(u => u.id !== state.currentUser.id && u.id !== 'flype_bot' && u.id !== 'gosbot' && !chat.participants.includes(u.id));
   users = users.filter(u => u.id && (u.email || u.flypeId)); users = users.filter(u => !u.banned || u.bannedUntil > Date.now());
   if (q) users = users.filter(u => { const n = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase(); const fid = (u.flypeId || '').toLowerCase(); return n.includes(q) || fid.includes(q); });
   if (users.length === 0) { c.innerHTML = `<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:12.5px;">Не найдено</div>`; return; }
@@ -1568,6 +1888,278 @@ async function deleteAccount() {
   showAuthScreen(); document.getElementById('loginForm').reset(); document.getElementById('registerForm').reset();
 }
 
+/* ============================================================
+   ГОСУСЛУГИ ЕСДС — @gosbot
+   ============================================================ */
+
+const GOSBOT_USER = {
+  id: 'gosbot', flypeId: 'gosbot',
+  firstName: 'Госуслуги', lastName: 'ЕСДС',
+  avatar: '', about: 'Официальный бот государственных услуг ЕСДС',
+  isOfficial: true, isBot: true, verified: true,
+  online: true, lastSeen: Date.now(), createdAt: Date.now(),
+  banned: false, bannedUntil: 0, blocked: []
+};
+
+async function ensureGosBot() {
+  if (!window.flypeFirebase) { setTimeout(ensureGosBot, 500); return; }
+  try {
+    const { database, ref, get, set } = window.flypeFirebase;
+    const snap = await get(ref(database, 'users/gosbot'));
+    if (!snap.exists()) {
+      await set(ref(database, 'users/gosbot'), GOSBOT_USER);
+      console.log('✅ @gosbot создан');
+    }
+    const lu = loadData(STORAGE_KEYS.users, []);
+    if (!lu.find(u => u.id === 'gosbot')) {
+      lu.push(GOSBOT_USER);
+      saveData(STORAGE_KEYS.users, lu);
+    }
+  } catch (e) { console.warn('ensureGosBot:', e); }
+}
+
+function createGosBotChat(user) {
+  const chatId = 'chat_gosbot_' + user.id;
+  const chats = loadData(STORAGE_KEYS.chats, []);
+  if (!chats.find(c => c.id === chatId)) {
+    chats.push({
+      id: chatId, type: 'private',
+      participants: [user.id, 'gosbot'],
+      createdAt: Date.now(), lastMessageAt: Date.now(),
+      isGovChat: true
+    });
+    saveData(STORAGE_KEYS.chats, chats);
+  }
+  const messages = loadData(STORAGE_KEYS.messages, []);
+  if (!messages.find(m => m.chatId === chatId)) {
+    messages.push({
+      id: genId(), chatId, senderId: 'gosbot',
+      text: `🏛️ Добро пожаловать в Госуслуги ЕСДС!\n\nЗдесь вы будете получать:\n🚨 Уведомления о ЧС\n🗳️ Приглашения на выборы\n💰 Налоговые уведомления\n📢 Официальные объявления\n\nВаш регион: ${user.region || 'не указан'}`,
+      timestamp: Date.now(), read: false, type: 'text'
+    });
+    saveData(STORAGE_KEYS.messages, messages);
+  }
+}
+
+async function broadcastFromGosBot({ audience, messageType, text, meta = {}, priority = 'normal' }) {
+  if (!window.flypeFirebase) { showToast('Ошибка', 'Firebase не подключён', 'fa-exclamation-circle'); return 0; }
+  const { database, ref, get, push, set, update } = window.flypeFirebase;
+  const usersSnap = await get(ref(database, 'users'));
+  const allUsers = Object.values(usersSnap.val() || {});
+  let recipients = allUsers.filter(u => !u.isOfficial && !u.isBot && !u.id.startsWith('gues_') && u.id !== 'flype_bot');
+  if (audience.type === 'region') recipients = recipients.filter(u => u.region === audience.region);
+  if (recipients.length === 0) { showToast('Нет получателей', 'Ни один гражданин не подходит', 'fa-info-circle'); return 0; }
+  let sent = 0;
+  for (const recipient of recipients) {
+    try {
+      const chatId = 'chat_gosbot_' + recipient.id;
+      const chatSnap = await get(ref(database, 'chats/' + chatId));
+      if (!chatSnap.exists()) {
+        await set(ref(database, 'chats/' + chatId), { id: chatId, type: 'private', participants: [recipient.id, 'gosbot'], createdAt: Date.now(), lastMessageAt: Date.now(), isGovChat: true });
+      }
+      const msgRef = push(ref(database, 'messages'));
+      await set(msgRef, { chatId, senderId: 'gosbot', text, timestamp: Date.now(), read: false, type: messageType, priority, meta, fromAdmin: state.currentUser.id });
+      await update(ref(database, 'chats/' + chatId), { lastMessageAt: Date.now(), lastMessage: text.slice(0, 60) });
+      sent++;
+    } catch (e) { console.warn('broadcast:', e); }
+  }
+  return sent;
+}
+
+function renderGosBotAdminPanel(chatId) {
+  const chat = state.chats.find(c => c.id === chatId);
+  if (!chat || !chat.isGovChat) return '';
+  if (!state.currentUser || !state.currentUser.isAdmin) return '';
+  return `<div class="gosbot-admin-panel">
+    <button class="gos-panel-btn danger" data-action="emergency"><i class="fas fa-exclamation-triangle"></i> 🚨 ЧС</button>
+    <button class="gos-panel-btn" data-action="election"><i class="fas fa-vote-yea"></i> 🗳️ Выборы</button>
+    <button class="gos-panel-btn warn" data-action="tax"><i class="fas fa-euro-sign"></i> 💰 Налог</button>
+    <button class="gos-panel-btn" data-action="announcement"><i class="fas fa-bullhorn"></i> 📢 Объявление</button>
+  </div>`;
+}
+
+let elCandidateList = [];
+function renderElectionCandidates(list) {
+  elCandidateList = list || [];
+  const c = document.getElementById('elCandidates');
+  if (!c) return;
+  if (elCandidateList.length === 0) { c.innerHTML = '<div style="padding:8px;text-align:center;color:var(--text-muted);font-size:12px;">Пока нет кандидатов</div>'; return; }
+  c.innerHTML = elCandidateList.map((cand, i) => `
+    <div class="candidate-picker-row">
+      <input type="text" value="${escapeHtml(cand.name)}" data-idx="${i}" placeholder="Имя кандидата" class="el-cand-input">
+      <button data-remove="${i}" title="Удалить"><i class="fas fa-times"></i></button>
+    </div>`).join('');
+  c.querySelectorAll('.el-cand-input').forEach(inp => {
+    inp.addEventListener('input', (e) => { elCandidateList[parseInt(e.target.dataset.idx)].name = e.target.value; });
+  });
+  c.querySelectorAll('[data-remove]').forEach(btn => {
+    btn.addEventListener('click', () => { elCandidateList.splice(parseInt(btn.dataset.remove), 1); renderElectionCandidates(elCandidateList); });
+  });
+}
+
+document.getElementById('emSend').addEventListener('click', async () => {
+  const region = document.getElementById('emRegion').value;
+  const type = document.getElementById('emType').value;
+  const level = document.getElementById('emLevel').value;
+  const description = document.getElementById('emDescription').value.trim();
+  const until = document.getElementById('emUntil').value;
+  if (!description) { Sound.error(); showToast('Ошибка', 'Введите описание', 'fa-exclamation-circle'); return; }
+  const typeLabels = { fire: 'Пожар', flood: 'Наводнение', earthquake: 'Землетрясение', war: 'Военное положение', epidemic: 'Эпидемия', other: 'ЧС' };
+  const levelLabels = { low: 'Низкий', medium: 'Средний', high: 'ВЫСОКИЙ', critical: '🔴 КРИТИЧЕСКИЙ' };
+  const scopeLabel = region === 'all' ? 'Вся страна' : region;
+  const text = `🚨 ЧРЕЗВЫЧАЙНАЯ СИТУАЦИЯ\n\nРегион: ${scopeLabel}\nТип: ${typeLabels[type]}\nУровень: ${levelLabels[level]}\n${until ? 'Действует до: ' + until + '\n' : ''}\n${description}`;
+  const sent = await broadcastFromGosBot({ audience: region === 'all' ? { type: 'all' } : { type: 'region', region }, messageType: 'emergency', text, meta: { emergencyType: type, level, until, description, scope: region }, priority: level === 'critical' ? 'critical' : 'high' });
+  if (sent > 0) showToast('Объявлено', `Разослано ${sent} гражданам`, 'fa-exclamation-triangle', 4000);
+  document.getElementById('gosEmergencyOverlay').classList.remove('open');
+  document.getElementById('emDescription').value = '';
+});
+
+document.getElementById('elAddCandidate').addEventListener('click', () => {
+  elCandidateList.push({ id: genId(), name: '' });
+  renderElectionCandidates(elCandidateList);
+  setTimeout(() => { const inputs = document.querySelectorAll('.el-cand-input'); if (inputs.length) inputs[inputs.length - 1].focus(); }, 100);
+});
+document.getElementById('elSend').addEventListener('click', async () => {
+  const type = document.getElementById('elType').value;
+  const scope = document.getElementById('elScope').value;
+  const start = document.getElementById('elStart').value;
+  const end = document.getElementById('elEnd').value;
+  const candidates = elCandidateList.filter(c => c.name.trim());
+  if (candidates.length < 2) { Sound.error(); showToast('Ошибка', 'Минимум 2 кандидата', 'fa-exclamation-circle'); return; }
+  if (!start || !end) { Sound.error(); showToast('Ошибка', 'Укажите даты', 'fa-exclamation-circle'); return; }
+  const typeLabels = { president: 'Президентские', parliament: 'Парламентские', regional: 'Региональные', referendum: 'Референдум' };
+  const scopeLabel = scope === 'all' ? 'Вся страна' : scope;
+  const electionId = 'election_' + genId();
+  const text = `🗳️ ${typeLabels[type].toUpperCase()} ВЫБОРЫ\n\nРегион: ${scopeLabel}\nПериод: ${new Date(start).toLocaleString('ru-RU')} — ${new Date(end).toLocaleString('ru-RU')}\n\nПроголосуйте за одного из кандидатов ниже:`;
+  const sent = await broadcastFromGosBot({ audience: scope === 'all' ? { type: 'all' } : { type: 'region', region: scope }, messageType: 'election', text, meta: { electionId, electionType: type, scope, start, end, candidates }, priority: 'high' });
+  if (window.flypeFirebase) { try { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'elections/' + electionId), { id: electionId, type, scope, start, end, candidates, status: 'active', createdAt: Date.now(), createdBy: state.currentUser.id, votes: {} }); } catch (e) {} }
+  if (sent > 0) showToast('Выборы объявлены', `Разослано ${sent} гражданам`, 'fa-vote-yea', 4000);
+  document.getElementById('gosElectionOverlay').classList.remove('open');
+  elCandidateList = [];
+});
+
+let selectedTaxCitizen = null;
+document.getElementById('taxCitizenSearch').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  const c = document.getElementById('taxCitizenResults');
+  if (!q) { c.innerHTML = ''; return; }
+  const users = state.users.filter(u => !u.isOfficial && !u.isBot && u.id !== state.currentUser.id && u.id !== 'flype_bot')
+    .filter(u => { const name = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase(); const fid = (u.flypeId || '').toLowerCase(); return name.includes(q) || fid.includes(q); })
+    .slice(0, 8);
+  if (users.length === 0) { c.innerHTML = '<div style="padding:8px;text-align:center;color:var(--text-muted);font-size:12px;">Никого не найдено</div>'; return; }
+  c.innerHTML = users.map(u => {
+    const n = `${u.firstName} ${u.lastName}`;
+    return `<div data-tax-uid="${u.id}" style="display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;border-radius:var(--radius);" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='transparent'">
+      <div class="avatar sm">${u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : initial(n)}</div>
+      <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;">${escapeHtml(n)}</div><div style="font-size:10.5px;font-family:monospace;color:var(--text-muted);">@${escapeHtml(u.flypeId || '')}</div></div>
+    </div>`;
+  }).join('');
+  c.querySelectorAll('[data-tax-uid]').forEach(el => el.addEventListener('click', () => {
+    const u = state.users.find(x => x.id === el.dataset.taxUid);
+    if (!u) return;
+    selectedTaxCitizen = u;
+    const sel = document.getElementById('taxSelectedCitizen');
+    sel.style.display = 'block';
+    sel.innerHTML = `✅ Выбран: <b>${escapeHtml(u.firstName + ' ' + u.lastName)}</b> (@${escapeHtml(u.flypeId)})`;
+    c.innerHTML = '';
+    document.getElementById('taxCitizenSearch').value = '';
+  }));
+});
+document.getElementById('taxSend').addEventListener('click', async () => {
+  if (!selectedTaxCitizen) { Sound.error(); showToast('Ошибка', 'Выберите гражданина', 'fa-exclamation-circle'); return; }
+  const type = document.getElementById('taxType').value;
+  const amount = document.getElementById('taxAmount').value;
+  const reason = document.getElementById('taxReason').value.trim();
+  const dueDate = document.getElementById('taxDueDate').value;
+  if (!amount || !dueDate) { Sound.error(); showToast('Ошибка', 'Заполните сумму и дату', 'fa-exclamation-circle'); return; }
+  const typeLabels = { income: 'Подоходный', transport: 'Транспортный', land: 'Земельный', property: 'Имущественный', fine: 'Штраф', other: 'Налог' };
+  const taxId = 'tax_' + genId();
+  const text = `💰 НАЛОГОВОЕ УВЕДОМЛЕНИЕ\n\nТип: ${typeLabels[type]}\nСумма: ${amount} €\n${reason ? 'Основание: ' + reason + '\n' : ''}Оплатить до: ${dueDate}`;
+  const { database, ref, get, set, push, update } = window.flypeFirebase;
+  try {
+    const chatId = 'chat_gosbot_' + selectedTaxCitizen.id;
+    const chatSnap = await get(ref(database, 'chats/' + chatId));
+    if (!chatSnap.exists()) { await set(ref(database, 'chats/' + chatId), { id: chatId, type: 'private', participants: [selectedTaxCitizen.id, 'gosbot'], createdAt: Date.now(), lastMessageAt: Date.now(), isGovChat: true }); }
+    const msgRef = push(ref(database, 'messages'));
+    await set(msgRef, { chatId, senderId: 'gosbot', text, timestamp: Date.now(), read: false, type: 'tax', priority: 'high', meta: { taxId, taxType: type, amount: Number(amount), reason, dueDate } });
+    await update(ref(database, 'chats/' + chatId), { lastMessageAt: Date.now(), lastMessage: text.slice(0, 60) });
+    await set(ref(database, 'taxes/' + taxId), { id: taxId, userId: selectedTaxCitizen.id, type, amount: Number(amount), reason, dueDate, status: 'unpaid', issuedBy: state.currentUser.id, issuedAt: Date.now() });
+    showToast('Налог выписан', `${selectedTaxCitizen.firstName}: ${amount} €`, 'fa-check-circle', 4000);
+    document.getElementById('gosTaxOverlay').classList.remove('open');
+    selectedTaxCitizen = null;
+    document.getElementById('taxSelectedCitizen').style.display = 'none';
+    document.getElementById('taxAmount').value = '';
+    document.getElementById('taxReason').value = '';
+  } catch (e) { Sound.error(); showToast('Ошибка', '', 'fa-exclamation-circle'); }
+});
+
+document.getElementById('anSend').addEventListener('click', async () => {
+  const title = document.getElementById('anTitle').value.trim();
+  const text = document.getElementById('anText').value.trim();
+  const audience = document.getElementById('anAudience').value;
+  const importance = document.getElementById('anImportance').value;
+  if (!title || !text) { Sound.error(); showToast('Ошибка', 'Заполните заголовок и текст', 'fa-exclamation-circle'); return; }
+  const impLabel = { normal: '', important: '📙 ВАЖНО\n', critical: '📕 КРИТИЧЕСКИ ВАЖНО\n' };
+  const msgText = `📢 ${title.toUpperCase()}\n${impLabel[importance]}\n${text}`;
+  const sent = await broadcastFromGosBot({ audience: audience === 'all' ? { type: 'all' } : { type: 'region', region: audience }, messageType: 'announcement', text: msgText, meta: { title, importance }, priority: importance === 'critical' ? 'critical' : (importance === 'important' ? 'high' : 'normal') });
+  if (sent > 0) showToast('Объявление отправлено', `Разослано ${sent} гражданам`, 'fa-bullhorn', 4000);
+  document.getElementById('gosAnnounceOverlay').classList.remove('open');
+  document.getElementById('anTitle').value = '';
+  document.getElementById('anText').value = '';
+});
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.gos-panel-btn');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  if (action === 'emergency') document.getElementById('gosEmergencyOverlay').classList.add('open');
+  if (action === 'election') { elCandidateList = []; renderElectionCandidates([]); document.getElementById('gosElectionOverlay').classList.add('open'); }
+  if (action === 'tax') document.getElementById('gosTaxOverlay').classList.add('open');
+  if (action === 'announcement') document.getElementById('gosAnnounceOverlay').classList.add('open');
+});
+
+document.addEventListener('click', async (e) => {
+  const payBtn = e.target.closest('.pay-tax-btn');
+  if (payBtn) {
+    const taxId = payBtn.dataset.taxId;
+    try {
+      if (window.flypeFirebase) {
+        const { database, ref, update } = window.flypeFirebase;
+        await update(ref(database, 'taxes/' + taxId), { status: 'paid', paidAt: Date.now() });
+      }
+      document.getElementById('taxPaidDetails').textContent = `Налог №${taxId.slice(-6)} — статус: ✅ Оплачен`;
+      document.getElementById('taxPaidOverlay').classList.add('open');
+      Sound.send();
+    } catch (err) { Sound.error(); }
+    return;
+  }
+  const voteBtn = e.target.closest('.vote-btn');
+  if (voteBtn) {
+    const electionId = voteBtn.dataset.election;
+    const candidateId = voteBtn.dataset.candidate;
+    const candidateName = voteBtn.textContent.replace('🗳️','').trim();
+    try {
+      if (window.flypeFirebase) {
+        const { database, ref, get, update } = window.flypeFirebase;
+        const snap = await get(ref(database, 'elections/' + electionId));
+        if (snap.exists()) {
+          const el = snap.val();
+          const votes = el.votes || {};
+          if (votes[state.currentUser.id]) { Sound.error(); showToast('Уже голосовали', 'Один голос на человека', 'fa-info-circle', 3000); return; }
+          votes[state.currentUser.id] = candidateId;
+          await update(ref(database, 'elections/' + electionId), { votes });
+        }
+      }
+      document.getElementById('voteConfirmName').textContent = candidateName;
+      document.getElementById('voteConfirmOverlay').classList.add('open');
+      Sound.send();
+    } catch (err) { Sound.error(); showToast('Ошибка', 'Не удалось проголосовать', 'fa-exclamation-circle'); }
+    return;
+  }
+});
+document.getElementById('taxPaidClose').addEventListener('click', () => document.getElementById('taxPaidOverlay').classList.remove('open'));
+document.getElementById('voteConfirmClose').addEventListener('click', () => document.getElementById('voteConfirmOverlay').classList.remove('open'));
+
 document.querySelectorAll('.auth-tab').forEach(tab => { tab.addEventListener('click', () => { document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const target = tab.dataset.tab; document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active')); document.getElementById(target === 'login' ? 'loginForm' : 'registerForm').classList.add('active'); document.querySelectorAll('.error-text').forEach(e => e.classList.remove('visible')); document.querySelectorAll('.input-group input').forEach(i => i.classList.remove('error')); }); });
 document.getElementById('regUsername').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20); document.getElementById('regUsernameError').classList.remove('visible'); e.target.classList.remove('error'); });
 document.getElementById('newIdDigits').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20); document.getElementById('newIdError').classList.remove('visible'); e.target.classList.remove('error'); });
@@ -1593,19 +2185,19 @@ document.getElementById('infoBtn').addEventListener('click', () => {
   const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) return;
   const info = getChatInfo(chat);
   document.getElementById('contactName').textContent = info.name;
-  document.getElementById('contactStatus').textContent = info.online ? 'В сети' : 'Был(а) недавно';
-  document.getElementById('contactFlypeId').textContent = chat.type === 'group' ? `Группа · ${chat.participants.length} участников` : (info.flypeId ? '@' + info.flypeId : '—');
+  document.getElementById('contactStatus').textContent = chat.isGovChat ? 'Официальный канал Госуслуг ЕСДС' : (info.online ? 'В сети' : 'Был(а) недавно');
+  document.getElementById('contactFlypeId').textContent = chat.isGovChat ? '@gosbot' : (chat.type === 'group' ? `Группа · ${chat.participants.length} участников` : (info.flypeId ? '@' + info.flypeId : '—'));
   const otherUser = chat.type === 'private' ? state.users.find(u => u.id === chat.participants.find(p => p !== state.currentUser.id)) : null;
   document.getElementById('contactAbout').textContent = (otherUser && otherUser.about) ? `«${otherUser.about}»` : '';
-  const av = document.getElementById('contactAvatar'); if (info.avatar) av.innerHTML = `<img src="${escapeHtml(info.avatar)}">`; else av.textContent = initial(info.name);
+  const av = document.getElementById('contactAvatar'); if (info.avatar) av.innerHTML = `<img src="${escapeHtml(info.avatar)}">`; else if (chat.isGovChat) av.innerHTML = '<i class="fas fa-landmark"></i>'; else av.textContent = initial(info.name);
   const ms = document.getElementById('groupMembersSection'); const ml = document.getElementById('groupMembersList');
   const isAdmin = chat.type === 'group' && chat.admins && chat.admins.includes(state.currentUser.id);
   if (chat.type === 'group') { ms.style.display = 'block'; ml.innerHTML = chat.participants.map(uid => { const u = state.users.find(x => x.id === uid); if (!u) return ''; const n = `${u.firstName} ${u.lastName}`.trim(); const isMe = uid === state.currentUser.id; const cr = isAdmin && !isMe; return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;"><div class="avatar sm">${u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : initial(n)}</div><div style="flex:1;font-size:12.5px;">${escapeHtml(n)}${isMe ? ' <span style="color:var(--text-muted);font-size:10.5px;">(вы)</span>' : ''}${u.isAdmin ? ' <i class="fas fa-shield-alt" style="color:var(--accent);font-size:10px;"></i>' : ''}</div>${cr ? `<button data-remove-uid="${uid}" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:13px;"><i class="fas fa-user-minus"></i></button>` : ''}</div>`; }).join(''); ml.querySelectorAll('[data-remove-uid]').forEach(btn => btn.addEventListener('click', () => removeGroupMember(chat.id, btn.dataset.removeUid))); document.getElementById('addGroupMemberBtn').style.display = isAdmin ? 'flex' : 'none'; } else ms.style.display = 'none';
   const delBtn = document.getElementById('deleteContactBtn'); delBtn.innerHTML = chat.type === 'group' ? '<i class="fas fa-trash-alt"></i> Удалить группу' : '<i class="fas fa-user-minus"></i> Удалить контакт';
-  const oia = otherUser && otherUser.isAdmin === true;
-  document.getElementById('blockContactBtn').style.display = (chat.type === 'group' || oia) ? 'none' : 'flex';
-  delBtn.style.display = oia ? 'none' : 'flex';
-  const rb = document.getElementById('reportUserBtn'); if (rb) rb.style.display = (chat.type === 'group' || oia) ? 'none' : 'flex';
+  const oia = otherUser && (otherUser.isAdmin === true || otherUser.isOfficial === true);
+  document.getElementById('blockContactBtn').style.display = (chat.type === 'group' || oia || chat.isGovChat) ? 'none' : 'flex';
+  delBtn.style.display = (oia || chat.isGovChat) ? 'none' : 'flex';
+  const rb = document.getElementById('reportUserBtn'); if (rb) rb.style.display = (chat.type === 'group' || oia || chat.isGovChat) ? 'none' : 'flex';
   document.getElementById('contactProfile').classList.remove('hidden'); document.getElementById('profilePanel').classList.add('open'); updateBlockButton();
 });
 document.getElementById('closeProfileBtn').addEventListener('click', () => document.getElementById('profilePanel').classList.remove('open'));
@@ -1711,7 +2303,7 @@ function renderNewChatResults(query) {
   users = users.filter(u => u.id && (u.email || u.flypeId)); users = users.filter(u => !u.banned || u.bannedUntil > Date.now());
   if (q) users = users.filter(u => { const n = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase(); const fid = (u.flypeId || '').toLowerCase(); return n.includes(q) || fid.includes(q); });
   if (users.length === 0) { c.innerHTML = `<div style="text-align:center;color:var(--text-secondary);font-size:12.5px;padding:14px;">${q ? 'Ничего не найдено' : 'Нет других'}</div>`; return; }
-  c.innerHTML = users.map(u => { const n = `${u.firstName} ${u.lastName}`.trim(); return `<div class="chat-item" data-user-id="${u.id}" style="cursor:pointer;border-left:none;"><div class="avatar sm">${u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : initial(n)}</div><div class="chat-info"><div class="name">${escapeHtml(n)}${u.isAdmin ? ' <i class="fas fa-shield-alt" style="color:var(--accent);font-size:10px;"></i>' : ''}</div><div class="last-msg" style="font-family:monospace;font-size:10.5px;">@${escapeHtml(u.flypeId || '')}</div></div></div>`; }).join('');
+  c.innerHTML = users.map(u => { const n = `${u.firstName} ${u.lastName}`.trim(); return `<div class="chat-item" data-user-id="${u.id}" style="cursor:pointer;border-left:none;"><div class="avatar sm">${u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : (u.isBot && u.id === 'gosbot' ? '<i class="fas fa-landmark"></i>' : initial(n))}</div><div class="chat-info"><div class="name">${escapeHtml(n)}${u.isAdmin ? ' <i class="fas fa-shield-alt" style="color:var(--accent);font-size:10px;"></i>' : ''}${u.isBot && u.id === 'gosbot' ? ' <i class="fas fa-check-circle" style="color:var(--accent);font-size:10px;"></i>' : ''}</div><div class="last-msg" style="font-family:monospace;font-size:10.5px;">@${escapeHtml(u.flypeId || '')}</div></div></div>`; }).join('');
   c.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => { openChatWithUser(el.dataset.userId); document.getElementById('newChatOverlay').classList.remove('open'); }));
 }
 async function openChatWithUser(userId) {
@@ -1758,7 +2350,7 @@ document.querySelectorAll('.modal-close-x').forEach(btn => { btn.addEventListene
 document.querySelectorAll('.modal-overlay').forEach(overlay => { overlay.addEventListener('click', (e) => { if (e.target === overlay) { if (overlay.id === 'confirmDeleteProfileOverlay') { closeConfirmDeleteProfile(); return; } if (overlay.id === 'incomingCallOverlay') return; if (overlay.id === 'outgoingCallOverlay') return; if (overlay.id === 'syncConfirmOverlay') return; overlay.classList.remove('open'); } }); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.open').forEach(o => { if (o.id === 'confirmDeleteProfileOverlay') closeConfirmDeleteProfile(); else o.classList.remove('open'); }); } });
 function init() {
-  checkAuth(); updateLoginBlockUI(); setInterval(updateLoginBlockUI, 1000); ensureAdminExists(); listenToMaintenance();
+  checkAuth(); updateLoginBlockUI(); setInterval(updateLoginBlockUI, 1000); ensureAdminExists(); ensureGosBot(); listenToMaintenance();
   setInterval(async () => { if (!window.flypeFirebase || !state.statuses.length) return; const day = 24*60*60*1000; const now = Date.now(); const expired = state.statuses.filter(s => now - s.timestamp >= day); if (expired.length === 0) return; const { database, ref, remove } = window.flypeFirebase; for (const s of expired) { try { await remove(ref(database, 'statuses/' + s.id)); } catch (e) {} } state.statuses = state.statuses.filter(s => now - s.timestamp < day); persistStatuses(); renderStatusList(); }, 5*60*1000);
 }
 document.addEventListener('DOMContentLoaded', init);
