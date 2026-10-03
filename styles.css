@@ -133,12 +133,24 @@ background:linear-gradient(180deg,#1A1D21 0%,#0F1216 100%)!important;
 body.dark.theme-oldflype .messages{background:linear-gradient(180deg,#0F1216 0%,#0A0D10 100%)!important;}
 
 /* ================== ГРАЖДАНИН ФРС: СКРЫТИЕ ================== */
-.citizen-only{display:none!important;}
-body.citizen-frc .citizen-only{display:flex!important;}
+/* Кнопка в рейле — скрыта, пока не гражданин */
 .app-rail-btn.citizen-only{display:none!important;}
 body.citizen-frc .app-rail-btn.citizen-only{display:flex!important;}
+
+/* Модуль Госуслуги — скрыт, пока не гражданин */
 .app-module.citizen-only{display:none!important;}
-body.citizen-frc .app-module.citizen-only.active{display:flex!important;}
+body.citizen-frc .app-module.citizen-only.active{display:flex!important;flex-direction:column;flex:1;overflow:hidden;}
+
+/* Обычные .citizen-only элементы (не модули и не кнопки) */
+.citizen-only{display:none!important;}
+body.citizen-frc .citizen-only:not(.app-module):not(.app-rail-btn){display:block!important;}
+
+/* Скрытие кнопок звонка в чате с ботом */
+body.gov-chat-open .call-action{display:none!important;}
+
+/* Модуль Госуслуг: правильный контейнер */
+#module-gossuslugi{width:100%;height:100%;}
+#module-gossuslugi .module-container{width:100%;height:100%;overflow-y:auto;}
 
 /* Скрытие кнопок звонка в чате с ботом */
 body.gov-chat-open .call-action{display:none!important;}
@@ -420,7 +432,7 @@ input:checked+.slider:before{transform:translateX(18px);}
 .swatch-gold{background:linear-gradient(135deg,#F4B400,#B8860B);}
 
 /* ================== МОДУЛИ ================== */
-.module-container{flex:1;overflow-y:auto;padding:24px 28px;}
+.module-container{flex:1;overflow-y:auto;padding:24px 28px;width:100%;box-sizing:border-box;}
 .module-container::-webkit-scrollbar{width:8px;}
 .module-container::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
 .module-header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--border-light);flex-wrap:wrap;}
