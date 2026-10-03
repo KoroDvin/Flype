@@ -1,3 +1,15 @@
+// Универсальный fallback: скрыть прелоадер через 3 секунды в любом случае
+(function() {
+  setTimeout(function() {
+    var pl = document.getElementById('flypePreloader');
+    if (pl && !pl.classList.contains('hide')) {
+      pl.classList.add('hide');
+      setTimeout(function() { if (pl.parentNode) pl.parentNode.removeChild(pl); }, 700);
+      console.warn('⚠️ Прелоадер скрыт через fallback');
+    }
+  }, 3000);
+})();
+
 /* ============================================================
    FLYPE · СУПЕР-АПП
    app.js — Часть 1: Ядро, мессенджер, Firebase, госуслуги, обучение
@@ -3081,7 +3093,13 @@ function init() {
     persistStatuses(); renderStatusList();
   }, 5*60*1000);
 }
-document.addEventListener('DOMContentLoaded', init);
+// Гарантированный запуск init() — не зависит от DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  // DOM уже загружен — запускаем сразу
+  init();
+}
 window.addEventListener('resize', () => { if (window.innerWidth > 900) document.getElementById('sidebar').classList.remove('hidden'); });
 if ('Notification' in window && Notification.permission === 'default') {
   document.addEventListener('click', function rn() { Notification.requestPermission(); document.removeEventListener('click', rn); }, { once: true });
