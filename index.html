@@ -1744,7 +1744,8 @@ document.getElementById('addMemberCancel').addEventListener('click', () => docum
 document.getElementById('addMemberSearch').addEventListener('input', e => renderAddMemberResults(e.target.value));
 let pendingStatusImageData = null;
 document.getElementById('addStatusBtn').addEventListener('click', () => { document.getElementById('statusText').value = ''; pendingStatusImageData = null; document.getElementById('statusImagePreview').innerHTML = '<i class="fas fa-image"></i>'; document.getElementById('addStatusOverlay').classList.add('open'); });
-document.getElementById('addStatusCancel').addEventListener('click', () => document.getElementById('addStatusOverlay').classList.remove('open'));
+const _agmb = document.getElementById('addGroupMemberBtn');
+if (_agmb) _agmb.addEventListener('click', () => { if (!state.activeChatId) return; document.getElementById('addMemberSearch').value = ''; renderAddMemberResults(''); document.getElementById('addMemberOverlay').classList.add('open'); });
 document.getElementById('statusImageBtn').addEventListener('click', () => document.getElementById('statusImageFile').click());
 document.getElementById('statusImageFile').addEventListener('change', async (e) => {
   const file = e.target.files[0]; if (!file) return;
