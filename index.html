@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Flype — Супер-апп</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-standard">
+
+<div id="flypePreloader">
+  <img src="favicon.png" alt="Flype" class="preloader-icon" onerror="this.style.display='none'">
+  <div class="preloader-text">Flype</div>
+  <div class="preloader-sub">Супер-апп</div>
+</div>
+
+<div id="bannedScreen" class="screen" style="background:linear-gradient(135deg,#E53935 0%,#B71C1C 100%);justify-content:center;align-items:center;padding:20px;">
+<div class="auth-card" style="text-align:center;max-width:480px;">
+<div style="font-size:64px;color:#D93025;margin-bottom:20px;"><i class="fas fa-ban"></i></div>
+<h1 style="font-size:24px;font-weight:600;color:var(--text);margin-bottom:12px;">Доступ заблокирован</h1>
+<p id="bannedReason" style="font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;"></p>
+<div id="bannedUntil" style="font-size:13px;color:#D93025;font-weight:600;padding:12px;background:var(--bg);border-radius:var(--radius);margin-bottom:20px;"></div>
+<div style="font-size:11px;color:var(--text-muted);">© 2026 Flype. Все права защищены.</div>
+</div>
+</div>
+
+<div id="maintenanceScreen" class="screen" style="background:linear-gradient(135deg,var(--accent) 0%,var(--accent-hover) 100%);justify-content:center;align-items:center;padding:20px;">
+<div class="auth-card" style="text-align:center;max-width:480px;">
+<div style="font-size:64px;color:var(--accent);margin-bottom:20px;"><i class="fas fa-tools"></i></div>
+<h1 style="font-size:24px;font-weight:600;color:var(--text);margin-bottom:12px;">Ведутся технические работы</h1>
+<p style="font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:20px;">Извините, Flype временно недоступен.</p>
+<div id="maintenanceMessage" style="font-size:13px;color:var(--text-muted);font-style:italic;padding:10px;background:var(--bg);border-radius:var(--radius);margin-bottom:20px;"></div>
+<div style="font-size:11px;color:var(--text-muted);">© 2026 Flype</div>
+</div>
+</div>
+
+<div id="authScreen" class="screen active">
+<div class="auth-card">
+<div class="auth-logo-row">
+<img src="favicon.png" class="auth-icon" alt="Flype" onerror="this.style.display='none'">
+<div class="auth-logo"><span>Flype.</span></div>
+</div>
+<p class="auth-sub">Супер-апп · мессенджер, браузер, новости, видео, музыка</p>
+<div class="auth-tabs">
+<button class="auth-tab active" data-tab="login">ВХОД</button>
+<button class="auth-tab" data-tab="register">РЕГИСТРАЦИЯ</button>
+</div>
+<form class="auth-form active" id="loginForm" novalidate>
+<div class="input-group"><label for="loginEmail">Gmail</label><input type="email" id="loginEmail" placeholder="example@gmail.com" autocomplete="email"><div class="error-text" id="loginEmailError">Введите корректный Gmail</div></div>
+<div class="input-group"><label for="loginPassword">Пароль</label><input type="password" id="loginPassword" placeholder="Минимум 6 символов" autocomplete="off"><div class="error-text" id="loginPasswordError">Минимум 6 символов</div></div>
+<button type="submit" class="btn">Войти</button>
+<div id="loginBlockNote" style="display:none;color:var(--danger);font-size:12px;text-align:center;padding:6px;"></div>
+</form>
+<form class="auth-form" id="registerForm" novalidate>
+<div class="input-group"><label for="regFirstName">Имя</label><input type="text" id="regFirstName" placeholder="Иван" autocomplete="off"><div class="error-text" id="regFirstNameError">Введите имя</div></div>
+<div class="input-group"><label for="regLastName">Фамилия</label><input type="text" id="regLastName" placeholder="Иванов" autocomplete="off"><div class="error-text" id="regLastNameError">Введите фамилию</div></div>
+<div class="input-group"><label for="regEmail">Gmail</label><input type="email" id="regEmail" placeholder="example@gmail.com" autocomplete="email"><div class="error-text" id="regEmailError">Введите корректный Gmail</div></div>
+<div class="input-group"><label for="regUsername">Ник (Flype ID)</label><div style="display:flex;align-items:center;gap:6px;"><span style="font-family:'Courier New',monospace;font-size:15px;color:var(--text-secondary);">@</span><input type="text" id="regUsername" placeholder="admin001" maxlength="20" autocomplete="off" style="flex:1;font-family:'Courier New',monospace;font-size:14px;"></div><div style="font-size:11px;color:var(--text-muted);margin-top:3px;">4–20 символов: латиница, цифры, _. Начинается с буквы.</div><div class="error-text" id="regUsernameError">Такой ник уже занят</div></div>
+<div class="input-group"><label for="regPassword">Пароль</label><input type="password" id="regPassword" placeholder="Минимум 6 символов" autocomplete="off"><div class="error-text" id="regPasswordError">Минимум 6 символов</div></div>
+<label class="citizen-checkbox">
+<input type="checkbox" id="regCitizenFRC">
+<span class="citizen-checkbox-mark"></span>
+<span class="citizen-checkbox-text">
+  <b>Я — гражданин Федеративной Республики Славия</b>
+  <small>Откроет доступ к модулю «Госуслуги ФРС» и уведомлениям от бота.</small>
+</span>
+</label>
+<div class="input-group hidden" id="regRegionGroup">
+  <label for="regRegion">Республика</label>
+  <select id="regRegion">
+    <option value="">— Выберите республику —</option>
+    <option value="Украинская">🇺🇦 Украинская республика</option>
+    <option value="Белорусская">🇧🇾 Белорусская республика</option>
+    <option value="Польская">🇵🇱 Польская республика</option>
+    <option value="Чешская">🇨🇿 Чешская республика</option>
+    <option value="Словацкая">🇸🇰 Словацкая республика</option>
+    <option value="Киев">🏛️ Киев (автономия в составе УР)</option>
+  </select>
+</div>
+<div class="input-group hidden" id="regBirthGroup">
+  <label for="regBirthDate">Дата рождения</label>
+  <input type="date" id="regBirthDate" max="2010-12-31">
+</div>
+<button type="submit" class="btn">Зарегистрироваться</button>
+</form>
+</div>
+</div>
+
+<div id="mainScreen" class="screen">
+<div class="main-body">
+
+<nav class="app-rail" id="appRail">
+  <div class="app-rail-top">
+    <button class="app-rail-btn active" data-app="messenger" title="Мессенджер"><i class="fas fa-comment-dots"></i><span class="app-rail-label">Чаты</span></button>
+    <button class="app-rail-btn citizen-only" data-app="gossuslugi" title="Госуслуги ФРС"><i class="fas fa-landmark"></i><span class="app-rail-label">Гос-услуги</span></button>
+    <button class="app-rail-btn" data-app="browser" title="Браузер"><i class="fas fa-globe"></i><span class="app-rail-label">Браузер</span></button>
+    <button class="app-rail-btn" data-app="news" title="Новости"><i class="fas fa-newspaper"></i><span class="app-rail-label">Новости</span></button>
+    <button class="app-rail-btn" data-app="video" title="Видео"><i class="fas fa-play-circle"></i><span class="app-rail-label">Видео</span></button>
+    <button class="app-rail-btn" data-app="music" title="Музыка"><i class="fas fa-music"></i><span class="app-rail-label">Музыка</span></button>
+  </div>
+  <div class="app-rail-bottom">
+    <button class="app-rail-btn" id="railLogoutBtn" title="Выход" style="color:#FF6B6B;"><i class="fas fa-sign-out-alt"></i><span class="app-rail-label">Выход</span></button>
+  </div>
+</nav>
+
+<div class="app-viewport" id="appViewport">
+
+<div class="app-module active" id="module-messenger">
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-profile" id="sidebarProfileBtn" title="Настройки профиля">
+<div class="avatar" id="sidebarAvatar">?</div>
+<div class="info"><div class="name" id="sidebarName">—</div><div class="status" id="sidebarStatus">В сети</div></div>
+</div>
+<div class="sidebar-search"><i class="fas fa-search"></i><input type="text" id="globalSearch" placeholder="Поиск"></div>
+<div class="sidebar-contacts-header">КОНТАКТЫ</div>
+<div class="sidebar-tabs">
+<button class="sidebar-tab active" data-stab="chats">ЧАТЫ</button>
+<button class="sidebar-tab" data-stab="statuses">СТАТУСЫ</button>
+</div>
+<div class="sidebar-content">
+<div class="tab-panel active" id="tabChats">
+<div class="sidebar-actions">
+<button class="btn btn-secondary" id="newChatBtn" style="font-size:11.5px;"><i class="fas fa-plus"></i> Новый</button>
+<button class="btn btn-secondary" id="newGroupBtn" style="font-size:11.5px;"><i class="fas fa-users"></i> Группа</button>
+</div>
+<div id="chatList"></div>
+</div>
+<div class="tab-panel" id="tabStatuses">
+<div class="sidebar-actions"><button class="btn" id="addStatusBtn" style="font-size:11.5px;"><i class="fas fa-plus"></i> Статус</button></div>
+<div id="statusList"></div>
+</div>
+</div>
+</aside>
+
+<main class="chat-area" id="chatArea">
+<div class="empty-chat" id="emptyChat"><h1>Flype™</h1><p>Выберите контакт слева или создайте новый чат</p></div>
+<div class="chat-header hidden" id="chatHeader">
+<button class="back-btn" id="backToSidebar"><i class="fas fa-arrow-left"></i></button>
+<div class="avatar" id="chatHeaderAvatar">?</div>
+<div class="chat-title">
+<div class="name" id="chatHeaderName">—</div>
+<div class="status" id="chatHeaderStatus">—</div>
+<div class="chat-search-bar hidden" id="chatSearchBar" style="margin-top:6px;"><input type="text" id="chatSearchInput" placeholder="Поиск в чате..." style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:12.5px;background:var(--white);color:var(--text);"></div>
+</div>
+<div class="actions">
+<button class="action-circle" id="searchInChatBtn" title="Поиск в чате"><i class="fas fa-search"></i></button>
+<button class="action-circle call-action" id="videoCallBtn" title="Видеозвонок"><i class="fas fa-video"></i></button>
+<button class="action-circle call-action" id="callBtn" title="Позвонить"><i class="fas fa-phone-alt"></i></button>
+<button class="action-circle" id="infoBtn" title="Информация"><i class="fas fa-info-circle"></i></button>
+</div>
+</div>
+<div class="group-members-bar hidden" id="groupMembersBar"></div>
+<div class="messages hidden" id="messagesContainer"></div>
+<div class="typing-indicator hidden" id="typingIndicator"><div class="typing-dots"><span></span><span></span><span></span></div><span id="typingText">печатает...</span></div>
+<div class="chat-input-area hidden" id="chatInputArea">
+<button class="input-btn" id="attachBtn" title="Прикрепить файл"><i class="fas fa-paperclip"></i></button>
+<input type="file" id="fileInput" class="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.zip">
+<textarea id="messageInput" placeholder="Введите сообщение..." rows="1"></textarea>
+<button class="input-btn" id="voiceBtn" title="Голосовое"><i class="fas fa-microphone"></i></button>
+<button class="send-btn" id="sendBtn" title="Отправить"><i class="fas fa-paper-plane"></i></button>
+</div>
+</main>
+
+<aside class="profile-panel" id="profilePanel">
+<button class="modal-close-x" id="closeProfileBtn" style="top:8px;right:8px;"><i class="fas fa-times"></i></button>
+<div id="contactProfile" class="hidden">
+<div class="profile-head">
+<div class="avatar lg" id="contactAvatar">?</div>
+<div class="name" id="contactName">—</div>
+<div class="status" id="contactStatus">—</div>
+<div class="status" id="contactAbout" style="font-style:italic;margin-top:6px;font-size:12px;"></div>
+</div>
+<div class="profile-section"><h4>Ник</h4><div class="profile-id" id="contactFlypeId">—</div></div>
+<div class="profile-section" id="groupMembersSection" style="display:none;">
+<h4>Участники</h4>
+<div id="groupMembersList" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;"></div>
+<button class="profile-action" id="addGroupMemberBtn" style="color:var(--accent-darker);"><i class="fas fa-user-plus"></i> Добавить участника</button>
+</div>
+<div class="profile-section">
+<h4>Действия</h4>
+<button class="profile-action" id="exportChatBtn"><i class="fas fa-download"></i> Экспорт чата</button>
+<button class="profile-action" id="hideChatBtn" style="color:#E85D22;"><i class="fas fa-eye-slash" style="color:#E85D22;"></i> Удалить чат у себя</button>
+<button class="profile-action" id="reportUserBtn" style="color:#E85D22;"><i class="fas fa-flag" style="color:#E85D22;"></i> Пожаловаться</button>
+<button class="profile-action danger" id="deleteContactBtn"><i class="fas fa-user-minus"></i> Удалить контакт у всех</button>
+<button class="profile-action danger" id="blockContactBtn"><i class="fas fa-ban"></i> Заблокировать</button>
+</div>
+</div>
+</aside>
+</div>
+
+<!-- ============================================================
+     МОДУЛЬ: ГОСУСЛУГИ ФРС
+     ============================================================ -->
+<div class="app-module citizen-only" id="module-gossuslugi">
+  <div class="gos-shell">
+    <aside class="gos-nav">
+      <div class="gos-nav-header">
+        <svg class="slavia-flag-sm" viewBox="0 0 132 88"><rect width="132" height="88" fill="#FFFFFF"/><polygon points="0,0 66,44 132,0" fill="#003399"/><polygon points="0,0 66,44 0,88" fill="#FFD700"/><polygon points="0,88 66,44 132,88" fill="#DC143C"/></svg>
+        <div><b>Госуслуги ФРС</b><span>Гражданин: <span id="gosCitizenName">—</span></span></div>
+      </div>
+      <nav class="gos-nav-list">
+        <button class="gos-nav-btn active" data-gos-section="dashboard"><i class="fas fa-home"></i> Главная</button>
+        <button class="gos-nav-btn" data-gos-section="passport"><i class="fas fa-id-card"></i> Паспорт ФРС</button>
+        <button class="gos-nav-btn" data-gos-section="address"><i class="fas fa-map-marker-alt"></i> Место жительства</button>
+        <button class="gos-nav-btn" data-gos-section="doctors"><i class="fas fa-user-md"></i> Запись к врачу</button>
+        <button class="gos-nav-btn" data-gos-section="school"><i class="fas fa-school"></i> Детсад / Школа</button>
+        <button class="gos-nav-btn" data-gos-section="children"><i class="fas fa-child"></i> Детские аккаунты</button>
+        <button class="gos-nav-btn" data-gos-section="diary"><i class="fas fa-book"></i> Дневник / Журнал</button>
+        <button class="gos-nav-btn" data-gos-section="taxes"><i class="fas fa-coins"></i> Налоги</button>
+        <button class="gos-nav-btn" data-gos-section="settings"><i class="fas fa-cog"></i> Настройки</button>
+        <button class="gos-nav-btn" data-gos-section="help" style="color:var(--accent);"><i class="fas fa-question-circle"></i> Задать вопрос</button>
+      </nav>
+    </aside>
+    <main class="gos-content" id="gosContent">
+      <!-- Подразделы рендерятся динамически -->
+    </main>
+  </div>
+</div>
+
+<div class="app-module" id="module-browser">
+  <div class="browser-shell">
+    <div class="browser-toolbar">
+      <button class="browser-nav-btn" id="bwBack" title="Назад"><i class="fas fa-arrow-left"></i></button>
+      <button class="browser-nav-btn" id="bwForward" title="Вперёд"><i class="fas fa-arrow-right"></i></button>
+      <button class="browser-nav-btn" id="bwReload" title="Обновить"><i class="fas fa-sync-alt"></i></button>
+      <button class="browser-nav-btn" id="bwHome" title="Домой"><i class="fas fa-home"></i></button>
+      <input type="text" class="browser-address" id="bwAddress" placeholder="Введите URL или поиск..." autocomplete="off">
+      <button class="browser-nav-btn" id="bwExternal" title="Открыть в системном браузере"><i class="fas fa-external-link-alt"></i></button>
+    </div>
+    <div class="browser-bookmarks" id="bwBookmarks">
+      <button class="bw-bm" data-url="https://ru.wikipedia.org/wiki/Заглавная_страница">Wikipedia</button>
+      <button class="bw-bm" data-url="https://ria.ru/">РИА Новости</button>
+      <button class="bw-bm" data-url="https://tass.ru/">ТАСС</button>
+      <button class="bw-bm" data-url="https://lenta.ru/">Lenta.ru</button>
+      <button class="bw-bm" data-url="https://duckduckgo.com/?q=">DuckDuckGo</button>
+      <button class="bw-bm" data-url="https://www.openstreetmap.org/">OpenStreetMap</button>
+    </div>
+    <div class="browser-frame-wrap">
+      <iframe id="bwFrame" class="browser-frame" src="about:blank" referrerpolicy="no-referrer" sandbox="allow-scripts allow-popups allow-forms"></iframe>
+      <div class="browser-blocked hidden" id="bwBlocked">
+        <i class="fas fa-shield-alt"></i>
+        <h3>Сайт запрещает встраивание</h3>
+        <p>Этот сайт не разрешает показ внутри iframe. Открой его в новой вкладке.</p>
+        <button class="btn" id="bwBlockedOpen"><i class="fas fa-external-link-alt"></i> Открыть в новой вкладке</button>
+      </div>
+    </div>
+    <div class="browser-note"><i class="fas fa-info-circle"></i> Встроенный браузер на базе iframe.</div>
+  </div>
+</div>
+
+<div class="app-module" id="module-news">
+  <div class="module-container">
+    <header class="module-header">
+      <i class="fas fa-newspaper module-ico"></i>
+      <div><h1>Новости</h1><p class="module-sub">Русские и мировые источники · с автопереводом</p></div>
+      <div class="module-header-actions">
+        <select id="newsSource">
+          <option value="https://ria.ru/export/rss2/archive/index.xml">🔵 РИА Новости</option>
+          <option value="https://tass.ru/rss/v2.xml">🔵 ТАСС</option>
+          <option value="https://lenta.ru/rss/news">🔵 Lenta.ru</option>
+          <option value="https://iz.ru/xml/rss/all.xml">🔵 Известия</option>
+          <option value="https://www.kommersant.ru/RSS/news.xml">🔵 Коммерсантъ</option>
+          <option value="https://www.gazeta.ru/export/rss/lenta.xml">🔵 Газета.ру</option>
+          <option value="https://russian.rt.com/rss">🔵 RT на русском</option>
+          <option value="https://www.euronews.com/rss?level=theme&name=news">🌍 Euronews</option>
+          <option value="https://www.aljazeera.com/xml/rss/all.xml">🌍 Al Jazeera</option>
+          <option value="https://feeds.skynews.com/feeds/rss/world.xml">🌍 Sky News</option>
+        </select>
+        <button class="btn btn-secondary" id="newsRefresh"><i class="fas fa-sync-alt"></i></button>
+      </div>
+    </header>
+    <div id="newsList" class="news-list">
+      <div class="news-loading"><i class="fas fa-circle-notch fa-spin"></i> Загрузка новостей...</div>
+    </div>
+  </div>
+</div>
+
+<div class="app-module" id="module-video">
+  <div class="module-container">
+    <header class="module-header">
+      <i class="fas fa-play-circle module-ico"></i>
+      <div><h1>Видео</h1><p class="module-sub">YouTube · VK Видео · Rutube · прямые mp4</p></div>
+      <div class="module-header-actions">
+        <input type="text" id="videoUrlInput" placeholder="Вставьте ссылку..." style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13px;min-width:280px;outline:none;">
+        <button class="btn" id="videoLoadBtn"><i class="fas fa-play"></i> Смотреть</button>
+      </div>
+    </header>
+    <div class="video-shell">
+      <div class="video-frame-wrap" id="videoFrameWrap">
+        <div class="video-placeholder" id="videoPlaceholder">
+          <i class="fas fa-play-circle"></i>
+          <h3>Вставьте ссылку на видео</h3>
+          <p>Поддерживаются: <b>YouTube</b>, <b>VK Видео</b>, <b>Rutube</b>, <b>Dailymotion</b>, <b>Vimeo</b>, <b>прямые mp4</b>.</p>
+        </div>
+        <iframe id="videoFrame" class="video-frame hidden" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"></iframe>
+        <video id="videoDirect" class="video-direct hidden" controls playsinline></video>
+      </div>
+      <div class="video-history" id="videoHistory">
+        <div class="video-history-title"><i class="fas fa-history"></i> История просмотров</div>
+        <div id="videoHistoryList" class="video-history-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app-module" id="module-music">
+  <div class="module-container">
+    <header class="module-header">
+      <i class="fas fa-music module-ico"></i>
+      <div><h1>Музыка</h1><p class="module-sub">Свои mp3-ссылки и загруженные файлы</p></div>
+      <div class="module-header-actions"><button class="btn" id="musicAddBtn"><i class="fas fa-plus"></i> Добавить трек</button></div>
+    </header>
+    <div class="music-player-box">
+      <div class="music-now">
+        <div class="music-art"><i class="fas fa-music"></i></div>
+        <div class="music-meta">
+          <div id="musicNowTitle" class="music-now-title">Ничего не выбрано</div>
+          <div id="musicNowArtist" class="music-now-artist">—</div>
+        </div>
+      </div>
+      <div class="music-progress-wrap">
+        <span id="musicCur">0:00</span>
+        <input type="range" id="musicSeek" class="music-seek" value="0" min="0" max="100">
+        <span id="musicDur">0:00</span>
+      </div>
+      <div class="music-controls">
+        <button class="music-ctrl" id="musicPrev"><i class="fas fa-step-backward"></i></button>
+        <button class="music-ctrl main" id="musicPlayPause"><i class="fas fa-play"></i></button>
+        <button class="music-ctrl" id="musicNext"><i class="fas fa-step-forward"></i></button>
+        <div class="music-volume"><i class="fas fa-volume-up"></i><input type="range" id="musicVolume" min="0" max="1" step="0.01" value="0.8"></div>
+      </div>
+      <audio id="musicAudio"></audio>
+    </div>
+    <div id="musicList" class="music-list"></div>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- ============================================================
+     МОДАЛКИ
+     ============================================================ -->
+
+<div class="modal-overlay" id="settingsOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="settingsOverlay"><i class="fas fa-times"></i></button>
+<h3>Настройки</h3>
+<div style="display:flex;flex-direction:column;gap:12px;">
+<div class="input-group">
+<label>Оформление</label>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;">Тёмная тема</span><label class="switch"><input type="checkbox" id="darkThemeToggle"><span class="slider"></span></label></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;">Звуки</span><label class="switch"><input type="checkbox" id="soundToggle" checked><span class="slider"></span></label></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><span style="font-size:13px;">✨ Прежний Flype (Frutiger Aero)</span><label class="switch"><input type="checkbox" id="oldFlypeToggle"><span class="slider"></span></label></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><span style="font-size:13px;">🏛️ Гражданин ФРС</span><label class="switch"><input type="checkbox" id="citizenFRCToggle"><span class="slider"></span></label></div>
+<div style="margin-bottom:10px;">
+<div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Рингтон звонка:</div>
+<select id="ringtoneSelect"><option value="sounds/Flype-Standart.mp3">Flype Standart</option><option value="sounds/Flype-Start.mp3">Flype Start</option><option value="sounds/Flype-New.mp3">Flype New</option></select>
+</div>
+<div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Цветовая тема:</div>
+<div class="theme-picker">
+<div class="theme-swatch swatch-standard selected" data-theme="standard"></div>
+<div class="theme-swatch swatch-green" data-theme="green"></div>
+<div class="theme-swatch swatch-red" data-theme="red"></div>
+<div class="theme-swatch swatch-blue" data-theme="blue"></div>
+<div class="theme-swatch swatch-white" data-theme="white"></div>
+<div class="theme-swatch swatch-orange" data-theme="orange"></div>
+<div class="theme-swatch swatch-purple" data-theme="purple"></div>
+<div class="theme-swatch swatch-pink" data-theme="pink"></div>
+<div class="theme-swatch swatch-turquoise" data-theme="turquoise"></div>
+<div class="theme-swatch swatch-gold" data-theme="gold"></div>
+</div>
+</div>
+<hr style="border:none;border-top:1px solid var(--border-light);margin:2px 0;">
+<div class="input-group"><label>Имя</label><input type="text" id="settingsFirstName"></div>
+<div class="input-group"><label>Фамилия</label><input type="text" id="settingsLastName"></div>
+<div class="input-group" id="settingsRegionGroup" style="display:none;"><label>Республика</label><select id="settingsRegion"><option value="Украинская">🇺🇦 Украинская республика</option><option value="Белорусская">🇧🇾 Белорусская республика</option><option value="Польская">🇵🇱 Польская республика</option><option value="Чешская">🇨🇿 Чешская республика</option><option value="Словацкая">🇸🇰 Словацкая республика</option><option value="Киев">🏛️ Киев (автономия в составе УР)</option></select></div>
+<div class="input-group"><label>О себе (до 60 символов)</label><input type="text" id="settingsAbout" maxlength="60"><div style="font-size:11px;color:var(--text-muted);margin-top:3px;"><span id="aboutCounter">0</span>/60</div></div>
+<div class="input-group">
+<label>Аватарка</label>
+<div style="display:flex;align-items:center;gap:10px;">
+<div class="avatar" id="settingsAvatarPreview" style="width:56px;height:56px;font-size:20px;flex-shrink:0;">?</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+<button type="button" class="btn btn-secondary" id="settingsAvatarBtn" style="padding:6px 10px;font-size:12px;"><i class="fas fa-upload"></i> Загрузить</button>
+<button type="button" class="btn btn-secondary" id="settingsAvatarRemoveBtn" style="padding:6px 10px;font-size:12px;color:var(--danger);"><i class="fas fa-trash-alt"></i> Удалить</button>
+<input type="file" id="settingsAvatarFile" accept="image/*" class="hidden">
+</div>
+</div>
+</div>
+<div class="input-group">
+<label>Ваш ник</label>
+<div class="profile-id" id="settingsUsername" style="font-size:14px;">@—</div>
+<button type="button" class="btn btn-secondary" id="changeUsernameBtn" style="font-size:12px;"><i class="fas fa-exchange-alt"></i> Изменить ник</button>
+<div id="changeIdTimer" style="font-size:11px;color:var(--text-muted);text-align:center;display:none;"></div>
+</div>
+<hr style="border:none;border-top:1px solid var(--border-light);margin:4px 0;">
+<button type="button" class="btn btn-secondary" id="requestKeyBtn" style="font-size:12px;"><i class="fas fa-mobile-alt"></i> Запросить ключ с другого устройства</button>
+<hr style="border:none;border-top:1px solid var(--border-light);margin:4px 0;">
+<button type="button" class="btn btn-secondary" id="restartTutorialBtn" style="font-size:12px;width:100%;"><i class="fas fa-graduation-cap"></i> Показать обучение заново</button>
+<hr style="border:none;border-top:1px solid var(--border-light);margin:4px 0;">
+<div id="adminPanel" class="hidden" style="padding:12px;background:var(--accent-light);border-radius:var(--radius);border:1px solid var(--accent-border);">
+<div style="font-size:11px;font-weight:700;color:var(--accent-darker);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;"><i class="fas fa-shield-alt"></i> Админ-панель</div>
+<button type="button" class="btn btn-secondary" id="maintenanceOnBtn" style="width:100%;font-size:12px;margin-bottom:6px;color:var(--danger);border-color:var(--danger);"><i class="fas fa-tools"></i> Ввести в режим тех. работ</button>
+<button type="button" class="btn btn-secondary" id="maintenanceOffBtn" style="width:100%;font-size:12px;color:var(--success);border-color:var(--success);"><i class="fas fa-check-circle"></i> Выключить тех. работы</button>
+</div>
+<button type="button" class="profile-action danger" id="settingsDeleteProfileBtn" style="justify-content:center;"><i class="fas fa-user-times"></i> Удалить профиль</button>
+</div>
+<div class="modal-actions"><button class="btn btn-secondary" id="settingsCancel">Отмена</button><button class="btn" id="settingsSave">Сохранить</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="editMessageOverlay"><div class="modal"><button class="modal-close-x" data-close="editMessageOverlay"><i class="fas fa-times"></i></button><h3>Редактировать</h3><div class="input-group"><textarea id="editMessageText" rows="4"></textarea></div><div class="modal-actions"><button class="btn btn-secondary" id="editMessageCancel">Отмена</button><button class="btn" id="editMessageSave">Сохранить</button></div></div></div>
+
+<div class="modal-overlay" id="syncWaitingOverlay"><div class="modal" style="text-align:center;max-width:360px;"><button class="modal-close-x" data-close="syncWaitingOverlay"><i class="fas fa-times"></i></button><div style="font-size:48px;color:var(--accent);margin-bottom:16px;"><i class="fas fa-hourglass-half"></i></div><h3>Запрос отправлен</h3><div class="modal-actions" style="margin-top:14px;"><button class="btn btn-secondary" id="syncWaitingCancel" style="flex:1;">Отменить</button></div></div></div>
+<div class="modal-overlay" id="syncConfirmOverlay"><div class="modal" style="text-align:center;max-width:380px;"><h3>Передать ключ?</h3><div class="modal-actions"><button class="btn btn-secondary" id="syncConfirmNo" style="flex:1;">Нет</button><button class="btn" id="syncConfirmYes" style="flex:1;">Да</button></div></div></div>
+<div class="modal-overlay" id="syncCodeOverlay"><div class="modal" style="text-align:center;max-width:380px;"><button class="modal-close-x" data-close="syncCodeOverlay"><i class="fas fa-times"></i></button><h3>Код</h3><div id="syncCodeValue" style="font-size:32px;font-weight:700;letter-spacing:6px;text-align:center;padding:20px;background:var(--accent-light);border-radius:var(--radius);margin:14px 0;font-family:monospace;color:var(--accent-darker);">—</div></div></div>
+
+<div class="modal-overlay" id="changeIdOverlay"><div class="modal"><button class="modal-close-x" data-close="changeIdOverlay"><i class="fas fa-times"></i></button><h3>Изменить ник</h3><div class="input-group"><label>Новый ник</label><div style="display:flex;align-items:center;gap:6px;"><span style="font-family:monospace;font-size:15px;color:var(--text-secondary);">@</span><input type="text" id="newIdDigits" maxlength="20" style="flex:1;font-family:monospace;font-size:14px;"></div><div class="error-text" id="newIdError"></div></div><div class="modal-actions"><button class="btn btn-secondary" id="changeIdCancel">Отмена</button><button class="btn" id="changeIdSave">Сохранить</button></div></div></div>
+
+<div class="modal-overlay" id="newChatOverlay"><div class="modal"><button class="modal-close-x" data-close="newChatOverlay"><i class="fas fa-times"></i></button><h3>Новый чат</h3><div class="input-group"><label>Поиск</label><input type="text" id="newChatSearch" placeholder="Ник или имя"></div><div id="newChatResults" style="max-height:220px;overflow-y:auto;margin-top:10px;"></div><div class="modal-actions"><button class="btn btn-secondary" id="newChatCancel">Закрыть</button></div></div></div>
+
+<div class="modal-overlay" id="newGroupOverlay"><div class="modal"><button class="modal-close-x" data-close="newGroupOverlay"><i class="fas fa-times"></i></button><h3>Создать группу</h3><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><div class="avatar" id="newGroupAvatarPreview" style="width:56px;height:56px;font-size:20px;flex-shrink:0;">?</div><div style="flex:1;"><button type="button" class="btn btn-secondary" id="newGroupAvatarBtn" style="width:100%;font-size:12px;"><i class="fas fa-upload"></i> Аватарка</button><input type="file" id="newGroupAvatarFile" accept="image/*" class="hidden"></div></div><div class="input-group"><label>Название</label><input type="text" id="groupName"></div><div class="input-group" style="margin-top:8px;"><label>Описание</label><input type="text" id="groupDescription" maxlength="100"></div><div style="margin-top:10px;"><label style="font-size:12px;color:var(--text-secondary);">Участники:</label><div id="newGroupContacts" style="max-height:180px;overflow-y:auto;margin-top:6px;border:1px solid var(--border-light);border-radius:var(--radius);"></div></div><div class="modal-actions"><button class="btn btn-secondary" id="newGroupCancel">Отмена</button><button class="btn" id="newGroupCreate">Создать</button></div></div></div>
+
+<div class="modal-overlay" id="addMemberOverlay"><div class="modal"><button class="modal-close-x" data-close="addMemberOverlay"><i class="fas fa-times"></i></button><h3>Добавить в группу</h3><input type="text" id="addMemberSearch" placeholder="Поиск" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;font-size:13px;background:var(--white);color:var(--text);"><div id="addMemberResults" style="max-height:240px;overflow-y:auto;"></div><div class="modal-actions"><button class="btn btn-secondary" id="addMemberCancel">Закрыть</button></div></div></div>
+
+<div class="modal-overlay" id="addStatusOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="addStatusOverlay"><i class="fas fa-times"></i></button>
+<h3>Новый статус</h3>
+<div class="input-group"><label>Текст</label><input type="text" id="statusText" placeholder="Что нового?"></div>
+<div class="input-group" style="margin-top:8px;">
+<label>Фото</label>
+<div style="display:flex;align-items:center;gap:10px;">
+<div id="statusImagePreview" style="width:64px;height:64px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:22px;flex-shrink:0;"><i class="fas fa-image"></i></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+<button type="button" class="btn btn-secondary" id="statusImageBtn" style="font-size:12px;"><i class="fas fa-upload"></i> Загрузить</button>
+<button type="button" class="btn btn-secondary" id="statusImageRemoveBtn" style="font-size:12px;color:var(--danger);"><i class="fas fa-trash-alt"></i> Удалить</button>
+<input type="file" id="statusImageFile" accept="image/*" class="hidden">
+</div>
+</div>
+</div>
+<div class="modal-actions"><button class="btn btn-secondary" id="addStatusCancel">Отмена</button><button class="btn" id="addStatusCreate">Опубликовать</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="statusViewOverlay"><div class="modal status-view-modal"><button class="modal-close-x" data-close="statusViewOverlay" style="color:#fff;"><i class="fas fa-times"></i></button><div class="sv-header"><div class="avatar sm" id="svAvatar">?</div><div><div class="name" id="svName">—</div><div class="time" id="svTime">—</div></div></div><div class="sv-body" id="svBody">—</div></div></div>
+
+<div class="modal-overlay" id="incomingCallOverlay" style="z-index:1200;"><div class="modal" style="background:#1C1C1C;color:#fff;text-align:center;max-width:360px;"><div class="avatar lg" id="incomingCallAvatar" style="width:90px;height:90px;font-size:34px;margin:0 auto 18px;">?</div><div style="font-size:20px;font-weight:600;margin-bottom:4px;" id="incomingCallName">—</div><div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:20px;" id="incomingCallType">Входящий...</div><div style="display:flex;justify-content:center;gap:14px;"><button id="rejectCallBtn" style="width:56px;height:56px;border-radius:50%;border:none;background:#D93025;color:#fff;font-size:20px;cursor:pointer;"><i class="fas fa-phone-slash"></i></button><button id="acceptCallBtn" style="width:56px;height:56px;border-radius:50%;border:none;background:#34A853;color:#fff;font-size:20px;cursor:pointer;"><i class="fas fa-phone"></i></button></div></div></div>
+<div class="modal-overlay" id="outgoingCallOverlay" style="z-index:1200;"><div class="modal" style="background:#1C1C1C;color:#fff;text-align:center;max-width:360px;"><div class="avatar lg" id="outgoingCallAvatar" style="width:90px;height:90px;font-size:34px;margin:0 auto 18px;">?</div><div style="font-size:20px;font-weight:600;margin-bottom:4px;" id="outgoingCallName">—</div><div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:8px;" id="outgoingCallType">Вызов...</div><div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:20px;" id="outgoingCallTimer">00:00</div><div style="display:flex;justify-content:center;gap:14px;"><button id="cancelCallBtn" style="width:56px;height:56px;border-radius:50%;border:none;background:#D93025;color:#fff;font-size:20px;cursor:pointer;"><i class="fas fa-phone-slash"></i></button></div></div></div>
+
+<div class="modal-overlay" id="deleteAccountOverlay"><div class="modal"><button class="modal-close-x" data-close="deleteAccountOverlay"><i class="fas fa-times"></i></button><h3 style="color:var(--danger);">⚠️ Удалить аккаунт?</h3><div class="input-group"><label>Пароль</label><input type="password" id="deleteAccountPassword"></div><div class="input-group" style="margin-top:8px;"><label>Введите <strong>УДАЛИТЬ</strong></label><input type="text" id="deleteAccountConfirm" placeholder="УДАЛИТЬ"></div><div class="modal-actions"><button class="btn btn-secondary" id="deleteAccountCancel">Отмена</button><button class="btn btn-danger" id="deleteAccountConfirmBtn">Удалить</button></div></div></div>
+
+<div class="modal-overlay" id="confirmDeleteProfileOverlay"><div class="modal"><button class="modal-close-x" data-close="confirmDeleteProfileOverlay"><i class="fas fa-times"></i></button><h3 style="color:var(--danger);">⚠️ Удалить профиль?</h3><label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:10px;background:var(--bg);border-radius:var(--radius);margin-bottom:6px;"><input type="checkbox" id="deleteProfileCheck" disabled style="margin-top:2px;"><span style="font-size:12.5px;">Я понимаю, что данные не восстановить.</span></label><div id="deleteProfileTimer" style="text-align:center;font-size:11.5px;color:var(--text-muted);margin-bottom:12px;">Подождите <span id="deleteProfileTimerValue">5</span> сек...</div><div class="modal-actions" style="margin-top:0;"><button class="btn btn-secondary" id="deleteProfileCancelBtn">Отмена</button><button class="btn btn-danger" id="deleteProfileConfirmBtn" disabled style="opacity:0.5;">Удалить</button></div></div></div>
+
+<div class="modal-overlay" id="hideChatOverlay"><div class="modal" style="text-align:center;max-width:420px;"><button class="modal-close-x" data-close="hideChatOverlay"><i class="fas fa-times"></i></button><div style="font-size:56px;color:#E85D22;margin-bottom:14px;"><i class="fas fa-eye-slash"></i></div><h3>Удалить чат у себя?</h3><p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;">Чат исчезнет <b>только у вас</b>.</p><div class="modal-actions"><button class="btn btn-secondary" id="hideChatCancel" style="flex:1;">Отмена</button><button class="btn" id="hideChatConfirm" style="flex:1;background:#E85D22;">Удалить</button></div></div></div>
+
+<div class="modal-overlay" id="lightboxOverlay" style="background:rgba(0,0,0,0.95);"><button class="modal-close-x" id="lightboxClose" style="color:#fff;top:16px;right:16px;width:44px;height:44px;font-size:20px;"><i class="fas fa-times"></i></button><a id="lightboxDownload" download="flype-photo.jpg" style="position:absolute;top:20px;left:20px;color:#fff;text-decoration:none;font-size:20px;"><i class="fas fa-download"></i></a><img id="lightboxImg" src="" style="max-width:95%;max-height:95%;border-radius:8px;"></div>
+
+<div class="modal-overlay" id="reportOverlay"><div class="modal"><button class="modal-close-x" data-close="reportOverlay"><i class="fas fa-times"></i></button><h3 style="color:#E85D22;"><i class="fas fa-flag"></i> Жалоба</h3><div id="reportTargetInfo" style="text-align:center;font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;"></div><div class="input-group"><label>Причина</label><select id="reportReason"><option value="">— Выберите —</option><option value="spam">Спам</option><option value="insult">Оскорбления</option><option value="threat">Угрозы</option><option value="fraud">Мошенничество</option><option value="inappropriate">Неприемлемый контент</option><option value="other">Другое</option></select></div><div class="input-group" style="margin-top:10px;"><label>Описание</label><textarea id="reportDescription" maxlength="300" rows="4"></textarea><div style="font-size:11px;color:var(--text-muted);text-align:right;"><span id="reportDescCounter">0</span>/300</div></div><div class="input-group" style="margin-top:10px;"><label>Доказательства</label><input type="file" id="reportEvidenceFile" accept="image/*,.pdf,.txt" style="font-size:12px;padding:6px 0;"><div id="reportEvidencePreview" style="margin-top:6px;font-size:12px;color:var(--text-secondary);"></div></div><div id="reportLimitInfo" style="margin-top:12px;padding:10px;background:var(--bg);border-radius:var(--radius);font-size:11.5px;color:var(--text-secondary);"></div><div class="modal-actions"><button class="btn btn-secondary" id="reportCancelBtn">Отмена</button><button class="btn" id="reportSubmitBtn" style="background:#E85D22;">Отправить</button></div></div></div>
+
+<div class="modal-overlay" id="adminActionOverlay"><div class="modal"><button class="modal-close-x" data-close="adminActionOverlay"><i class="fas fa-times"></i></button><h3><i class="fas fa-shield-alt"></i> Действия админа</h3><div id="adminActionTarget" style="text-align:center;font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;"></div><div class="input-group"><label>Комментарий</label><input type="text" id="adminActionComment" maxlength="100"></div><div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;"><button class="btn btn-secondary" id="adminWarnBtn"><i class="fas fa-exclamation-triangle" style="color:#F4B400;"></i> Предупреждение</button><button class="btn btn-secondary" id="adminTempBanBtn"><i class="fas fa-clock" style="color:#E85D22;"></i> Забанить на срок</button><button class="btn btn-danger" id="adminDeleteUserBtn"><i class="fas fa-user-times"></i> Удалить</button></div><div class="modal-actions"><button class="btn btn-secondary" id="adminActionCancel">Закрыть</button></div></div></div>
+
+<div class="modal-overlay" id="banDaysOverlay"><div class="modal"><button class="modal-close-x" data-close="banDaysOverlay"><i class="fas fa-times"></i></button><h3>На сколько дней?</h3><div class="input-group"><label>1–365</label><input type="number" id="banDaysInput" min="1" max="365" value="7"></div><div class="modal-actions"><button class="btn btn-secondary" id="banDaysCancel">Отмена</button><button class="btn btn-danger" id="banDaysConfirm">Заблокировать</button></div></div></div>
+
+<div class="modal-overlay" id="gosEmergencyOverlay"><div class="modal"><button class="modal-close-x" data-close="gosEmergencyOverlay"><i class="fas fa-times"></i></button><h3 style="color:#D93025;"><i class="fas fa-exclamation-triangle"></i> Объявить ЧС</h3><div class="input-group"><label>Республика</label><select id="emRegion"><option value="all">🌍 Вся страна</option><option value="Киев">🏛️ Киев</option><option value="Украинская">🇺🇦 Украинская</option><option value="Белорусская">🇧🇾 Белорусская</option><option value="Польская">🇵🇱 Польская</option><option value="Чешская">🇨🇿 Чешская</option><option value="Словацкая">🇸🇰 Словацкая</option></select></div><div class="input-group" style="margin-top:8px;"><label>Тип</label><select id="emType"><option value="fire">🔥 Пожар</option><option value="flood">🌊 Наводнение</option><option value="earthquake">🌍 Землетрясение</option><option value="war">⚔️ Военное положение</option><option value="epidemic">🦠 Эпидемия</option><option value="other">⚠️ Другое</option></select></div><div class="input-group" style="margin-top:8px;"><label>Уровень</label><select id="emLevel"><option value="low">🟢 Низкий</option><option value="medium">🟡 Средний</option><option value="high">🟠 Высокий</option><option value="critical">🔴 Критический</option></select></div><div class="input-group" style="margin-top:8px;"><label>Описание</label><textarea id="emDescription" rows="3"></textarea></div><div class="input-group" style="margin-top:8px;"><label>До</label><input type="date" id="emUntil"></div><div class="modal-actions"><button class="btn btn-secondary" data-close="gosEmergencyOverlay">Отмена</button><button class="btn btn-danger" id="emSend">🚨 Объявить</button></div></div></div>
+
+<div class="modal-overlay" id="gosElectionOverlay"><div class="modal"><button class="modal-close-x" data-close="gosElectionOverlay"><i class="fas fa-times"></i></button><h3><i class="fas fa-vote-yea" style="color:#1565C0;"></i> Объявить выборы</h3><div class="input-group"><label>Тип</label><select id="elType"><option value="president">👤 Президентские</option><option value="parliament">🏛️ Парламентские</option><option value="republic">📍 Республиканские</option><option value="regional">🗺️ Областные</option><option value="referendum">📊 Референдум</option></select></div><div class="input-group" style="margin-top:8px;"><label>Охват</label><select id="elScope"><option value="all">🌍 Вся страна</option><option value="Киев">🏛️ Киев</option><option value="Украинская">🇺🇦 Украинская</option><option value="Белорусская">🇧🇾 Белорусская</option><option value="Польская">🇵🇱 Польская</option><option value="Чешская">🇨🇿 Чешская</option><option value="Словацкая">🇸🇰 Словацкая</option></select></div><div class="input-group" style="margin-top:8px;"><label>Начало</label><input type="datetime-local" id="elStart"></div><div class="input-group" style="margin-top:8px;"><label>Конец</label><input type="datetime-local" id="elEnd"></div><div style="margin-top:10px;"><label style="font-size:12px;color:var(--text-secondary);text-transform:uppercase;font-weight:600;">Кандидаты</label><div id="elCandidates" style="margin-top:6px;"></div><button class="btn btn-secondary" id="elAddCandidate" style="margin-top:6px;font-size:12px;width:100%;"><i class="fas fa-plus"></i> Добавить</button></div><div class="modal-actions"><button class="btn btn-secondary" data-close="gosElectionOverlay">Отмена</button><button class="btn" id="elSend" style="background:#1565C0;">🗳️ Объявить</button></div></div></div>
+
+<div class="modal-overlay" id="gosTaxOverlay"><div class="modal"><button class="modal-close-x" data-close="gosTaxOverlay"><i class="fas fa-times"></i></button><h3 style="color:#B8860B;"><i class="fas fa-coins"></i> Выписать налог</h3><div class="input-group"><label>Гражданин</label><input type="text" id="taxCitizenSearch" placeholder="Поиск" autocomplete="off"><div id="taxCitizenResults" style="max-height:160px;overflow-y:auto;margin-top:6px;"></div><div id="taxSelectedCitizen" style="display:none;padding:8px;background:var(--accent-light);border-radius:var(--radius);margin-top:6px;font-size:13px;"></div></div><div class="input-group" style="margin-top:8px;"><label>Тип</label><select id="taxType"><option value="income">💼 Подоходный</option><option value="transport">🚗 Транспортный</option><option value="land">🏞️ Земельный</option><option value="property">🏠 Имущественный</option><option value="fine">⚠️ Штраф</option><option value="other">📄 Другой</option></select></div><div class="input-group" style="margin-top:8px;"><label>Сумма (₮)</label><input type="number" id="taxAmount" min="1"></div><div class="input-group" style="margin-top:8px;"><label>Основание</label><input type="text" id="taxReason"></div><div class="input-group" style="margin-top:8px;"><label>Оплатить до</label><input type="date" id="taxDueDate"></div><div class="modal-actions"><button class="btn btn-secondary" data-close="gosTaxOverlay">Отмена</button><button class="btn" id="taxSend" style="background:#B8860B;">₮ Выписать</button></div></div></div>
+
+<div class="modal-overlay" id="gosAnnounceOverlay"><div class="modal"><button class="modal-close-x" data-close="gosAnnounceOverlay"><i class="fas fa-times"></i></button><h3><i class="fas fa-bullhorn" style="color:#2E7D32;"></i> Объявление</h3><div class="input-group"><label>Заголовок</label><input type="text" id="anTitle"></div><div class="input-group" style="margin-top:8px;"><label>Текст</label><textarea id="anText" rows="4"></textarea></div><div class="input-group" style="margin-top:8px;"><label>Аудитория</label><select id="anAudience"><option value="all">🌍 Все граждане</option><option value="Киев">🏛️ Киев</option><option value="Украинская">🇺🇦 Украинская</option><option value="Белорусская">🇧🇾 Белорусская</option><option value="Польская">🇵🇱 Польская</option><option value="Чешская">🇨🇿 Чешская</option><option value="Словацкая">🇸🇰 Словацкая</option></select></div><div class="input-group" style="margin-top:8px;"><label>Важность</label><select id="anImportance"><option value="normal">📘 Обычное</option><option value="important">📙 Важное</option><option value="critical">📕 Критическое</option></select></div><div class="modal-actions"><button class="btn btn-secondary" data-close="gosAnnounceOverlay">Отмена</button><button class="btn" id="anSend" style="background:#2E7D32;">📢 Отправить</button></div></div></div>
+
+<div class="modal-overlay" id="taxPaidOverlay"><div class="modal" style="text-align:center;max-width:380px;"><button class="modal-close-x" data-close="taxPaidOverlay"><i class="fas fa-times"></i></button><div style="font-size:56px;color:#34A853;margin-bottom:14px;"><i class="fas fa-check-circle"></i></div><h3>Налог оплачен</h3><div id="taxPaidDetails" style="font-size:12.5px;color:var(--text-muted);padding:10px;background:var(--bg);border-radius:var(--radius);margin-bottom:16px;"></div><button class="btn" id="taxPaidClose" style="width:100%;">Понятно</button></div></div>
+
+<div class="modal-overlay" id="voteConfirmOverlay"><div class="modal" style="text-align:center;max-width:380px;"><button class="modal-close-x" data-close="voteConfirmOverlay"><i class="fas fa-times"></i></button><div style="font-size:56px;color:#1565C0;margin-bottom:14px;"><i class="fas fa-vote-yea"></i></div><h3>Голос учтён</h3><div id="voteConfirmName" style="font-size:18px;font-weight:600;color:var(--accent-darker);padding:14px;background:var(--accent-light);border-radius:var(--radius);margin-bottom:16px;">—</div><button class="btn" id="voteConfirmClose" style="width:100%;background:#1565C0;">Понятно</button></div></div>
+
+<div class="modal-overlay" id="musicAddOverlay"><div class="modal"><button class="modal-close-x" data-close="musicAddOverlay"><i class="fas fa-times"></i></button><h3>Добавить трек</h3><div class="input-group"><label>Название</label><input type="text" id="musicTitle" placeholder="Можно оставить пустым"></div><div class="input-group" style="margin-top:8px;"><label>Исполнитель</label><input type="text" id="musicArtist"></div><div class="input-group" style="margin-top:8px;"><label>URL mp3</label><input type="text" id="musicUrl" placeholder="https://example.com/song.mp3"></div><div class="input-group" style="margin-top:8px;"><label>Или файл (до 10 МБ)</label><input type="file" id="musicFile" accept="audio/*"></div><div class="modal-actions"><button class="btn btn-secondary" id="musicCancel">Отмена</button><button class="btn" id="musicSave">Добавить</button></div></div></div>
+
+<div class="modal-overlay" id="tutorialOverlay" style="z-index:3000;"><div class="modal tutorial-modal"><div class="tutorial-progress" id="tutorialProgress"></div><div class="tutorial-icon" id="tutorialIcon"><i class="fas fa-graduation-cap"></i></div><h3 id="tutorialTitle">Добро пожаловать!</h3><p id="tutorialText">Короткое обучение.</p><div class="tutorial-actions"><button class="btn btn-secondary" id="tutorialSkip">Пропустить</button><button class="btn" id="tutorialNext">Далее <i class="fas fa-arrow-right"></i></button></div></div></div>
+
+<div class="toast-container" id="toastContainer"></div>
+<div class="auth-footer" id="authFooter">© 2026 Flype</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, get, child, push, update, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-database.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+const firebaseConfig = { apiKey: "AIzaSyAIbeepIF2GPcXQUZAt2cr2r54JNM6jMLM", authDomain: "flype-d8034.firebaseapp.com", databaseURL: "https://flype-d8034-default-rtdb.firebaseio.com", projectId: "flype-d8034", storageBucket: "flype-d8034.firebasestorage.app", messagingSenderId: "928586015641", appId: "1:928586015641:web:1fd2c85c48d49694e9e908", measurementId: "G-1RRG5QFNC7" };
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+const auth = getAuth(app);
+onAuthStateChanged(auth, (user) => { if (user) console.log('✅ Firebase Auth:', user.uid); else console.log('⚠️ Не авторизован'); });
+window.flypeFirebase = { database, ref, set, onValue, get, child, push, update, remove, query, orderByChild, equalTo, auth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential };
+window.dispatchEvent(new Event('flype-firebase-ready'));
+console.log('✅ Firebase подключён');
+</script>
+
+<script src="app.js"></script>
+</body>
+</html>
