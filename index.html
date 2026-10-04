@@ -1739,7 +1739,7 @@ document.getElementById('newGroupCreate').addEventListener('click', async () => 
   Sound.send(); showToast('Группа создана', `"${name}" · ${ids.length}`, 'fa-users');
 });
 const _agmb = document.getElementById('addGroupMemberBtn');
-if (_agmb) _agmb.addEventListener('click', () => { if (!state.activeChatId) return; document.getElementById('addMemberSearch').value = ''; renderAddMemberResults(''); document.getElementById('addMemberOverlay').classList.add('open'); });
+if (_agmb) _agmb.addEventListener('click', () => { if (!state.activeChatId) return; document.getElementById('addMemberSearch').value = ''; renderAddMemberResults(''); document.getElementById('addMemberOverlay').classList.add('open');
 document.getElementById('addMemberCancel').addEventListener('click', () => document.getElementById('addMemberOverlay').classList.remove('open'));
 document.getElementById('addMemberSearch').addEventListener('input', e => renderAddMemberResults(e.target.value));
 let pendingStatusImageData = null;
