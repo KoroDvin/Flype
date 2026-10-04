@@ -687,7 +687,17 @@ body.dark .report-message{background:#3A2F1C!important;border-color:#7A6520!impo
 <button class="modal-close-x" data-close="addStatusOverlay"><i class="fas fa-times"></i></button>
 <h3>Новый статус</h3>
 <div class="input-group"><label>Текст статуса</label><input type="text" id="statusText" placeholder="Что нового?"></div>
-<div class="input-group" style="margin-top:8px;"><label>Или URL картинки</label><input type="text" id="statusImage" placeholder="https://..."></div>
+<div class="input-group" style="margin-top:8px;">
+<label>Картинка</label>
+<div style="display:flex;align-items:center;gap:10px;">
+<div id="statusImagePreview" style="width:64px;height:64px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:20px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);"><i class="fas fa-image"></i></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+<button type="button" class="btn btn-secondary" id="statusImageBtn" style="padding:6px 10px;font-size:12px;"><i class="fas fa-upload"></i> Загрузить</button>
+<button type="button" class="btn btn-secondary" id="statusImageRemoveBtn" style="padding:6px 10px;font-size:12px;color:var(--danger);"><i class="fas fa-trash-alt"></i> Удалить</button>
+<input type="file" id="statusImageFile" accept="image/*" class="hidden">
+</div>
+</div>
+</div>
 <div class="modal-actions"><button class="btn btn-secondary" id="addStatusCancel">Отмена</button><button class="btn" id="addStatusCreate">Опубликовать</button></div>
 </div>
 </div>
@@ -1743,9 +1753,12 @@ if (_agmb) _agmb.addEventListener('click', () => { if (!state.activeChatId) retu
 document.getElementById('addMemberCancel').addEventListener('click', () => document.getElementById('addMemberOverlay').classList.remove('open'));
 document.getElementById('addMemberSearch').addEventListener('input', e => renderAddMemberResults(e.target.value));
 let pendingStatusImageData = null;
-document.getElementById('addStatusBtn').addEventListener('click', () => { document.getElementById('statusText').value = ''; pendingStatusImageData = null; document.getElementById('statusImagePreview').innerHTML = '<i class="fas fa-image"></i>'; document.getElementById('addStatusOverlay').classList.add('open'); });
-document.getElementById('statusImageBtn').addEventListener('click', () => document.getElementById('statusImageFile').click());
-document.getElementById('statusImageFile').addEventListener('change', async (e) => {
+const _asb = document.getElementById('addStatusBtn');
+if (_asb) _asb.addEventListener('click', () => { document.getElementById('statusText').value = ''; pendingStatusImageData = null; document.getElementById('statusImagePreview').innerHTML = '<i class="fas fa-image"></i>'; document.getElementById('addStatusOverlay').classList.add('open'); });
+const _sib = document.getElementById('statusImageBtn');
+if (_sib) _sib.addEventListener('click', () => document.getElementById('statusImageFile').click());
+const _sif = document.getElementById('statusImageFile');
+if (_sif) _sif.addEventListener('change', async (e) => {});
   const file = e.target.files[0]; if (!file) return;
   if (file.size > 5*1024*1024) { Sound.statusFailed(); showToast('Файл большой', 'Максимум 5 МБ', 'fa-exclamation-circle'); e.target.value = ''; return; }
   if (!file.type.startsWith('image/')) { Sound.statusFailed(); showToast('Не картинка', '', 'fa-exclamation-circle'); e.target.value = ''; return; }
@@ -1757,7 +1770,8 @@ document.getElementById('statusImageFile').addEventListener('change', async (e) 
   } catch (err) { Sound.error(); }
   e.target.value = '';
 });
-document.getElementById('statusImageRemoveBtn').addEventListener('click', () => { pendingStatusImageData = null; document.getElementById('statusImagePreview').innerHTML = '<i class="fas fa-image"></i>'; });
+const _sirb = document.getElementById('statusImageRemoveBtn');
+if (_sirb) _sirb.addEventListener('click', () => { pendingStatusImageData = null; document.getElementById('statusImagePreview').innerHTML = '<i class="fas fa-image"></i>'; });
 document.getElementById('addStatusCreate').addEventListener('click', async () => {
   const text = document.getElementById('statusText').value.trim();
   const img = pendingStatusImageData;
