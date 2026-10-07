@@ -1897,7 +1897,7 @@ function openSettings() {
   const rt = document.getElementById('ringtoneSelect'); if (rt) rt.value = state.settings.ringtone || 'sounds/Flype-Standart.mp3';
   pendingAvatarData = u.avatar || '';
   const preview = document.getElementById('settingsAvatarPreview');
-  if (u.avatar) preview.innerHTML = `<img src="${escapeHtml(u.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`; else preview.textContent = initial(`${u.firstName} ${u.lastName}`);
+  if (u.avatar) { preview.innerHTML = '<img src="' + escapeHtml(u.avatar) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'; } else { preview.textContent = initial(u.firstName + ' ' + u.lastName); }
   updateChangeIdButton(); updateAdminPanel();
   document.querySelectorAll('.theme-swatch').forEach(sw => sw.classList.toggle('selected', sw.dataset.theme === (state.settings.theme || 'standard')));
   document.getElementById('settingsOverlay').classList.add('open');
