@@ -1885,7 +1885,8 @@ document.querySelectorAll('.modal-close-x').forEach(btn => { btn.addEventListene
 document.querySelectorAll('.modal-overlay').forEach(overlay => { overlay.addEventListener('click', (e) => { if (e.target === overlay) { if (overlay.id === 'confirmDeleteProfileOverlay') { closeConfirmDeleteProfile(); return; } if (overlay.id === 'incomingCallOverlay') return; if (overlay.id === 'outgoingCallOverlay') return; if (overlay.id === 'syncConfirmOverlay') return; overlay.classList.remove('open'); } }); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.open').forEach(o => { if (o.id === 'confirmDeleteProfileOverlay') closeConfirmDeleteProfile(); else o.classList.remove('open'); });
 function openSettings() {
-  const u = state.currentUser; if (!u) return;
+  const u = state.currentUser;
+  if (!u) return;
   document.getElementById('settingsFirstName').value = u.firstName;
   document.getElementById('settingsLastName').value = u.lastName;
   document.getElementById('settingsAbout').value = u.about || '';
@@ -1893,13 +1894,18 @@ function openSettings() {
   document.getElementById('settingsUsername').textContent = '@' + (u.flypeId || '');
   document.getElementById('darkThemeToggle').checked = state.settings.darkTheme;
   document.getElementById('soundToggle').checked = state.settings.sounds;
-  const _oft = document.getElementById('oldFlypeToggle'); if (_oft) _oft.checked = state.settings.oldFlype === true;
-  const rt = document.getElementById('ringtoneSelect'); if (rt) rt.value = state.settings.ringtone || 'sounds/Flype-Standart.mp3';
-  pendingAvatarData = u.avatar || '';
+  const oft = document.getElementById('oldFlypeToggle');
+  if (oft) oft.checked = state.settings.oldFlype === true;
+  const rt = document.getElementById('ringtoneSelect');
+  if (rt) rt.value = state.settings.ringtone || 'sounds/Flype-Standart.mp3';
   const preview = document.getElementById('settingsAvatarPreview');
-  if (u.avatar) { preview.innerHTML = '<img src="' + escapeHtml(u.avatar) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'; } else { preview.textContent = initial(u.firstName + ' ' + u.lastName); }
-  updateChangeIdButton(); updateAdminPanel();
-  document.querySelectorAll('.theme-swatch').forEach(sw => sw.classList.toggle('selected', sw.dataset.theme === (state.settings.theme || 'standard')));
+  if (u.avatar) {
+    preview.innerHTML = '<img src="' + escapeHtml(u.avatar) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+  } else {
+    preview.textContent = initial(u.firstName + ' ' + u.lastName);
+  }
+  updateChangeIdButton();
+  updateAdminPanel();
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function init() {
