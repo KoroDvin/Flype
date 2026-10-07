@@ -434,7 +434,6 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 <div style="font-size:11px;color:var(--text-muted);">© 2026 Flype. Все права защищены.</div>
 </div>
 </div>
-
 <div id="maintenanceScreen" class="screen" style="background:linear-gradient(135deg,var(--accent) 0%,var(--accent-hover) 100%);justify-content:center;align-items:center;padding:20px;">
 <div class="auth-card" style="text-align:center;max-width:480px;">
 <div style="font-size:64px;color:var(--accent);margin-bottom:20px;"><i class="fas fa-tools" style="animation:avatarBreathe 3s ease-in-out infinite;"></i></div>
@@ -444,7 +443,6 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 <div style="font-size:11px;color:var(--text-muted);">© 2026 Flype. Все права защищены.</div>
 </div>
 </div>
-
 <div id="authScreen" class="screen active">
 <div class="auth-card">
 <div class="auth-logo"><span>Flype.</span></div>
@@ -469,7 +467,6 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 </form>
 </div>
 </div>
-
 <div id="mainScreen" class="screen">
 <div class="main-body">
 <aside class="sidebar" id="sidebar">
@@ -498,7 +495,6 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 </div>
 </div>
 </aside>
-
 <main class="chat-area" id="chatArea">
 <div class="empty-chat" id="emptyChat"><h1>Flype™</h1><p>Выберите контакт слева или создайте новый чат</p></div>
 <div class="chat-header hidden" id="chatHeader">
@@ -528,7 +524,6 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 <button class="send-btn" id="sendBtn" title="Отправить"><i class="fas fa-paper-plane"></i></button>
 </div>
 </main>
-
 <aside class="profile-panel" id="profilePanel">
 <button class="modal-close-x" id="closeProfileBtn" style="top:8px;right:8px;"><i class="fas fa-times"></i></button>
 <div id="contactProfile" class="hidden">
@@ -555,7 +550,6 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 </aside>
 </div>
 </div>
-
 <div class="modal-overlay" id="settingsOverlay">
 <div class="modal">
 <button class="modal-close-x" data-close="settingsOverlay"><i class="fas fa-times"></i></button>
@@ -1894,6 +1888,7 @@ function init() {
   checkAuth(); updateLoginBlockUI(); setInterval(updateLoginBlockUI, 1000); ensureAdminExists(); listenToMaintenance();
   setInterval(async () => { if (!window.flypeFirebase || !state.statuses.length) return; const day = 24*60*60*1000; const now = Date.now(); const expired = state.statuses.filter(s => now - s.timestamp >= day); if (expired.length === 0) return; const { database, ref, remove } = window.flypeFirebase; for (const s of expired) { try { await remove(ref(database, 'statuses/' + s.id)); } catch (e) {} } state.statuses = state.statuses.filter(s => now - s.timestamp < day); persistStatuses(); renderStatusList(); }, 5*60*1000);
 }
+document.getElementById('sidebarProfileBtn').addEventListener('click', openSettings);
 document.addEventListener('DOMContentLoaded', init);
 window.addEventListener('resize', () => { if (window.innerWidth > 900) document.getElementById('sidebar').classList.remove('hidden'); });
 if ('Notification' in window && Notification.permission === 'default') { document.addEventListener('click', function rn() { Notification.requestPermission(); document.removeEventListener('click', rn); }, { once: true }); }
