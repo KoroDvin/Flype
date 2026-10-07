@@ -1883,7 +1883,25 @@ document.getElementById('lightboxClose').addEventListener('click', () => documen
 document.getElementById('lightboxOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('lightboxOverlay')) document.getElementById('lightboxOverlay').classList.remove('open'); });
 document.querySelectorAll('.modal-close-x').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); const oid = btn.dataset.close; if (oid === 'confirmDeleteProfileOverlay') { closeConfirmDeleteProfile(); return; } if (oid) document.getElementById(oid).classList.remove('open'); else btn.closest('.modal-overlay')?.classList.remove('open'); }); });
 document.querySelectorAll('.modal-overlay').forEach(overlay => { overlay.addEventListener('click', (e) => { if (e.target === overlay) { if (overlay.id === 'confirmDeleteProfileOverlay') { closeConfirmDeleteProfile(); return; } if (overlay.id === 'incomingCallOverlay') return; if (overlay.id === 'outgoingCallOverlay') return; if (overlay.id === 'syncConfirmOverlay') return; overlay.classList.remove('open'); } }); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.open').forEach(o => { if (o.id === 'confirmDeleteProfileOverlay') closeConfirmDeleteProfile(); else o.classList.remove('open'); }); } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.open').forEach(o => { if (o.id === 'confirmDeleteProfileOverlay') closeConfirmDeleteProfile(); else o.classList.remove('open'); });
+function openSettings() {
+  const u = state.currentUser; if (!u) return;
+  document.getElementById('settingsFirstName').value = u.firstName;
+  document.getElementById('settingsLastName').value = u.lastName;
+  document.getElementById('settingsAbout').value = u.about || '';
+  document.getElementById('aboutCounter').textContent = (u.about || '').length;
+  document.getElementById('settingsUsername').textContent = '@' + (u.flypeId || '');
+  document.getElementById('darkThemeToggle').checked = state.settings.darkTheme;
+  document.getElementById('soundToggle').checked = state.settings.sounds;
+  const _oft = document.getElementById('oldFlypeToggle'); if (_oft) _oft.checked = state.settings.oldFlype === true;
+  const rt = document.getElementById('ringtoneSelect'); if (rt) rt.value = state.settings.ringtone || 'sounds/Flype-Standart.mp3';
+  pendingAvatarData = u.avatar || '';
+  const preview = document.getElementById('settingsAvatarPreview');
+  if (u.avatar) preview.innerHTML = `<img src="${escapeHtml(u.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`; else preview.textContent = initial(`${u.firstName} ${u.lastName}`);
+  updateChangeIdButton(); updateAdminPanel();
+  document.querySelectorAll('.theme-swatch').forEach(sw => sw.classList.toggle('selected', sw.dataset.theme === (state.settings.theme || 'standard')));
+  document.getElementById('settingsOverlay').classList.add('open');
+}
 function init() {
   checkAuth(); updateLoginBlockUI(); setInterval(updateLoginBlockUI, 1000); ensureAdminExists(); listenToMaintenance();
   setInterval(async () => { if (!window.flypeFirebase || !state.statuses.length) return; const day = 24*60*60*1000; const now = Date.now(); const expired = state.statuses.filter(s => now - s.timestamp >= day); if (expired.length === 0) return; const { database, ref, remove } = window.flypeFirebase; for (const s of expired) { try { await remove(ref(database, 'statuses/' + s.id)); } catch (e) {} } state.statuses = state.statuses.filter(s => now - s.timestamp < day); persistStatuses(); renderStatusList(); }, 5*60*1000);
