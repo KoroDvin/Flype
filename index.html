@@ -1910,7 +1910,7 @@ function openSettings() {
 }
 function init() {
   checkAuth(); updateLoginBlockUI(); setInterval(updateLoginBlockUI, 1000); ensureAdminExists(); listenToMaintenance();
-  setInterval(async () => { if (!window.flypeFirebase || !state.statuses.length) return; const day = 24*60*60*1000; const now = Date.now(); const expired = state.statuses.filter(s => now - s.timestamp >= day); if (expired.length === 0) return; const { database, ref, remove } = window.flypeFirebase; for (const s of expired) { try { await remove(ref(database, 'statuses/' + s.id)); } catch (e) {} } state.statuses = state.statuses.filter(s => now - s.timestamp < day); persistStatuses(); renderStatusList(); }, 5*60*1000);
+setInterval(async () => { if (!window.flypeFirebase || !state.statuses.length) return; const day = 24*60*60*1000; const now = Date.now(); const expired = state.statuses.filter(s => now - s.timestamp >= day); if (expired.length === 0) return; const { database, ref, remove } = window.flypeFirebase; for (const s of expired) { try { await remove(ref(database, 'statuses/' + s.id)); } catch (e) {} } state.statuses = state.statuses.filter(s => now - s.timestamp < day); persistStatuses(); renderStatusList(); }, 5*60*1000);
 }
 document.getElementById('sidebarProfileBtn').addEventListener('click', openSettings);
 document.addEventListener('DOMContentLoaded', init);
