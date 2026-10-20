@@ -1865,5 +1865,34 @@ onAuthStateChanged(auth, (user) => { if (user) console.log('✅ Firebase Auth: U
 window.flypeFirebase = { database, ref, set, onValue, get, child, push, update, remove, query, orderByChild, equalTo, auth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential };
 console.log('✅ Firebase подключён. databaseURL:', firebaseConfig.databaseURL);
 </script>
+<script>
+window.addEventListener('load', () => {
+  // Кнопка Выход
+  const lb = document.getElementById('logoutLink');
+  if (lb) lb.onclick = function() { if (window.handleLogout) handleLogout(); else { localStorage.removeItem('flype_current_user'); location.reload(); } };
+
+  // Кнопка Файл
+  const ab = document.getElementById('attachBtn');
+  if (ab) ab.onclick = function() { document.getElementById('fileInput').click(); };
+
+  // Кнопка Эмодзи (Смайлы)
+  const eb = document.getElementById('emojiBtn');
+  if (eb) eb.onclick = function() { document.getElementById('emojiPicker').classList.toggle('hidden'); };
+
+  // Кнопка Статус
+  const sb = document.getElementById('addStatusBtn');
+  if (sb) sb.onclick = function() { 
+    document.getElementById('statusText').value = ''; 
+    document.getElementById('statusImagePreview').innerHTML = '<i class="fas fa-image"></i>'; 
+    document.getElementById('addStatusOverlay').classList.add('open'); 
+  };
+
+  // Кнопка Голосового сообщения
+  const vb = document.getElementById('voiceBtn');
+  if (vb) vb.onclick = function() { alert('Функция записи голоса доступна через удержание (в разработке)'); };
+
+  console.log('✅ Все 5 кнопок переподключены!');
+});
+</script>
 </body>
 </html>
