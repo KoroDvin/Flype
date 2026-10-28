@@ -1891,6 +1891,22 @@ window.addEventListener('load', () => {
   const vb = document.getElementById('voiceBtn');
   if (vb) vb.onclick = function() { alert('Функция записи голоса доступна через удержание (в разработке)'); };
 
+    // Жесткий перехват кнопки Войти
+  const loginFrm = document.getElementById('loginForm');
+  if (loginFrm) {
+    loginFrm.addEventListener('submit', function(e) {
+      e.preventDefault(); // Останавливаем перезагрузку страницы
+      e.stopPropagation();
+      
+      // Если функция входа жива — вызываем её
+      if (typeof handleLogin === 'function') {
+        handleLogin(e);
+      } else {
+        alert('Кнопка нажата, но функция handleLogin потерялась в коде.');
+      }
+    });
+  }
+
   console.log('✅ Все 5 кнопок переподключены!');
 });
 </script>
