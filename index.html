@@ -1907,6 +1907,105 @@ window.addEventListener('load', () => {
     });
   }
 
+    // 1. Кнопка отправки сообщения
+  const sendB = document.getElementById('sendBtn');
+  if (sendB) {
+    sendB.onclick = function() {
+      const input = document.getElementById('messageInput');
+      if (input.value.trim() && typeof sendMessage === 'function') {
+        sendMessage(input.value);
+        input.value = '';
+        input.style.height = 'auto';
+      }
+    };
+  }
+
+  // 2. Кнопка Статусы (вкладка)
+  const statusTab = document.querySelector('.sidebar-tab[data-stab="statuses"]');
+  if (statusTab) {
+    statusTab.onclick = function() {
+      document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+      statusTab.classList.add('active');
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tabStatuses').classList.add('active');
+    };
+  }
+
+  // 3. Поиск чатов
+  const searchB = document.getElementById('globalSearch');
+  if (searchB) {
+    searchB.oninput = function(e) {
+      if (typeof state !== 'undefined') {
+        state.searchQuery = e.target.value;
+        if (typeof renderChatList === 'function') renderChatList();
+      }
+    };
+  }
+
+  // 4. Звонки
+  const callB = document.getElementById('callBtn');
+  if (callB) callB.onclick = () => { if (typeof startCall === 'function') startCall(state.activeChatId, false); };
+  const videoB = document.getElementById('videoCallBtn');
+  if (videoB) videoB.onclick = () => { if (typeof startCall === 'function') startCall(state.activeChatId, true); };
+
+  // 5. Смайлы (открытие, крестик и клик по смайлу)
+  const eb = document.getElementById('emojiBtn');
+  const ep = document.getElementById('emojiPicker');
+  if (eb && ep) {
+    eb.onclick = (e) => { e.preventDefault(); e.stopPropagation(); ep.classList.toggle('hidden'); };
+    const ec = document.getElementById('emojiPickerClose');
+    if (ec) ec.onclick = (e) => { e.preventDefault(); e.stopPropagation(); ep.classList.add('hidden'); };
+    // Восстанавливаем клики по самим смайлам
+    const eg = document.getElementById('emojiPickerGrid');
+    if (eg) {
+      eg.onclick = (e) => {
+        if (e.target.classList.contains('emoji-item')) {
+          const input = document.getElementById('messageInput');
+          input.value += e.target.innerText;
+          input.focus();
+        }
+      };
+    }
+  }
+
+  // 6. Звуки при входе/выходе и убираем уведомление
+  // Убираем надоедливое "Добрый день"
+  if (typeof showMainScreen === 'function' && !window.originalShowMain) {
+    window.originalShowMain = showMainScreen;
+    window.showMainScreen = function() {
+      window.originalShowMain();
+      // Перебиваем стандартное уведомление, если оно вдруг вылезет
+      setTimeout(() => {
+        const toasts = document.querySelectorAll('.toast');
+        toasts.forEach(t => { if(t.innerText.includes('Добрый') || t.innerText.includes('рады видеть')) t.remove(); });
+      }, 500); 
+    };
+  }
+
+  // Внедряем звук login.mp3 в функцию входа
+  if (typeof handleLogin === 'function' && !window.originalLogin) {
+    window.originalLogin = handleLogin;
+    window.handleLogin = async function(e) {
+      if (e) e.preventDefault();
+      await window.originalLogin(e);
+      // Если вход успешен (появился главный экран)
+      setTimeout(() => {
+        if (document.getElementById('mainScreen').classList.contains('active')) {
+           new Audio('sounds/login.mp3').play().catch(()=>{});
+        }
+      }, 1000);
+    };
+  }
+
+  // Внедряем звук logout.mp3 в функцию выхода
+  if (typeof handleLogout === 'function' && !window.originalLogout) {
+    window.originalLogout = handleLogout;
+    window.handleLogout = async function() {
+      new Audio('sounds/logout.mp3').play().catch(()=>{});
+      await window.originalLogout();
+    };
+  }
+  
   console.log('✅ Все 5 кнопок переподключены!');
 });
 </script>
