@@ -1713,6 +1713,56 @@ const auth = getAuth(app);
 onAuthStateChanged(auth, (user) => { if (user) console.log('✅ Firebase Auth: UID:', user.uid); else console.log('⚠️ Firebase Auth: не авторизован'); });
 window.flypeFirebase = { database, ref, set, onValue, get, child, push, update, remove, query, orderByChild, equalTo, auth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential };
 console.log('✅ Firebase подключён. databaseURL:', firebaseConfig.databaseURL);
+// --- ВОССТАНОВЛЕНИЕ ПОТЕРЯННЫХ ФУНКЦИЙ ---
+
+// 1. Функция для голосовых
+window._fmtVoiceTime = function(sec) { 
+    const m = Math.floor(sec/60), s = sec%60; 
+    return m + ':' + String(s).padStart(2,'0'); 
+};
+
+// 2. Функция для создания группы
+window.renderNewGroupContacts = function() {
+  const c = document.getElementById('newGroupContacts');
+  if (!c) return;
+  const users = state.users.filter(u => u.id !== state.currentUser.id && u.id !== 'flype_bot' && u.id !== 'oqqFsE0hg3Rg2tJnCjLdWNd8o892');
+  if (users.length === 0) { c.innerHTML = `<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:12.5px;">Нет других</div>`; return; }
+  c.innerHTML = users.map(u => { 
+    const name = `${u.firstName} ${u.lastName}`.trim(); 
+    const checked = selectedGroupContacts.has(u.id); 
+    return `<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-light);"><input type="checkbox" data-uid="${u.id}" ${checked ? 'checked' : ''} style="width:16px;height:16px;cursor:pointer;"><div class="avatar sm">${u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : initial(name)}</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(name)}</div><div style="font-size:10.5px;font-family:monospace;color:var(--text-muted);">@${escapeHtml(u.flypeId || '')}</div></div></label>`; 
+  }).join('');
+  c.querySelectorAll('input[type=checkbox]').forEach(cb => { 
+    cb.addEventListener('change', (e) => { 
+      if (e.target.checked) selectedGroupContacts.add(e.target.dataset.uid); 
+      else selectedGroupContacts.delete(e.target.dataset.uid); 
+    }); 
+  });
+};
+
+window.renderAddMemberResults = function(query) {
+  const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) return;
+  const c = document.getElementById('addMemberResults'); const q = query.trim().toLowerCase();
+  let users = state.users.filter(u => u.id !== state.currentUser.id && u.id !== 'flype_bot' && !chat.participants.includes(u.id));
+  users = users.filter(u => u.id && (u.email || u.flypeId)); users = users.filter(u => !u.banned || u.bannedUntil > Date.now());
+  if (q) users = users.filter(u => { const n = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase(); const fid = (u.flypeId || '').toLowerCase(); return n.includes(q) || fid.includes(q); });
+  if (users.length === 0) { c.innerHTML = `<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:12.5px;">Не найдено</div>`; return; }
+  c.innerHTML = users.map(u => { const n = `${u.firstName} ${u.lastName}`.trim(); return `<div class="chat-item" data-add-uid="${u.id}" style="cursor:pointer;border-left:none;"><div class="avatar sm">${u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : initial(n)}</div><div class="chat-info"><div class="name">${escapeHtml(n)}</div><div class="last-msg" style="font-family:monospace;font-size:10.5px;">@${escapeHtml(u.flypeId || '')}</div></div></div>`; }).join('');
+  c.querySelectorAll('[data-add-uid]').forEach(el => el.addEventListener('click', () => window.addGroupMember(el.dataset.addUid)));
+};
+
+window.addGroupMember = async function(uid) { 
+  const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) return; 
+  if (chat.participants.includes(uid)) return; 
+  chat.participants.push(uid); 
+  if(typeof persistChats === 'function') persistChats(); 
+  try { if (window.flypeFirebase) { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'chats/' + chat.id), chat); } } catch (err) {} 
+  document.getElementById('addMemberOverlay').classList.remove('open'); 
+  if(typeof renderAll === 'function') renderAll(); 
+  document.getElementById('infoBtn').click(); 
+  if(typeof Sound !== 'undefined') Sound.send(); 
+  if(typeof showToast === 'function') showToast('Добавлен', '', 'fa-user-plus'); 
+};
 </script>
 </body>
 </html>
