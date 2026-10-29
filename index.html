@@ -947,7 +947,7 @@ function showMainScreen() {
     document.getElementById('maintenanceScreen').classList.remove('active'); document.getElementById('bannedScreen').classList.remove('active'); document.getElementById('mainScreen').classList.add('active'); document.getElementById('authFooter').style.display = 'none';
     loadState(); renderAll(); listenToUsers(); listenToChats(); listenToCalls(); listenToMaintenance(); listenToStatuses(); startBanChecker(); updateSidebarProfile(); updateAdminPanel(); startPresenceHeartbeat();
     listenToSyncRequests(); checkSyncTimer();
-    if (state.currentUser) { const hour = new Date().getHours(); let g = 'Добрый день'; if (hour < 12) g = 'Доброе утро'; else if (hour >= 18) g = 'Добрый вечер'; setTimeout(() => { Sound.system(); showToast('Flype', `${g}, ${state.currentUser.firstName}!`, 'fa-hand-wave', 4000); }, 600); }
+    //if (state.currentUser) { const hour = new Date().getHours(); let g = 'Добрый день'; if (hour < 12) g = 'Доброе утро'; else if (hour >= 18) g = 'Добрый вечер'; setTimeout(() => { Sound.system(); showToast('Flype', `${g}, ${state.currentUser.firstName}!`, 'fa-hand-wave', 4000); }, 600); }
   }, 300);
 }
 function updateSidebarProfile() { const u = state.currentUser; if (!u) return; const name = `${u.firstName} ${u.lastName}`.trim(); const sn = document.getElementById('sidebarName'); if (sn) sn.textContent = name; const sa = document.getElementById('sidebarAvatar'); if (sa) { if (u.avatar) sa.innerHTML = `<img src="${escapeHtml(u.avatar)}">`; else sa.textContent = initial(name); } const st = document.getElementById('sidebarStatus'); if (st) st.textContent = u.isAdmin ? 'Администратор' : 'В сети'; }
@@ -1104,7 +1104,22 @@ async function handleLogin(e) {
   if (!window.flypeFirebase) { await new Promise(r => setTimeout(r, 1000)); return handleLogin(e); }
   if (!foundUser) { Sound.error(); registerFailedLogin(); const b = getLoginBlock(); if (b.blockedUntil > Date.now()) { const left = Math.ceil((b.blockedUntil - Date.now())/1000); showToast('Заблокировано', `Подождите ${Math.ceil(left/60)} мин.`, 'fa-clock', 5000); } else { showToast('Ошибка входа', `Неверный Gmail или пароль. Попыток: ${3 - b.attempts}`, 'fa-exclamation-circle'); } updateLoginBlockUI(); return; }
   if (foundUser.banned) { if (foundUser.bannedUntil === 0 || Date.now() < foundUser.bannedUntil) { showBannedScreen(foundUser); return; } else { foundUser.banned = false; foundUser.bannedUntil = 0; } }
-  resetLoginBlock(); localStorage.setItem(STORAGE_KEYS.currentUserId, foundUser.id); state.currentUser = foundUser; state.users = allUsers; saveData(STORAGE_KEYS.users, allUsers); Sound.statusSent(); showToast('Добро пожаловать!', `${foundUser.firstName}, рады видеть вас!`, 'fa-check-circle'); showMainScreen();
+    resetLoginBlock(); 
+  localStorage.setItem(STORAGE_KEYS.currentUserId, foundUser.id); 
+  state.currentUser = foundUser; 
+  state.users = allUsers; 
+  saveData(STORAGE_KEYS.users, allUsers); 
+  
+  // Убираем базовый звук
+  if (window.Sound) { window.Sound.statusSent = function(){}; }
+  
+  // Играем ТОЛЬКО login.mp3
+  new Audio('sounds/login.mp3').play().catch(()=>{});
+  
+  // Показываем ОДНО уведомление
+  showToast('Добро пожаловать!', `${foundUser.firstName}, рады видеть вас!`, 'fa-hand-wave'); 
+  
+  showMainScreen();
 }
 function showError(id, show) { const i = document.getElementById(id); const e = document.getElementById(id + 'Error'); if (i) i.classList.toggle('error', show); if (e) e.classList.toggle('visible', show); }
 async function handleLogout() {
