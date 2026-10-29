@@ -1949,10 +1949,10 @@ window.addEventListener('load', () => {
   if (videoB) videoB.onclick = () => { if (typeof startCall === 'function') startCall(state.activeChatId, true); };
 
   // 5. Смайлы (открытие, крестик и клик по смайлу)
-  const eb = document.getElementById('emojiBtn');
-  const ep = document.getElementById('emojiPicker');
-  if (eb && ep) {
-    eb.onclick = (e) => { e.preventDefault(); e.stopPropagation(); ep.classList.toggle('hidden'); };
+  const _ebBtn = document.getElementById('emojiBtn');
+  const _epBox = document.getElementById('emojiPicker');
+  if (_ebBtn && _epBox) {
+    _ebBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); _epBox.classList.toggle('hidden'); };
     const ec = document.getElementById('emojiPickerClose');
     if (ec) ec.onclick = (e) => { e.preventDefault(); e.stopPropagation(); ep.classList.add('hidden'); };
     // Восстанавливаем клики по самим смайлам
@@ -2007,6 +2007,12 @@ window.addEventListener('load', () => {
   }
   
   console.log('✅ Все 5 кнопок переподключены!');
+
+    // Восстанавливаем функцию времени для голосовых
+  window._fmtVoiceTime = function(sec) { 
+    const m = Math.floor(sec/60), s = sec%60; 
+    return `${m}:${String(s).padStart(2,'0')}`; 
+  };
 });
 </script>
 </body>
