@@ -1742,6 +1742,36 @@ document.getElementById('deleteProfileCancelBtn').addEventListener('click', clos
 document.getElementById('deleteProfileConfirmBtn').addEventListener('click', async () => { const check = document.getElementById('deleteProfileCheck'); if (!check.checked) { Sound.error(); showToast('Подтвердите', 'Поставьте галочку', 'fa-exclamation-circle'); return; } closeConfirmDeleteProfile(); document.getElementById('settingsOverlay').classList.remove('open'); setTimeout(() => { document.getElementById('deleteAccountPassword').value = ''; document.getElementById('deleteAccountConfirm').value = ''; document.getElementById('deleteAccountOverlay').classList.add('open'); }, 200); });
 document.getElementById('confirmDeleteProfileOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('confirmDeleteProfileOverlay')) closeConfirmDeleteProfile(); });
 document.getElementById('deleteAccountCancel').addEventListener('click', () => document.getElementById('deleteAccountOverlay').classList.remove('open'));
+async function deleteAuthUser(password) {
+  try {
+    if (!window.flypeFirebase || !window.flypeFirebase.deleteUser) return false;
+    const auth = window.flypeFirebase.auth; const user = auth.currentUser; if (!user) return false;
+    try { const { EmailAuthProvider, reauthenticateWithCredential } = window.flypeFirebase; if (EmailAuthProvider && reauthenticateWithCredential && user.email) { const cred = EmailAuthProvider.credential(user.email, password); await reauthenticateWithCredential(user, cred); console.log('🔄 Переавторизация OK'); } } catch (reauthErr) { console.warn('⚠️ Reauth провалился:', reauthErr.code); }
+    await window.flypeFirebase.deleteUser(user);
+    console.log('✅ Firebase Auth: пользователь удалён');
+    return true;
+  } catch (err) { console.warn('⚠️ Не удалось удалить из Firebase Auth:', err.code, err.message); return false; }
+}
+
+async function deleteAccount() {
+  const user = state.currentUser; if (!user) return;
+  if (user.isAdmin) { Sound.error(); showToast('Недоступно', 'Нельзя удалить аккаунт админа', 'fa-shield-alt', 3000); return; }
+  const pwd = document.getElementById('deleteAccountPassword').value;
+  if (pwd !== user.password) { Sound.error(); showToast('Неверный пароль', '', 'fa-exclamation-circle'); return; }
+  const cw = document.getElementById('deleteAccountConfirm').value.trim();
+  if (cw !== 'УДАЛИТЬ') { Sound.error(); showToast('Подтверждение неверно', 'Введите УДАЛИТЬ', 'fa-exclamation-circle'); return; }
+  await deleteUserForever(user.id, `${user.firstName} ${user.lastName}`.trim());
+  const authDeleted = await deleteAuthUser(pwd);
+  if (!authDeleted) console.warn('⚠️ Firebase Auth НЕ удалён');
+  if (window.flypeFirebase && window.flypeFirebase.signOut) { try { await window.flypeFirebase.signOut(window.flypeFirebase.auth); } catch (e) {} }
+  localStorage.removeItem(STORAGE_KEYS.currentUserId); localStorage.removeItem('flype_private_key_' + user.id); localStorage.removeItem('flype_sync_unlock_until'); localStorage.removeItem('flype_is_primary');
+  stopPresenceHeartbeat(); state.currentUser = null; state.activeChatId = null; state.users = []; state.chats = []; state.messages = [];
+  if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
+  if (callListenerUnsubscribe) { callListenerUnsubscribe(); callListenerUnsubscribe = null; }
+  if (syncKeysListener) { syncKeysListener(); syncKeysListener = null; }
+  document.getElementById('deleteAccountOverlay').classList.remove('open');
+  showAuthScreen(); document.getElementById('loginForm').reset(); document.getElementById('registerForm').reset();
+}
 document.getElementById('deleteAccountConfirmBtn').addEventListener('click', deleteAccount);
 document.getElementById('newChatBtn').addEventListener('click', () => { document.getElementById('newChatSearch').value = ''; renderNewChatResults(''); document.getElementById('newChatOverlay').classList.add('open'); });
 document.getElementById('newChatCancel').addEventListener('click', () => document.getElementById('newChatOverlay').classList.remove('open'));
