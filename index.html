@@ -21,7 +21,7 @@ body.theme-gold{--accent:#F4B400;--accent-hover:#DFA300;--accent-darker:#B8860B;
 body.theme-oldflype{--accent:#4AB8E8;--accent-hover:#3A9DD0;--accent-darker:#2A7BA8;--accent-light:#D4EEFA;--accent-hover-light:#B8E1F5;--accent-border:#A0D4EC;--accent-shadow:rgba(74,184,232,0.45);--text-blue:#2A7BA8;--online:#5FD35F;}
 body.theme-oldflype .sidebar-profile::after{background:radial-gradient(circle at 50% 80%,rgba(95,211,95,0.4) 0%,transparent 50%),linear-gradient(180deg,#A8E0F5 0%,#4AB8E8 50%,#2A7BA8 100%)!important;}
 body.theme-oldflype .sidebar-profile::before{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 80' preserveAspectRatio='none'><g fill='%23FFFFFF' fill-opacity='0.9'><ellipse cx='20' cy='80' rx='55' ry='30'/><ellipse cx='75' cy='82' rx='60' ry='32'/><ellipse cx='135' cy='80' rx='65' ry='30'/><ellipse cx='200' cy='82' rx='62' ry='32'/><ellipse cx='265' cy='80' rx='60' ry='30'/></g><g fill='%23FFFFFF' fill-opacity='0.6'><ellipse cx='45' cy='88' rx='75' ry='34'/><ellipse cx='145' cy='89' rx='80' ry='36'/><ellipse cx='245' cy='88' rx='75' ry='34'/></g><rect x='0' y='80' width='280' height='2' fill='%23FFFFFF'/></svg>")!important;}
-body.theme-oldflype .btn{background:linear-gradient(180deg,rgba(255,255,255,0.5) 0%,var(--accent) 50%,var(--accent-hover) 100%);border:1px solid rgba(255,255,255,0.7);box-shadow:0 2px 4px rgba(74,184,232,0.4),inset 0 1px 2px rgba(255,255,255,0.8);text-shadow:0 1px 2px rgba(0,0,0,0.2);border-radius:20px;}
+body.theme-oldflype .btn{background:linear-gradient(180deg,rgba(255,255,255,0.5) 0%,var(--accent) 50%,var(--accent-hover) 100%);border:1px solid rgba(255,255,255,0.7);box-shadow:0 2px 4px rgba(74,184,232,0.4),inset 0 1px 2px rgba(255,255,255,0.8);text-shadow:0 1px 2px rgba(0,0,0,0.2);border-radius:20px;color:#FFFFFF!important;}
 body.theme-oldflype .btn:hover{background:linear-gradient(180deg,rgba(255,255,255,0.7) 0%,var(--accent-hover) 50%,var(--accent-darker) 100%);}
 body.theme-oldflype .message-row.out .message-bubble{background:linear-gradient(180deg,rgba(255,255,255,0.7) 0%,var(--accent-light) 100%);border:1px solid rgba(255,255,255,0.9);box-shadow:0 3px 8px rgba(74,184,232,0.3),inset 0 1px 2px rgba(255,255,255,0.9);border-radius:18px;}
 body.theme-oldflype .message-row.in .message-bubble{background:linear-gradient(180deg,rgba(255,255,255,0.95) 0%,#E8F4F9 100%);border:1px solid rgba(255,255,255,0.9);box-shadow:0 3px 8px rgba(0,0,0,0.08),inset 0 1px 2px rgba(255,255,255,0.9);border-radius:18px;}
@@ -876,7 +876,7 @@ const SOUND_FILES = {
   callEnded:'sounds/call-failed.mp3', 
   callFailed:'sounds/failed-to-connect.mp3', 
   connectionLost:'sounds/connection-was-lost.mp3', 
-  logout:'sounds/logging-out-of-the-account.mp3', 
+  logout:'sounds/logout.mp3', 
   statusSent:'sounds/status-or-photo-has-been-sent.mp3', 
   statusFailed:'sounds/failed-to-send-the-status-or-photo.mp3' 
 };
@@ -978,7 +978,7 @@ function showMainScreen() {
     document.getElementById('maintenanceScreen').classList.remove('active'); document.getElementById('bannedScreen').classList.remove('active'); document.getElementById('mainScreen').classList.add('active'); document.getElementById('authFooter').style.display = 'none';
     loadState(); renderAll(); listenToUsers(); listenToChats(); listenToCalls(); listenToMaintenance(); listenToStatuses(); startBanChecker(); updateSidebarProfile(); updateAdminPanel(); startPresenceHeartbeat();
     listenToSyncRequests(); checkSyncTimer();
-    if (state.currentUser) { const hour = new Date().getHours(); let g = 'Добрый день'; if (hour < 12) g = 'Доброе утро'; else if (hour >= 18) g = 'Добрый вечер'; setTimeout(() => { Sound.system(); showToast('Flype', `${g}, ${state.currentUser.firstName}!`, 'fa-hand-wave', 4000); }, 600); }
+    // Убран вызов звука и тоста
   }, 300);
 }
 function updateSidebarProfile() { const u = state.currentUser; if (!u) return; const name = `${u.firstName} ${u.lastName}`.trim(); const sn = document.getElementById('sidebarName'); if (sn) sn.textContent = name; const sa = document.getElementById('sidebarAvatar'); if (sa) { if (u.avatar) sa.innerHTML = `<img src="${escapeHtml(u.avatar)}">`; else sa.textContent = initial(name); } const st = document.getElementById('sidebarStatus'); if (st) st.textContent = u.isAdmin ? 'Администратор' : 'В сети'; }
@@ -1103,7 +1103,8 @@ async function handleRegister(e) {
   localStorage.setItem(STORAGE_KEYS.currentUserId, newUser.id); state.currentUser = newUser; state.users = users;
   createWelcomeChat(newUser);
   try { if (window.flypeFirebase) { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'users/' + newUser.id), newUser); } } catch (err) {}
-  Sound.statusSent(); showToast('Регистрация успешна!', `Ваш ник: @${flypeId}`, 'fa-check-circle', 5000);
+  new Audio('sounds/login.mp3').play().catch(()=>{});
+  showToast('Рады вас видеть снова', `${newUser.firstName}, добро пожаловать!`, 'fa-check-circle', 5000);
   setTimeout(() => showMainScreen(), 1500);
 }
 function createWelcomeChat(user) {
@@ -1133,12 +1134,15 @@ async function handleLogin(e) {
   if (!window.flypeFirebase) { await new Promise(r => setTimeout(r, 1000)); return handleLogin(e); }
   if (!foundUser) { Sound.error(); registerFailedLogin(); const b = getLoginBlock(); if (b.blockedUntil > Date.now()) { const left = Math.ceil((b.blockedUntil - Date.now())/1000); showToast('Заблокировано', `Подождите ${Math.ceil(left/60)} мин.`, 'fa-clock', 5000); } else { showToast('Ошибка входа', `Неверный Gmail или пароль. Попыток: ${3 - b.attempts}`, 'fa-exclamation-circle'); } updateLoginBlockUI(); return; }
   if (foundUser.banned) { if (foundUser.bannedUntil === 0 || Date.now() < foundUser.bannedUntil) { showBannedScreen(foundUser); return; } else { foundUser.banned = false; foundUser.bannedUntil = 0; } }
-  resetLoginBlock(); localStorage.setItem(STORAGE_KEYS.currentUserId, foundUser.id); state.currentUser = foundUser; state.users = allUsers; saveData(STORAGE_KEYS.users, allUsers); Sound.statusSent(); showToast('Добро пожаловать!', `${foundUser.firstName}, рады видеть вас!`, 'fa-check-circle'); showMainScreen();
+  resetLoginBlock(); localStorage.setItem(STORAGE_KEYS.currentUserId, foundUser.id); state.currentUser = foundUser; state.users = allUsers; saveData(STORAGE_KEYS.users, allUsers); 
+  new Audio('sounds/login.mp3').play().catch(()=>{});
+  showToast('Рады вас видеть снова', `${foundUser.firstName}!`, 'fa-check-circle'); 
+  showMainScreen();
 }
 function showError(id, show) { const i = document.getElementById(id); const e = document.getElementById(id + 'Error'); if (i) i.classList.toggle('error', show); if (e) e.classList.toggle('visible', show); }
 async function handleLogout() {
   if (!confirm('Вы уверены, что хотите выйти?')) return;
-  Sound.logout();
+  new Audio('sounds/logout.mp3').play().catch(()=>{});
   if (window.flypeFirebase && window.flypeFirebase.signOut) { try { await window.flypeFirebase.signOut(window.flypeFirebase.auth); } catch (e) {} }
   localStorage.removeItem(STORAGE_KEYS.currentUserId); stopPresenceHeartbeat(); state.currentUser = null; state.activeChatId = null;
   if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
@@ -1738,36 +1742,6 @@ document.getElementById('deleteProfileCancelBtn').addEventListener('click', clos
 document.getElementById('deleteProfileConfirmBtn').addEventListener('click', async () => { const check = document.getElementById('deleteProfileCheck'); if (!check.checked) { Sound.error(); showToast('Подтвердите', 'Поставьте галочку', 'fa-exclamation-circle'); return; } closeConfirmDeleteProfile(); document.getElementById('settingsOverlay').classList.remove('open'); setTimeout(() => { document.getElementById('deleteAccountPassword').value = ''; document.getElementById('deleteAccountConfirm').value = ''; document.getElementById('deleteAccountOverlay').classList.add('open'); }, 200); });
 document.getElementById('confirmDeleteProfileOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('confirmDeleteProfileOverlay')) closeConfirmDeleteProfile(); });
 document.getElementById('deleteAccountCancel').addEventListener('click', () => document.getElementById('deleteAccountOverlay').classList.remove('open'));
-async function deleteAuthUser(password) {
-  try {
-    if (!window.flypeFirebase || !window.flypeFirebase.deleteUser) return false;
-    const auth = window.flypeFirebase.auth; const user = auth.currentUser; if (!user) return false;
-    try { const { EmailAuthProvider, reauthenticateWithCredential } = window.flypeFirebase; if (EmailAuthProvider && reauthenticateWithCredential && user.email) { const cred = EmailAuthProvider.credential(user.email, password); await reauthenticateWithCredential(user, cred); console.log('🔄 Переавторизация OK'); } } catch (reauthErr) { console.warn('⚠️ Reauth провалился:', reauthErr.code); }
-    await window.flypeFirebase.deleteUser(user);
-    console.log('✅ Firebase Auth: пользователь удалён');
-    return true;
-  } catch (err) { console.warn('⚠️ Не удалось удалить из Firebase Auth:', err.code, err.message); return false; }
-}
-
-async function deleteAccount() {
-  const user = state.currentUser; if (!user) return;
-  if (user.isAdmin) { Sound.error(); showToast('Недоступно', 'Нельзя удалить аккаунт админа', 'fa-shield-alt', 3000); return; }
-  const pwd = document.getElementById('deleteAccountPassword').value;
-  if (pwd !== user.password) { Sound.error(); showToast('Неверный пароль', '', 'fa-exclamation-circle'); return; }
-  const cw = document.getElementById('deleteAccountConfirm').value.trim();
-  if (cw !== 'УДАЛИТЬ') { Sound.error(); showToast('Подтверждение неверно', 'Введите УДАЛИТЬ', 'fa-exclamation-circle'); return; }
-  await deleteUserForever(user.id, `${user.firstName} ${user.lastName}`.trim());
-  const authDeleted = await deleteAuthUser(pwd);
-  if (!authDeleted) console.warn('⚠️ Firebase Auth НЕ удалён');
-  if (window.flypeFirebase && window.flypeFirebase.signOut) { try { await window.flypeFirebase.signOut(window.flypeFirebase.auth); } catch (e) {} }
-  localStorage.removeItem(STORAGE_KEYS.currentUserId); localStorage.removeItem('flype_private_key_' + user.id); localStorage.removeItem('flype_sync_unlock_until'); localStorage.removeItem('flype_is_primary');
-  stopPresenceHeartbeat(); state.currentUser = null; state.activeChatId = null; state.users = []; state.chats = []; state.messages = [];
-  if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
-  if (callListenerUnsubscribe) { callListenerUnsubscribe(); callListenerUnsubscribe = null; }
-  if (syncKeysListener) { syncKeysListener(); syncKeysListener = null; }
-  document.getElementById('deleteAccountOverlay').classList.remove('open');
-  showAuthScreen(); document.getElementById('loginForm').reset(); document.getElementById('registerForm').reset();
-}
 document.getElementById('deleteAccountConfirmBtn').addEventListener('click', deleteAccount);
 document.getElementById('newChatBtn').addEventListener('click', () => { document.getElementById('newChatSearch').value = ''; renderNewChatResults(''); document.getElementById('newChatOverlay').classList.add('open'); });
 document.getElementById('newChatCancel').addEventListener('click', () => document.getElementById('newChatOverlay').classList.remove('open'));
@@ -1864,126 +1838,6 @@ const auth = getAuth(app);
 onAuthStateChanged(auth, (user) => { if (user) console.log('✅ Firebase Auth: UID:', user.uid); else console.log('⚠️ Firebase Auth: не авторизован'); });
 window.flypeFirebase = { database, ref, set, onValue, get, child, push, update, remove, query, orderByChild, equalTo, auth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential };
 console.log('✅ Firebase подключён. databaseURL:', firebaseConfig.databaseURL);
-</script>
-<script>
-// 1. СКРЫВАЕМ КОНСОЛЬ (убираем databaseURL и лишние логи)
-(function() {
-  const originalLog = console.log;
-  const originalWarn = console.warn;
-  console.log = function(...args) {
-    if (args[0] && typeof args[0] === 'string' && (args[0].includes('Firebase подключён') || args[0].includes('databaseURL') || args[0].includes('UID:') || args[0].includes('Заплатка') || args[0].includes('Вход, UID'))) return;
-    originalLog.apply(console, args);
-  };
-  console.warn = function(...args) {
-    if (args[0] && typeof args[0] === 'string' && args[0].includes('Admin')) return;
-    originalWarn.apply(console, args);
-  };
-})();
-
-window.addEventListener('load', () => {
-  // --- 1. КНОПКИ ВХОДА / РЕГИСТРАЦИИ ---
-  const regForm = document.getElementById('registerForm');
-  if (regForm) regForm.onsubmit = (e) => { e.preventDefault(); if(typeof handleRegister === 'function') handleRegister(e); };
-  const logForm = document.getElementById('loginForm');
-  if (logForm) logForm.onsubmit = (e) => { e.preventDefault(); if(typeof handleLogin === 'function') handleLogin(e); };
-
-  // --- 2. ВКЛАДКИ (ЧАТЫ / СТАТУСЫ) ---
-  document.querySelectorAll('.sidebar-tab').forEach(tab => {
-    tab.onclick = function() {
-      document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
-      this.classList.add('active');
-      const target = this.dataset.stab;
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      const panel = document.getElementById(target === 'chats' ? 'tabChats' : 'tabStatuses');
-      if(panel) panel.classList.add('active');
-    };
-  });
-
-  // --- 3. СМАЙЛЫ (Окно, крестик, клик) ---
-  const emojiBtn = document.getElementById('emojiBtn');
-  const emojiPicker = document.getElementById('emojiPicker');
-  if (emojiBtn && emojiPicker) {
-    emojiBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); emojiPicker.style.display = (emojiPicker.style.display === 'flex' ? 'none' : 'flex'); emojiPicker.classList.remove('hidden'); };
-    const emojiClose = document.getElementById('emojiPickerClose');
-    if (emojiClose) emojiClose.onclick = (e) => { e.preventDefault(); e.stopPropagation(); emojiPicker.style.display = 'none'; };
-    const emojiGrid = document.getElementById('emojiPickerGrid');
-    if (emojiGrid) emojiGrid.onclick = (e) => {
-      if (e.target.classList.contains('emoji-item')) {
-        const input = document.getElementById('messageInput');
-        input.value += e.target.innerText;
-        input.focus();
-      }
-    };
-  }
-
-  // --- 4. ЗВОНКИ ---
-  const cancelBtn = document.getElementById('cancelCallBtn'); if (cancelBtn) cancelBtn.onclick = (e) => { e.preventDefault(); if(typeof cancelCall === 'function') cancelCall(); };
-  const rejectBtn = document.getElementById('rejectCallBtn'); if (rejectBtn) rejectBtn.onclick = (e) => { e.preventDefault(); if(typeof rejectCall === 'function') rejectCall(); };
-  const acceptBtn = document.getElementById('acceptCallBtn'); if (acceptBtn) acceptBtn.onclick = (e) => { e.preventDefault(); if(typeof acceptCall === 'function') acceptCall(); };
-  const callBtn = document.getElementById('callBtn'); if (callBtn) callBtn.onclick = () => { if(typeof startCall === 'function' && state.activeChatId) startCall(state.activeChatId, false); };
-  const videoBtn = document.getElementById('videoCallBtn'); if (videoBtn) videoBtn.onclick = () => { if(typeof startCall === 'function' && state.activeChatId) startCall(state.activeChatId, true); };
-
-  // --- 5. ЗВУКИ И УБИРАЕМ "ДОБРЫЙ ДЕНЬ" ---
-  if (typeof window.showMainScreen === 'function' && !window.originalShowMainScreen) {
-    window.originalShowMainScreen = window.showMainScreen;
-    window.showMainScreen = function() {
-      if (window.Sound && window.Sound.system) window.Sound.system = function() {}; // Убираем звук статуса при входе
-      window.originalShowMainScreen();
-      setTimeout(() => {
-        document.querySelectorAll('.toast').forEach(t => {
-          if(t.innerText.includes('Добрый') || t.innerText.includes('рады видеть')) t.remove();
-        });
-      }, 500);
-    };
-  }
-
-  if (typeof window.handleLogin === 'function' && !window.origLogin) {
-    window.origLogin = window.handleLogin;
-    window.handleLogin = async function(e) {
-      if (e) e.preventDefault();
-      await window.origLogin(e);
-      setTimeout(() => { if(document.getElementById('mainScreen').classList.contains('active')) new Audio('sounds/login.mp3').play().catch(()=>{}); }, 1000);
-    };
-  }
-  if (typeof window.handleLogout === 'function' && !window.origLogout) {
-    window.origLogout = window.handleLogout;
-    window.handleLogout = async function() { new Audio('sounds/logout.mp3').play().catch(()=>{}); await window.origLogout(); };
-    const lBtn = document.getElementById('logoutLink'); if(lBtn) lBtn.onclick = window.handleLogout;
-  }
-
-  // --- 6. ПОЧИНКА ГОЛОСОВЫХ (ошибка _fmtVoiceTime) ---
-  if (typeof window._fmtVoiceTime !== 'function') {
-    window._fmtVoiceTime = function(sec) { const m = Math.floor(sec/60), s = sec%60; return m + ':' + String(s).padStart(2,'0'); };
-  }
-
-  // --- 7. ОБМЕН КЛЮЧАМИ (Упрощенная версия) ---
-  window.requestKeyFromOtherDevice = async function() {
-    if (!state.currentUser || !window.flypeFirebase) return;
-    const u = state.currentUser;
-    if (!!localStorage.getItem('flype_private_key_' + u.id) && localStorage.getItem('flype_is_primary') === 'true') { showToast('Уже активно', 'Вы на основном устройстве', 'fa-info-circle'); return; }
-    try {
-      const { database, ref, set, onValue } = window.flypeFirebase;
-      const code = Math.floor(10000000 + Math.random() * 90000000).toString();
-      await set(ref(database, 'sync_requests/' + u.id), { requestedAt: Date.now(), expiresAt: Date.now() + 24*60*60*1000, authCode: code, status: 'pending' });
-      showToast('Запрос отправлен', 'Ожидаем подтверждения', 'fa-check');
-      onValue(ref(database, 'sync_keys/' + u.id), (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.encryptedKey && data.status === 'approved') {
-          const userInput = prompt('Введите код с основного устройства:');
-          if (userInput === data.authCode) {
-             localStorage.setItem('flype_private_key_' + u.id, data.encryptedKey);
-             if(data.duration !== 'infinity') localStorage.setItem('flype_sync_unlock_until', String(Date.now() + data.duration));
-             else localStorage.removeItem('flype_sync_unlock_until');
-             showToast('Ключи получены!', 'Переписка расшифрована', 'fa-unlock');
-             if (typeof renderMessages === 'function') renderMessages(state.activeChatId);
-          } else showToast('Неверный код', 'Попробуйте снова', 'fa-times');
-        }
-      });
-    } catch (e) { showToast('Ошибка', 'Не удалось отправить запрос', 'fa-times'); }
-  };
-  const reqKeyBtn = document.getElementById('requestKeyBtn');
-  if (reqKeyBtn) reqKeyBtn.onclick = window.requestKeyFromOtherDevice;
-});
 </script>
 </body>
 </html>
