@@ -2029,5 +2029,110 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 @keyframes voiceWave{0%,100%{transform:scaleY(0.5);}50%{transform:scaleY(1.4);}}
 .voice-message-duration{font-size:11px;color:var(--text-muted);}
 </style>
+<script>
+window.addEventListener('load', () => {
+  console.log('🛠️ Финальный патч v2.0');
+
+  // 1. ВОССТАНОВЛЕНИЕ КРЕСТИКОВ (модалки)
+  document.querySelectorAll('.modal-close-x').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const oid = btn.dataset.close;
+      if (oid) {
+        const el = document.getElementById(oid);
+        if (el) el.classList.remove('open');
+      } else {
+        const overlay = btn.closest('.modal-overlay');
+        if (overlay) overlay.classList.remove('open');
+      }
+    };
+  });
+
+  // 2. ЧИНИМ СБРОС ВХОДА (принудительное восстановление сессии)
+  setTimeout(() => {
+    const savedId = localStorage.getItem('flype_current_user');
+    if (savedId && window.state && !state.currentUser) {
+      const users = JSON.parse(localStorage.getItem('flype_users') || '[]');
+      const user = users.find(u => u.id === savedId);
+      if (user) {
+        state.currentUser = user;
+        state.users = users;
+        if (typeof showMainScreen === 'function') showMainScreen();
+      }
+    }
+  }, 1000);
+
+  // 3. УВЕДОМЛЕНИЕ ПРИ ВХОДЕ (только звук login и "Добро пожаловать")
+  if (typeof window.handleLogin === 'function' && !window.origLoginPatched) {
+    window.origLoginPatched = window.handleLogin;
+    window.handleLogin = async function(e) {
+      if (e) e.preventDefault();
+      if (window.Sound) {
+        if (window.Sound.system) window.Sound.system = function() {};
+        if (window.Sound.statusSent) window.Sound.statusSent = function() {};
+      }
+      await window.origLoginPatched(e);
+      setTimeout(() => {
+        if (document.getElementById('mainScreen').classList.contains('active') && state.currentUser) {
+          new Audio('sounds/login.mp3').play().catch(()=>{});
+          document.querySelectorAll('.toast').forEach(t => {
+            if (t.innerText.includes('Добрый') || t.innerText.includes('рады видеть вас')) t.remove();
+          });
+          showToast('Добро пожаловать!', `${state.currentUser.firstName}, рады видеть вас!`, 'fa-hand-wave', 4000);
+        }
+      }, 1000);
+    };
+    const lf = document.getElementById('loginForm');
+    if (lf) lf.onsubmit = window.handleLogin;
+  }
+
+  // 4. ПОЧИНКА КНОПКИ "+ СТАТУС"
+  const addStatusBtn = document.getElementById('addStatusBtn');
+  if (addStatusBtn) {
+    const newBtn = addStatusBtn.cloneNode(true);
+    addStatusBtn.parentNode.replaceChild(newBtn, addStatusBtn);
+    newBtn.addEventListener('click', () => {
+      document.getElementById('statusText').value = '';
+      window.pendingStatusImageData = null;
+      const _p = document.getElementById('statusImagePreview');
+      if (_p) _p.innerHTML = '<i class="fas fa-image"></i>';
+      document.getElementById('addStatusOverlay').classList.add('open');
+    });
+  }
+
+  // 5. ПОЛНОЕ ГЛУШЕНИЕ ЗВУКОВ (кроме звонка) + СИНХРОНИЗАЦИЯ ТУМБЛЕРА
+  if (window.playSoundFile) {
+    const origPlaySound = window.playSoundFile;
+    window.playSoundFile = function(name, volume) {
+      if (name === 'ringtone' || name === 'callConnect' || name === 'callStart') {
+        return origPlaySound(name, volume);
+      }
+      if (window.state && window.state.settings && window.state.settings.sounds === false) {
+        return;
+      }
+      return origPlaySound(name, volume);
+    };
+  }
+  
+  const origAudio = window.Audio;
+  window.Audio = function(src) {
+    const isRinging = src && (src.includes('Flype-Standart') || src.includes('connection-') || src.includes('start-of-the-call'));
+    if (!isRinging && window.state && window.state.settings && window.state.settings.sounds === false) {
+      return { play: () => {}, pause: () => {}, cloneNode: () => ({ play: () => {} }), volume: 0 };
+    }
+    return new origAudio(src);
+  };
+
+  const soundToggle = document.getElementById('soundToggle');
+  if (soundToggle) {
+    soundToggle.onchange = (e) => {
+      if (window.state && window.state.settings) {
+        state.settings.sounds = e.target.checked;
+        if (typeof persistSettings === 'function') persistSettings();
+      }
+    };
+  }
+});
+</script>
 </body>
 </html>
