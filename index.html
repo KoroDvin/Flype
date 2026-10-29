@@ -1841,29 +1841,34 @@ window.addEventListener('load', () => {
   // Звонки
   bind('callBtn', () => { if (window.startCall) window.startCall(state.activeChatId, false); });
   bind('videoCallBtn', () => { if (window.startCall) window.startCall(state.activeChatId, true); });
+  bind('cancelCallBtn', () => { if (window.cancelCall) window.cancelCall(); });
+  bind('rejectCallBtn', () => { if (window.rejectCall) window.rejectCall(); });
+  bind('acceptCallBtn', () => { if (window.acceptCall) window.acceptCall(); });
 
   // Прикрепление файла
   bind('attachBtn', () => document.getElementById('fileInput').click());
 
-  // 3. УБИРАЕМ МИГАНИЕ (перехватываем обновление сообщений)
+  // 3. УБИРАЕМ ТОРМОЗА И МИГАНИЕ
   if (window.renderMessages) {
     const origRender = window.renderMessages;
+    let renderTimeout = null;
+    
     window.renderMessages = function(chatId) {
       const c = document.getElementById('messagesContainer');
-      // Запоминаем, был ли пользователь внизу
+      if (!c) return origRender(chatId);
+
       const isAtBottom = c.scrollTop + c.clientHeight >= c.scrollHeight - 50;
       
-      origRender(chatId);
-      
-      // Если он был внизу, скроллим вниз. Если листал вверх — не трогаем!
-      if (isAtBottom) {
-        c.scrollTop = c.scrollHeight;
-      }
+      // Защита от частых вызовов
+      if (renderTimeout) clearTimeout(renderTimeout);
+      renderTimeout = setTimeout(() => {
+         origRender(chatId);
+         if (isAtBottom) c.scrollTop = c.scrollHeight;
+      }, 300); // Задержка в 300 мс, чтобы не тормозило
     };
   }
 
   // 4. ЗВУК И УВЕДОМЛЕНИЕ ПРИ ВХОДЕ
-  // Перехватываем функцию входа, чтобы проиграть звук и показать тост
   if (window.handleLogin) {
     const origLogin = window.handleLogin;
     window.handleLogin = async function(e) {
@@ -1874,7 +1879,6 @@ window.addEventListener('load', () => {
         if (document.getElementById('mainScreen').classList.contains('active') && state.currentUser) {
           new Audio('sounds/login.mp3').play().catch(()=>{});
           
-          // Тост "Добрый день/утро/вечер"
           const hour = new Date().getHours();
           let g = 'Добрый день';
           if (hour < 12) g = 'Доброе утро'; 
@@ -1882,6 +1886,26 @@ window.addEventListener('load', () => {
           
           if (window.showToast) window.showToast('Flype', `${g}, ${state.currentUser.firstName}!`, 'fa-hand-wave', 4000);
         }
+      }, 1000);
+    };
+    const form = document.getElementById('loginForm');
+    if (form) form.onsubmit = window.handleLogin;
+  }
+  
+  if (window.handleRegister) {
+    const origReg = window.handleRegister;
+    window.handleRegister = async function(e) {
+      if (e) e.preventDefault();
+      await origReg(e);
+      setTimeout(() => {
+        if (document.getElementById('mainScreen').classList.contains('active') && state.currentUser) {
+          new Audio('sounds/login.mp3').play().catch(()=>{});
+        }
+      }, 1500);
+    };
+    const form = document.getElementById('registerForm');
+    if (form) form.onsubmit = window.handleRegister;
+  }
       }, 1000);
     };
     
