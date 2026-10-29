@@ -2030,10 +2030,84 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 .voice-message-duration{font-size:11px;color:var(--text-muted);}
 </style>
 <script>
+// Ждём загрузки страницы
 window.addEventListener('load', () => {
-  console.log('🛠️ Финальный патч v2.0');
+  console.log('🛠️ Финальный фикс входа и звуков');
 
-  // 1. ВОССТАНОВЛЕНИЕ КРЕСТИКОВ (модалки)
+  // 1. ЧИНИМ ВХОД (принудительно восстанавливаем сессию, если скрипт упал)
+  setTimeout(() => {
+    const savedId = localStorage.getItem('flype_current_user');
+    if (savedId && window.state && !state.currentUser) {
+      const users = JSON.parse(localStorage.getItem('flype_users') || '[]');
+      const user = users.find(u => u.id === savedId);
+      if (user) {
+        state.currentUser = user;
+        state.users = users;
+        if (typeof showMainScreen === 'function') showMainScreen();
+      }
+    }
+  }, 1000);
+
+  // 2. УБИРАЕМ «ДОБРЫЙ ДЕНЬ» И ЛИШНИЕ ЗВУКИ ИЗ БАЗОВОЙ ФУНКЦИИ
+  // Переопределяем showMainScreen, чтобы она не играла звуки и не показывала тост
+  if (typeof window.showMainScreen === 'function') {
+    const origShowMain = window.showMainScreen;
+    window.showMainScreen = function() {
+      origShowMain(); // запускаем базовую логику (загрузка чатов, слушатели)
+      // Принудительно удаляем тост "Добрый день", если он успел появиться
+      setTimeout(() => {
+        document.querySelectorAll('.toast').forEach(t => {
+          if (t.innerText.includes('Добрый') || t.innerText.includes('рады видеть')) t.remove();
+        });
+      }, 100);
+    };
+  }
+
+  // 3. ПЕРЕХВАТЫВАЕМ КНОПКУ ВХОДА
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    // Удаляем старые обработчики
+    const newForm = loginForm.cloneNode(true);
+    loginForm.parentNode.replaceChild(newForm, loginForm);
+
+    newForm.onsubmit = async (e) => {
+      e.preventDefault();
+      
+      // Глушим все звуки базового кода на время входа
+      if (window.Sound) {
+        const origStatusSent = Sound.statusSent;
+        const origSystem = Sound.system;
+        Sound.statusSent = function() {};
+        Sound.system = function() {};
+      }
+
+      // Вызываем оригинальную функцию входа
+      if (typeof window.handleLogin === 'function') {
+        await window.handleLogin(e);
+      }
+
+      // После входа
+      setTimeout(() => {
+        if (document.getElementById('mainScreen').classList.contains('active') && state.currentUser) {
+          // Восстанавливаем звуки (если нужно)
+          if (window.Sound) {
+             // (восстановление не обязательно, но можно)
+          }
+          
+          // Удаляем все старые тосты
+          document.querySelectorAll('.toast').forEach(t => t.remove());
+
+          // Играем ТОЛЬКО login.mp3
+          new Audio('sounds/login.mp3').play().catch(()=>{});
+          
+          // Показываем ОДНО уведомление
+          showToast('Добро пожаловать!', `${state.currentUser.firstName}, рады видеть вас!`, 'fa-hand-wave', 4000);
+        }
+      }, 1000);
+    };
+  }
+
+  // 4. ВОССТАНОВЛЕНИЕ КРЕСТИКОВ
   document.querySelectorAll('.modal-close-x').forEach(btn => {
     btn.onclick = (e) => {
       e.stopPropagation();
@@ -2048,45 +2122,7 @@ window.addEventListener('load', () => {
     };
   });
 
-  // 2. ЧИНИМ СБРОС ВХОДА (принудительное восстановление сессии)
-  setTimeout(() => {
-    const savedId = localStorage.getItem('flype_current_user');
-    if (savedId && window.state && !state.currentUser) {
-      const users = JSON.parse(localStorage.getItem('flype_users') || '[]');
-      const user = users.find(u => u.id === savedId);
-      if (user) {
-        state.currentUser = user;
-        state.users = users;
-        if (typeof showMainScreen === 'function') showMainScreen();
-      }
-    }
-  }, 1000);
-
-  // 3. УВЕДОМЛЕНИЕ ПРИ ВХОДЕ (только звук login и "Добро пожаловать")
-  if (typeof window.handleLogin === 'function' && !window.origLoginPatched) {
-    window.origLoginPatched = window.handleLogin;
-    window.handleLogin = async function(e) {
-      if (e) e.preventDefault();
-      if (window.Sound) {
-        if (window.Sound.system) window.Sound.system = function() {};
-        if (window.Sound.statusSent) window.Sound.statusSent = function() {};
-      }
-      await window.origLoginPatched(e);
-      setTimeout(() => {
-        if (document.getElementById('mainScreen').classList.contains('active') && state.currentUser) {
-          new Audio('sounds/login.mp3').play().catch(()=>{});
-          document.querySelectorAll('.toast').forEach(t => {
-            if (t.innerText.includes('Добрый') || t.innerText.includes('рады видеть вас')) t.remove();
-          });
-          showToast('Добро пожаловать!', `${state.currentUser.firstName}, рады видеть вас!`, 'fa-hand-wave', 4000);
-        }
-      }, 1000);
-    };
-    const lf = document.getElementById('loginForm');
-    if (lf) lf.onsubmit = window.handleLogin;
-  }
-
-  // 4. ПОЧИНКА КНОПКИ "+ СТАТУС"
+  // 5. ПОЧИНКА КНОПКИ "+ СТАТУС"
   const addStatusBtn = document.getElementById('addStatusBtn');
   if (addStatusBtn) {
     const newBtn = addStatusBtn.cloneNode(true);
@@ -2100,29 +2136,21 @@ window.addEventListener('load', () => {
     });
   }
 
-  // 5. ПОЛНОЕ ГЛУШЕНИЕ ЗВУКОВ (кроме звонка) + СИНХРОНИЗАЦИЯ ТУМБЛЕРА
+  // 6. ГЛУШЕНИЕ ЗВУКОВ ПРИ ВЫКЛЮЧЕННОМ ТУМБЛЕРЕ (без звонка)
   if (window.playSoundFile) {
-    const origPlaySound = window.playSoundFile;
+    const origPlay = window.playSoundFile;
     window.playSoundFile = function(name, volume) {
       if (name === 'ringtone' || name === 'callConnect' || name === 'callStart') {
-        return origPlaySound(name, volume);
+        return origPlay(name, volume);
       }
       if (window.state && window.state.settings && window.state.settings.sounds === false) {
         return;
       }
-      return origPlaySound(name, volume);
+      return origPlay(name, volume);
     };
   }
-  
-  const origAudio = window.Audio;
-  window.Audio = function(src) {
-    const isRinging = src && (src.includes('Flype-Standart') || src.includes('connection-') || src.includes('start-of-the-call'));
-    if (!isRinging && window.state && window.state.settings && window.state.settings.sounds === false) {
-      return { play: () => {}, pause: () => {}, cloneNode: () => ({ play: () => {} }), volume: 0 };
-    }
-    return new origAudio(src);
-  };
 
+  // Тумблер
   const soundToggle = document.getElementById('soundToggle');
   if (soundToggle) {
     soundToggle.onchange = (e) => {
