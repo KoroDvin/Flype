@@ -1866,153 +1866,123 @@ window.flypeFirebase = { database, ref, set, onValue, get, child, push, update, 
 console.log('✅ Firebase подключён. databaseURL:', firebaseConfig.databaseURL);
 </script>
 <script>
-window.addEventListener('load', () => {
-  // Кнопка Выход
-  const lb = document.getElementById('logoutLink');
-  if (lb) lb.onclick = function() { if (window.handleLogout) handleLogout(); else { localStorage.removeItem('flype_current_user'); location.reload(); } };
-
-  // Кнопка Файл
-  const ab = document.getElementById('attachBtn');
-  if (ab) ab.onclick = function() { document.getElementById('fileInput').click(); };
-
-  // Кнопка Эмодзи (Смайлы)
-  const eb = document.getElementById('emojiBtn');
-  if (eb) eb.onclick = function() { document.getElementById('emojiPicker').classList.toggle('hidden'); };
-
-  // Кнопка Статус
-  const sb = document.getElementById('addStatusBtn');
-  if (sb) sb.onclick = function() { 
-    document.getElementById('statusText').value = ''; 
-    document.getElementById('statusImagePreview').innerHTML = '<i class="fas fa-image"></i>'; 
-    document.getElementById('addStatusOverlay').classList.add('open'); 
+// 1. СКРЫВАЕМ КОНСОЛЬ (убираем databaseURL и лишние логи)
+(function() {
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  console.log = function(...args) {
+    if (args[0] && typeof args[0] === 'string' && (args[0].includes('Firebase подключён') || args[0].includes('databaseURL') || args[0].includes('UID:') || args[0].includes('Заплатка') || args[0].includes('Вход, UID'))) return;
+    originalLog.apply(console, args);
   };
+  console.warn = function(...args) {
+    if (args[0] && typeof args[0] === 'string' && args[0].includes('Admin')) return;
+    originalWarn.apply(console, args);
+  };
+})();
 
-  // Кнопка Голосового сообщения
-  const vb = document.getElementById('voiceBtn');
-  if (vb) vb.onclick = function() { alert('Функция записи голоса доступна через удержание (в разработке)'); };
+window.addEventListener('load', () => {
+  // --- 1. КНОПКИ ВХОДА / РЕГИСТРАЦИИ ---
+  const regForm = document.getElementById('registerForm');
+  if (regForm) regForm.onsubmit = (e) => { e.preventDefault(); if(typeof handleRegister === 'function') handleRegister(e); };
+  const logForm = document.getElementById('loginForm');
+  if (logForm) logForm.onsubmit = (e) => { e.preventDefault(); if(typeof handleLogin === 'function') handleLogin(e); };
 
-    // Жесткий перехват кнопки Войти
-  const loginFrm = document.getElementById('loginForm');
-  if (loginFrm) {
-    loginFrm.addEventListener('submit', function(e) {
-      e.preventDefault(); // Останавливаем перезагрузку страницы
-      e.stopPropagation();
-      
-      // Если функция входа жива — вызываем её
-      if (typeof handleLogin === 'function') {
-        handleLogin(e);
-      } else {
-        alert('Кнопка нажата, но функция handleLogin потерялась в коде.');
-      }
-    });
-  }
-
-    // 1. Кнопка отправки сообщения
-  const sendB = document.getElementById('sendBtn');
-  if (sendB) {
-    sendB.onclick = function() {
-      const input = document.getElementById('messageInput');
-      if (input.value.trim() && typeof sendMessage === 'function') {
-        sendMessage(input.value);
-        input.value = '';
-        input.style.height = 'auto';
-      }
-    };
-  }
-
-  // 2. Кнопка Статусы (вкладка)
-  const statusTab = document.querySelector('.sidebar-tab[data-stab="statuses"]');
-  if (statusTab) {
-    statusTab.onclick = function() {
+  // --- 2. ВКЛАДКИ (ЧАТЫ / СТАТУСЫ) ---
+  document.querySelectorAll('.sidebar-tab').forEach(tab => {
+    tab.onclick = function() {
       document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
-      statusTab.classList.add('active');
+      this.classList.add('active');
+      const target = this.dataset.stab;
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById('tabStatuses').classList.add('active');
+      const panel = document.getElementById(target === 'chats' ? 'tabChats' : 'tabStatuses');
+      if(panel) panel.classList.add('active');
     };
-  }
+  });
 
-  // 3. Поиск чатов
-  const searchB = document.getElementById('globalSearch');
-  if (searchB) {
-    searchB.oninput = function(e) {
-      if (typeof state !== 'undefined') {
-        state.searchQuery = e.target.value;
-        if (typeof renderChatList === 'function') renderChatList();
+  // --- 3. СМАЙЛЫ (Окно, крестик, клик) ---
+  const emojiBtn = document.getElementById('emojiBtn');
+  const emojiPicker = document.getElementById('emojiPicker');
+  if (emojiBtn && emojiPicker) {
+    emojiBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); emojiPicker.style.display = (emojiPicker.style.display === 'flex' ? 'none' : 'flex'); emojiPicker.classList.remove('hidden'); };
+    const emojiClose = document.getElementById('emojiPickerClose');
+    if (emojiClose) emojiClose.onclick = (e) => { e.preventDefault(); e.stopPropagation(); emojiPicker.style.display = 'none'; };
+    const emojiGrid = document.getElementById('emojiPickerGrid');
+    if (emojiGrid) emojiGrid.onclick = (e) => {
+      if (e.target.classList.contains('emoji-item')) {
+        const input = document.getElementById('messageInput');
+        input.value += e.target.innerText;
+        input.focus();
       }
     };
   }
 
-  // 4. Звонки
-  const callB = document.getElementById('callBtn');
-  if (callB) callB.onclick = () => { if (typeof startCall === 'function') startCall(state.activeChatId, false); };
-  const videoB = document.getElementById('videoCallBtn');
-  if (videoB) videoB.onclick = () => { if (typeof startCall === 'function') startCall(state.activeChatId, true); };
+  // --- 4. ЗВОНКИ ---
+  const cancelBtn = document.getElementById('cancelCallBtn'); if (cancelBtn) cancelBtn.onclick = (e) => { e.preventDefault(); if(typeof cancelCall === 'function') cancelCall(); };
+  const rejectBtn = document.getElementById('rejectCallBtn'); if (rejectBtn) rejectBtn.onclick = (e) => { e.preventDefault(); if(typeof rejectCall === 'function') rejectCall(); };
+  const acceptBtn = document.getElementById('acceptCallBtn'); if (acceptBtn) acceptBtn.onclick = (e) => { e.preventDefault(); if(typeof acceptCall === 'function') acceptCall(); };
+  const callBtn = document.getElementById('callBtn'); if (callBtn) callBtn.onclick = () => { if(typeof startCall === 'function' && state.activeChatId) startCall(state.activeChatId, false); };
+  const videoBtn = document.getElementById('videoCallBtn'); if (videoBtn) videoBtn.onclick = () => { if(typeof startCall === 'function' && state.activeChatId) startCall(state.activeChatId, true); };
 
-  // 5. Смайлы (открытие, крестик и клик по смайлу)
-  const _ebBtn = document.getElementById('emojiBtn');
-  const _epBox = document.getElementById('emojiPicker');
-  if (_ebBtn && _epBox) {
-    _ebBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); _epBox.classList.toggle('hidden'); };
-    const ec = document.getElementById('emojiPickerClose');
-    if (ec) ec.onclick = (e) => { e.preventDefault(); e.stopPropagation(); ep.classList.add('hidden'); };
-    // Восстанавливаем клики по самим смайлам
-    const eg = document.getElementById('emojiPickerGrid');
-    if (eg) {
-      eg.onclick = (e) => {
-        if (e.target.classList.contains('emoji-item')) {
-          const input = document.getElementById('messageInput');
-          input.value += e.target.innerText;
-          input.focus();
-        }
-      };
-    }
-  }
-
-  // 6. Звуки при входе/выходе и убираем уведомление
-  // Убираем надоедливое "Добрый день"
-  if (typeof showMainScreen === 'function' && !window.originalShowMain) {
-    window.originalShowMain = showMainScreen;
+  // --- 5. ЗВУКИ И УБИРАЕМ "ДОБРЫЙ ДЕНЬ" ---
+  if (typeof window.showMainScreen === 'function' && !window.originalShowMainScreen) {
+    window.originalShowMainScreen = window.showMainScreen;
     window.showMainScreen = function() {
-      window.originalShowMain();
-      // Перебиваем стандартное уведомление, если оно вдруг вылезет
+      if (window.Sound && window.Sound.system) window.Sound.system = function() {}; // Убираем звук статуса при входе
+      window.originalShowMainScreen();
       setTimeout(() => {
-        const toasts = document.querySelectorAll('.toast');
-        toasts.forEach(t => { if(t.innerText.includes('Добрый') || t.innerText.includes('рады видеть')) t.remove(); });
-      }, 500); 
+        document.querySelectorAll('.toast').forEach(t => {
+          if(t.innerText.includes('Добрый') || t.innerText.includes('рады видеть')) t.remove();
+        });
+      }, 500);
     };
   }
 
-  // Внедряем звук login.mp3 в функцию входа
-  if (typeof handleLogin === 'function' && !window.originalLogin) {
-    window.originalLogin = handleLogin;
+  if (typeof window.handleLogin === 'function' && !window.origLogin) {
+    window.origLogin = window.handleLogin;
     window.handleLogin = async function(e) {
       if (e) e.preventDefault();
-      await window.originalLogin(e);
-      // Если вход успешен (появился главный экран)
-      setTimeout(() => {
-        if (document.getElementById('mainScreen').classList.contains('active')) {
-           new Audio('sounds/login.mp3').play().catch(()=>{});
+      await window.origLogin(e);
+      setTimeout(() => { if(document.getElementById('mainScreen').classList.contains('active')) new Audio('sounds/login.mp3').play().catch(()=>{}); }, 1000);
+    };
+  }
+  if (typeof window.handleLogout === 'function' && !window.origLogout) {
+    window.origLogout = window.handleLogout;
+    window.handleLogout = async function() { new Audio('sounds/logout.mp3').play().catch(()=>{}); await window.origLogout(); };
+    const lBtn = document.getElementById('logoutLink'); if(lBtn) lBtn.onclick = window.handleLogout;
+  }
+
+  // --- 6. ПОЧИНКА ГОЛОСОВЫХ (ошибка _fmtVoiceTime) ---
+  if (typeof window._fmtVoiceTime !== 'function') {
+    window._fmtVoiceTime = function(sec) { const m = Math.floor(sec/60), s = sec%60; return m + ':' + String(s).padStart(2,'0'); };
+  }
+
+  // --- 7. ОБМЕН КЛЮЧАМИ (Упрощенная версия) ---
+  window.requestKeyFromOtherDevice = async function() {
+    if (!state.currentUser || !window.flypeFirebase) return;
+    const u = state.currentUser;
+    if (!!localStorage.getItem('flype_private_key_' + u.id) && localStorage.getItem('flype_is_primary') === 'true') { showToast('Уже активно', 'Вы на основном устройстве', 'fa-info-circle'); return; }
+    try {
+      const { database, ref, set, onValue } = window.flypeFirebase;
+      const code = Math.floor(10000000 + Math.random() * 90000000).toString();
+      await set(ref(database, 'sync_requests/' + u.id), { requestedAt: Date.now(), expiresAt: Date.now() + 24*60*60*1000, authCode: code, status: 'pending' });
+      showToast('Запрос отправлен', 'Ожидаем подтверждения', 'fa-check');
+      onValue(ref(database, 'sync_keys/' + u.id), (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.encryptedKey && data.status === 'approved') {
+          const userInput = prompt('Введите код с основного устройства:');
+          if (userInput === data.authCode) {
+             localStorage.setItem('flype_private_key_' + u.id, data.encryptedKey);
+             if(data.duration !== 'infinity') localStorage.setItem('flype_sync_unlock_until', String(Date.now() + data.duration));
+             else localStorage.removeItem('flype_sync_unlock_until');
+             showToast('Ключи получены!', 'Переписка расшифрована', 'fa-unlock');
+             if (typeof renderMessages === 'function') renderMessages(state.activeChatId);
+          } else showToast('Неверный код', 'Попробуйте снова', 'fa-times');
         }
-      }, 1000);
-    };
-  }
-
-  // Внедряем звук logout.mp3 в функцию выхода
-  if (typeof handleLogout === 'function' && !window.originalLogout) {
-    window.originalLogout = handleLogout;
-    window.handleLogout = async function() {
-      new Audio('sounds/logout.mp3').play().catch(()=>{});
-      await window.originalLogout();
-    };
-  }
-  
-  console.log('✅ Все 5 кнопок переподключены!');
-
-    // Восстанавливаем функцию времени для голосовых
-  window._fmtVoiceTime = function(sec) { 
-    const m = Math.floor(sec/60), s = sec%60; 
-    return `${m}:${String(s).padStart(2,'0')}`; 
+      });
+    } catch (e) { showToast('Ошибка', 'Не удалось отправить запрос', 'fa-times'); }
   };
+  const reqKeyBtn = document.getElementById('requestKeyBtn');
+  if (reqKeyBtn) reqKeyBtn.onclick = window.requestKeyFromOtherDevice;
 });
 </script>
 </body>
