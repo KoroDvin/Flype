@@ -1817,5 +1817,151 @@ onAuthStateChanged(auth, async (user) => {
 window.flypeFirebase = { database, ref, set, onValue, get, child, push, update, remove, query, orderByChild, equalTo, auth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential };
 console.log('✅ Firebase подключён. databaseURL:', firebaseConfig.databaseURL);
 </script>
+<script>
+window.addEventListener('load', () => {
+  console.log('🛠️ Финальный патч: Восстановление кнопок');
+
+  // 1. ПРОФИЛЬ
+  const profileBtn = document.getElementById('sidebarProfileBtn');
+  if (profileBtn) {
+    profileBtn.onclick = () => {
+      if (typeof openSettings === 'function') openSettings();
+      else {
+        const u = state.currentUser;
+        if(!u) return;
+        document.getElementById('settingsFirstName').value = u.firstName || '';
+        document.getElementById('settingsLastName').value = u.lastName || '';
+        document.getElementById('settingsUsername').textContent = '@' + (u.flypeId || '');
+        document.getElementById('settingsOverlay').classList.add('open');
+      }
+    };
+  }
+
+  // 2. ВЫХОД
+  const logoutBtn = document.getElementById('logoutLink');
+  if (logoutBtn) {
+    logoutBtn.onclick = () => {
+      if (typeof handleLogout === 'function') handleLogout();
+      else { localStorage.clear(); location.reload(); }
+    };
+  }
+
+  // 3. ВКЛАДКИ ЧАТЫ/СТАТУСЫ
+  document.querySelectorAll('.sidebar-tab').forEach(tab => {
+    tab.onclick = function() {
+      document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      const panel = document.getElementById(this.dataset.stab === 'chats' ? 'tabChats' : 'tabStatuses');
+      if (panel) panel.classList.add('active');
+    };
+  });
+
+  // 4. КНОПКА "i" (О контакте)
+  const infoBtn = document.getElementById('infoBtn');
+  if (infoBtn) {
+    infoBtn.onclick = () => {
+      if (!state.activeChatId) return;
+      const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) return;
+      const info = getChatInfo(chat);
+      document.getElementById('contactName').textContent = info.name || 'Неизвестный';
+      document.getElementById('contactStatus').textContent = info.online ? 'В сети' : 'Был(а) недавно';
+      document.getElementById('contactFlypeId').textContent = chat.type === 'group' ? `Группа · ${chat.participants.length} участников` : (info.flypeId ? '@' + info.flypeId : '—');
+      const av = document.getElementById('contactAvatar'); 
+      if (info.avatar) av.innerHTML = `<img src="${escapeHtml(info.avatar)}">`; 
+      else av.textContent = initial(info.name);
+      document.getElementById('contactProfile').classList.remove('hidden'); 
+      document.getElementById('profilePanel').classList.add('open');
+    };
+  }
+
+  // 5. ЗВОНКИ
+  const callBtn = document.getElementById('callBtn');
+  if (callBtn) callBtn.onclick = () => { if(typeof startCall === 'function') startCall(state.activeChatId, false); };
+  const videoBtn = document.getElementById('videoCallBtn');
+  if (videoBtn) videoBtn.onclick = () => { if(typeof startCall === 'function') startCall(state.activeChatId, true); };
+  const cancelBtn = document.getElementById('cancelCallBtn');
+  if (cancelBtn) cancelBtn.onclick = () => { if(typeof cancelCall === 'function') cancelCall(); };
+  const rejectBtn = document.getElementById('rejectCallBtn');
+  if (rejectBtn) rejectBtn.onclick = () => { if(typeof rejectCall === 'function') rejectCall(); };
+  const acceptBtn = document.getElementById('acceptCallBtn');
+  if (acceptBtn) acceptBtn.onclick = () => { if(typeof acceptCall === 'function') acceptCall(); };
+
+  // 6. ОТПРАВКА СООБЩЕНИЙ
+  const sendBtn = document.getElementById('sendBtn');
+  if (sendBtn) {
+    sendBtn.onclick = () => {
+      const input = document.getElementById('messageInput');
+      if (input.value.trim() && typeof sendMessage === 'function') {
+        sendMessage(input.value);
+        input.value = '';
+        input.style.height = 'auto';
+      }
+    };
+  }
+
+  // 7. ВОЗВРАЩАЕМ СМАЙЛЫ (создаём кнопку динамически)
+  if (!document.getElementById('emojiBtn')) {
+    const inputArea = document.querySelector('.chat-input-area');
+    const voiceBtn = document.getElementById('voiceBtn');
+    if (inputArea && voiceBtn) {
+      const emojiBtn = document.createElement('button');
+      emojiBtn.className = 'input-btn';
+      emojiBtn.id = 'emojiBtn';
+      emojiBtn.title = 'Смайлы';
+      emojiBtn.innerHTML = '<i class="fas fa-smile"></i>';
+      inputArea.insertBefore(emojiBtn, voiceBtn);
+
+      const emojiPicker = document.createElement('div');
+      emojiPicker.className = 'emoji-picker hidden';
+      emojiPicker.id = 'emojiPicker';
+      emojiPicker.innerHTML = `<div class="emoji-picker-header"><span>Смайлы</span><button class="emoji-picker-close" id="emojiPickerClose"><i class="fas fa-times"></i></button></div><div class="emoji-picker-grid" id="emojiPickerGrid"></div>`;
+      document.body.appendChild(emojiPicker);
+
+      const EMOJIS = ['😁','😀','😄','😅','😊','😂','🙂','🙃','😉','☺️','😇','🥰','😍','🤩','😘','😙','😋','😛','😜','😝','🤑','🤗','🤭','😶','🤐','🤨','😐','🙄','😏','😬','🤥','🙁','😴','😷','🤒','🤕','🤢','🤮','🥵','🥶','🥴','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','☹️','😲','😳','🥺','😦','😧','😨','😰','😢','😭','😱','😵‍💫','😞','😥','😫','🥱','😤','😡','🤬','😈','👿'];
+      const grid = document.getElementById('emojiPickerGrid');
+      grid.innerHTML = EMOJIS.map(e => `<button class="emoji-item">${e}</button>`).join('');
+
+      emojiBtn.onclick = (e) => { e.stopPropagation(); emojiPicker.classList.toggle('hidden'); };
+      document.getElementById('emojiPickerClose').onclick = () => emojiPicker.classList.add('hidden');
+      grid.onclick = (e) => {
+        if (e.target.classList.contains('emoji-item')) {
+          const msgInput = document.getElementById('messageInput');
+          msgInput.value += e.target.innerText;
+          msgInput.focus();
+        }
+      };
+    }
+  }
+
+  // 8. УБИРАЕМ ДУБЛИРОВАНИЕ ГОЛОСОВЫХ (Перехватываем _sendVoiceMessage)
+  if (window._sendVoiceMessage) {
+    const origVoiceSend = window._sendVoiceMessage;
+    window._sendVoiceMessage = async function(audioData, duration) {
+      if (!state.activeChatId || !window.flypeFirebase) return;
+      const chatId = state.activeChatId;
+      const uid = state.currentUser.id;
+      try {
+        const { database, ref, push, set, update } = window.flypeFirebase;
+        const msg = { chatId, senderId: uid, text: '', encrypted: false, timestamp: Date.now(), read: false, type: 'voice', audioUrl: audioData, duration };
+        const nm = push(ref(database, 'messages')); await set(nm, msg);
+        try { await update(ref(database, 'chats/' + chatId), { lastMessageAt: msg.timestamp, lastMessage: '🎤 Голосовое' }); } catch (e) {}
+        
+        // Добавляем локально, чтобы не было дубля
+        if (!state.messages.find(m => m.id === nm.key)) {
+          state.messages.push({ id: nm.key, ...msg });
+        }
+        const lc = state.chats.find(c => c.id === chatId);
+        if (lc) { lc.lastMessageAt = msg.timestamp; lc.lastMessage = '🎤 Голосовое'; }
+        persistMessages(); persistChats();
+        if (state.activeChatId === chatId) renderMessages(chatId);
+        renderChatList();
+        Sound.statusSent();
+        showToast('Отправлено', 'Голосовое сообщение', 'fa-microphone', 2000);
+      } catch (err) { console.error('❌ Voice send:', err); Sound.statusFailed(); showToast('Ошибка', 'Не удалось отправить', 'fa-exclamation-circle'); }
+    };
+  }
+});
+</script>
 </body>
 </html>
