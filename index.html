@@ -2012,241 +2012,179 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 <script>
-window.addEventListener('load', () => {
-  // Ждём загрузки
-  setTimeout(() => {
-    // 1. ЧИНИМ ОТКРЫТИЕ НАСТРОЕК (чтобы подтягивались данные)
-    const profileBtn = document.getElementById('sidebarProfileBtn');
-    if (profileBtn) {
-      profileBtn.onclick = function() {
-        const u = window.state ? window.state.currentUser : null;
-        if (!u) return;
-        
-        // Заполняем текстовые поля
+// Не ждём load, делаем сразу после загрузки DOM
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('🛠️ Универсальный пульт настроек');
+
+  // 1. ОТКРЫТИЕ НАСТРОЕК (Берём данные прямо из localStorage)
+  const profileBtn = document.getElementById('sidebarProfileBtn');
+  if (profileBtn) {
+    profileBtn.onclick = function() {
+      const currentUserId = localStorage.getItem('flype_current_user');
+      const users = JSON.parse(localStorage.getItem('flype_users') || '[]');
+      const u = users.find(x => x.id === currentUserId);
+      
+      if (u) {
         document.getElementById('settingsFirstName').value = u.firstName || '';
         document.getElementById('settingsLastName').value = u.lastName || '';
         document.getElementById('settingsAbout').value = u.about || '';
         document.getElementById('aboutCounter').textContent = (u.about || '').length;
         document.getElementById('settingsUsername').textContent = '@' + (u.flypeId || '');
         
-        // Заполняем аватарку
         const preview = document.getElementById('settingsAvatarPreview');
-        if (u.avatar) {
-          preview.innerHTML = '<img src="' + u.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-        } else {
-          preview.textContent = (u.firstName ? u.firstName.charAt(0).toUpperCase() : '?');
-        }
-        
-        // Открываем окно
-        document.getElementById('settingsOverlay').classList.add('open');
-      };
-    }
+        if (u.avatar) preview.innerHTML = `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        else preview.textContent = (u.firstName ? u.firstName.charAt(0).toUpperCase() : '?');
+      }
+      document.getElementById('settingsOverlay').classList.add('open');
+    };
+  }
 
-    // 2. ЧИНИМ ЗАГРУЗКУ АВАТАРКИ
-    const avBtn = document.getElementById('settingsAvatarBtn');
-    const avFile = document.getElementById('settingsAvatarFile');
-    if (avBtn && avFile) {
-      avBtn.onclick = () => avFile.click();
-      avFile.onchange = async (e) => {
-        const file = e.target.files[0]; if (!file) return;
+  // 2. ТУМБЛЕР ТЁМНАЯ ТЕМА
+  const darkTgl = document.getElementById('darkThemeToggle');
+  if (darkTgl) {
+    darkTgl.onchange = function(e) {
+      document.body.classList.toggle('dark', e.target.checked);
+      localStorage.setItem('flype_dark_theme', e.target.checked ? 'true' : 'false');
+    };
+  }
+
+  // 3. ТУМБЛЕР ЗВУКИ
+  const soundTgl = document.getElementById('soundToggle');
+  if (soundTgl) {
+    soundTgl.onchange = function(e) {
+      localStorage.setItem('flype_sounds', e.target.checked ? 'true' : 'false');
+    };
+  }
+
+  // 4. ТУМБЛЕР FRUTIGER AERO
+  const oldFlypeTgl = document.getElementById('oldFlypeToggle');
+  if (oldFlypeTgl) {
+    oldFlypeTgl.onchange = function(e) {
+      document.body.classList.toggle('theme-oldflype', e.target.checked);
+      localStorage.setItem('flype_oldflype', e.target.checked ? 'true' : 'false');
+    };
+  }
+
+  // 5. ЦВЕТОВЫЕ ТЕМЫ
+  document.querySelectorAll('.theme-swatch').forEach(swatch => {
+    swatch.onclick = function() {
+      const themes = ['theme-standard','theme-green','theme-red','theme-blue','theme-white','theme-orange','theme-purple','theme-pink','theme-turquoise','theme-gold'];
+      document.body.classList.remove(...themes);
+      document.body.classList.add('theme-' + this.dataset.theme);
+      localStorage.setItem('flype_theme', this.dataset.theme);
+      
+      document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('selected'));
+      this.classList.add('selected');
+    };
+  });
+
+  // 6. СОХРАНЕНИЕ ПРОФИЛЯ (Пишем напрямую в localStorage)
+  const saveBtn = document.getElementById('settingsSave');
+  if (saveBtn) {
+    saveBtn.onclick = async function() {
+      const currentUserId = localStorage.getItem('flype_current_user');
+      const users = JSON.parse(localStorage.getItem('flype_users') || '[]');
+      const idx = users.findIndex(x => x.id === currentUserId);
+      if (idx === -1) return alert('Пользователь не найден');
+
+      users[idx].firstName = document.getElementById('settingsFirstName').value.trim();
+      users[idx].lastName = document.getElementById('settingsLastName').value.trim();
+      users[idx].about = document.getElementById('settingsAbout').value.trim();
+      
+      if (window.pendingAvatarData !== undefined) {
+        users[idx].avatar = window.pendingAvatarData;
+      }
+      
+      // Сохраняем локально
+      localStorage.setItem('flype_users', JSON.stringify(users));
+      
+      // Сохраняем в Firebase (если есть)
+      if (window.flypeFirebase) {
         try {
-          const compressed = await compressImage(file, 256, 0.8);
-          window.pendingAvatarData = compressed;
-          const preview = document.getElementById('settingsAvatarPreview');
-          preview.innerHTML = '<img src="' + compressed + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-        } catch (err) { alert('Ошибка загрузки фото'); }
-      };
-    }
-
-    // 3. ЧИНИМ УДАЛЕНИЕ АВАТАРКИ
-    const avRem = document.getElementById('settingsAvatarRemoveBtn');
-    if (avRem) {
-      avRem.onclick = () => {
-        window.pendingAvatarData = '';
-        const preview = document.getElementById('settingsAvatarPreview');
-        const u = window.state ? window.state.currentUser : null;
-        preview.textContent = u && u.firstName ? u.firstName.charAt(0).toUpperCase() : '?';
-      };
-    }
-
-    // 4. ЧИНИМ КНОПКУ СОХРАНЕНИЯ
-    const saveBtn = document.getElementById('settingsSave');
-    if (saveBtn) {
-      saveBtn.onclick = async function() {
-        const u = window.state ? window.state.currentUser : null;
-        if (!u) return;
-        
-        const fn = document.getElementById('settingsFirstName').value.trim();
-        const ln = document.getElementById('settingsLastName').value.trim();
-        const ab = document.getElementById('settingsAbout').value.trim();
-        const newAvatar = window.pendingAvatarData !== undefined ? window.pendingAvatarData : u.avatar;
-        
-        u.firstName = fn; u.lastName = ln; u.about = ab; u.avatar = newAvatar;
-        
-        // Сохраняем в Firebase
-        if (window.flypeFirebase) {
           const { database, ref, set } = window.flypeFirebase;
-          await set(ref(database, 'users/' + u.id), u);
-        }
-        
-        // Сохраняем локально
-        if (typeof persistUsers === 'function') persistUsers();
-        if (typeof updateSidebarProfile === 'function') updateSidebarProfile();
-        
-        document.getElementById('settingsOverlay').classList.remove('open');
-        alert('Профиль обновлён!');
-      };
-    }
-  }, 1000);
-});
-</script>
-<script>
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    // 1. ПРИНУДИТЕЛЬНОЕ ОТКРЫТИЕ МЕНЮ НАСТРОЕК
-    const profileBtn = document.getElementById('sidebarProfileBtn');
-    if (profileBtn) {
-      profileBtn.onclick = function() {
-        // Заполняем данные перед открытием
-        const u = window.state && window.state.currentUser ? window.state.currentUser : null;
-        if (u) {
-          document.getElementById('settingsFirstName').value = u.firstName || '';
-          document.getElementById('settingsLastName').value = u.lastName || '';
-          document.getElementById('settingsAbout').value = u.about || '';
-          document.getElementById('aboutCounter').textContent = (u.about || '').length;
-          document.getElementById('settingsUsername').textContent = '@' + (u.flypeId || '');
-          
-          const preview = document.getElementById('settingsAvatarPreview');
-          if (u.avatar) {
-            preview.innerHTML = '<img src="' + u.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-          } else {
-            preview.textContent = (u.firstName ? u.firstName.charAt(0).toUpperCase() : '?');
-          }
-        }
-        // Открываем меню
-        const overlay = document.getElementById('settingsOverlay');
-        if (overlay) overlay.classList.add('open');
-      };
-    }
-
-    // 2. СОХРАНЕНИЕ ПРОФИЛЯ
-    const saveBtn = document.getElementById('settingsSave');
-    if (saveBtn) {
-      saveBtn.onclick = async function() {
-        const u = window.state && window.state.currentUser ? window.state.currentUser : null;
-        if (!u) return;
-        
-        const fn = document.getElementById('settingsFirstName').value.trim();
-        const ln = document.getElementById('settingsLastName').value.trim();
-        const ab = document.getElementById('settingsAbout').value.trim();
-        const newAvatar = window.pendingAvatarData !== undefined ? window.pendingAvatarData : u.avatar;
-        
-        u.firstName = fn; u.lastName = ln; u.about = ab; u.avatar = newAvatar;
-        
-        if (window.flypeFirebase) {
-          const { database, ref, set } = window.flypeFirebase;
-          try { await set(ref(database, 'users/' + u.id), u); } catch (err) {}
-        }
-        if (typeof persistUsers === 'function') persistUsers();
-        if (typeof updateSidebarProfile === 'function') updateSidebarProfile();
-        
-        document.getElementById('settingsOverlay').classList.remove('open');
-        alert('Сохранено!');
-      };
-    }
-
-    // 3. ЗАГРУЗКА И УДАЛЕНИЕ АВАТАРКИ
-    const avBtn = document.getElementById('settingsAvatarBtn');
-    const avFile = document.getElementById('settingsAvatarFile');
-    if (avBtn && avFile) {
-      avBtn.onclick = () => avFile.click();
-      avFile.onchange = async (e) => {
-        const file = e.target.files[0]; if (!file) return;
-        try {
-          const compressed = await compressImage(file, 256, 0.8);
-          window.pendingAvatarData = compressed;
-          document.getElementById('settingsAvatarPreview').innerHTML = '<img src="' + compressed + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-        } catch (err) { alert('Ошибка загрузки фото'); }
-      };
-    }
-    const avRem = document.getElementById('settingsAvatarRemoveBtn');
-    if (avRem) {
-      avRem.onclick = () => {
-        window.pendingAvatarData = '';
-        const preview = document.getElementById('settingsAvatarPreview');
-        const u = window.state && window.state.currentUser ? window.state.currentUser : null;
-        preview.textContent = u && u.firstName ? u.firstName.charAt(0).toUpperCase() : '?';
-      };
-    }
-
-    // 4. ТУМБЛЕРЫ И ТЕМЫ
-    const darkTgl = document.getElementById('darkThemeToggle');
-    if (darkTgl) darkTgl.onchange = (e) => {
-      if (window.state && window.state.settings) {
-        state.settings.darkTheme = e.target.checked;
-        if (typeof applyTheme === 'function') applyTheme();
-        if (typeof persistSettings === 'function') persistSettings();
+          await set(ref(database, 'users/' + currentUserId), users[idx]);
+        } catch (err) { console.error('Firebase save error:', err); }
       }
+      
+      // Обновляем сайдбар
+      const name = `${users[idx].firstName} ${users[idx].lastName}`.trim();
+      document.getElementById('sidebarName').textContent = name;
+      const sa = document.getElementById('sidebarAvatar');
+      if (users[idx].avatar) sa.innerHTML = `<img src="${users[idx].avatar}">`;
+      else sa.textContent = users[idx].firstName.charAt(0).toUpperCase();
+      
+      document.getElementById('settingsOverlay').classList.remove('open');
+      alert('Профиль сохранён!');
     };
-    const soundTgl = document.getElementById('soundToggle');
-    if (soundTgl) soundTgl.onchange = (e) => {
-      if (window.state && window.state.settings) {
-        state.settings.sounds = e.target.checked;
-        if (typeof persistSettings === 'function') persistSettings();
-      }
-    };
-    const oldFlypeTgl = document.getElementById('oldFlypeToggle');
-    if (oldFlypeTgl) oldFlypeTgl.onchange = (e) => {
-      if (window.state && window.state.settings) {
-        state.settings.oldFlype = e.target.checked;
-        if (typeof applyTheme === 'function') applyTheme();
-        if (typeof persistSettings === 'function') persistSettings();
-      }
-    };
-    document.querySelectorAll('.theme-swatch').forEach(swatch => {
-      swatch.onclick = function() {
-        if (window.state && window.state.settings) {
-          state.settings.theme = this.dataset.theme;
-          if (typeof applyTheme === 'function') applyTheme();
-          if (typeof persistSettings === 'function') persistSettings();
-          document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('selected'));
-          this.classList.add('selected');
-        }
-      };
-    });
+  }
 
-    // 5. ПОДЕЛИТЬСЯ САЙТОМ
-    const shareBtn = document.getElementById('shareSiteBtn');
-    if (shareBtn) {
-      shareBtn.onclick = function() {
-        const url = 'https://korodvin.github.io/Flype/';
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(url).then(() => alert('Ссылка скопирована!')).catch(() => {});
-        } else {
-          const ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-          alert('Ссылка скопирована!');
-        }
+  // 7. ЗАГРУЗКА И УДАЛЕНИЕ АВАТАРКИ
+  const avBtn = document.getElementById('settingsAvatarBtn');
+  const avFile = document.getElementById('settingsAvatarFile');
+  if (avBtn && avFile) {
+    avBtn.onclick = () => avFile.click();
+    avFile.onchange = async (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const max = 256;
+          let w = img.width, h = img.height;
+          if (w > max) { h = h * max / w; w = max; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const b64 = canvas.toDataURL('image/jpeg', 0.8);
+          window.pendingAvatarData = b64;
+          document.getElementById('settingsAvatarPreview').innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        };
+        img.src = ev.target.result;
       };
-    }
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    };
+  }
+  const avRem = document.getElementById('settingsAvatarRemoveBtn');
+  if (avRem) {
+    avRem.onclick = () => {
+      window.pendingAvatarData = '';
+      document.getElementById('settingsAvatarPreview').textContent = '?';
+    };
+  }
 
-    // 6. ТЕХ. РАБОТЫ
-    const maintOn = document.getElementById('maintenanceOnBtn');
-    if (maintOn) maintOn.onclick = async function() {
-      if (!window.flypeFirebase || !window.state || !window.state.currentUser || !state.currentUser.isAdmin) return;
-      const msg = prompt('Сообщение для пользователей:', 'Скоро вернёмся!');
+  // 8. ПОДЕЛИТЬСЯ САЙТОМ
+  const shareBtn = document.getElementById('shareSiteBtn');
+  if (shareBtn) {
+    shareBtn.onclick = function() {
+      const url = 'https://korodvin.github.io/Flype/';
+      navigator.clipboard.writeText(url).then(() => alert('Ссылка скопирована!')).catch(() => alert('Не удалось скопировать.'));
+    };
+  }
+
+  // 9. ТЕХ. РАБОТЫ
+  const maintOn = document.getElementById('maintenanceOnBtn');
+  if (maintOn) {
+    maintOn.onclick = async function() {
+      const msg = prompt('Сообщение:', 'Скоро вернёмся!');
       if (msg === null) return;
-      const { database, ref, set } = window.flypeFirebase;
-      await set(ref(database, 'maintenance'), { active: true, message: msg || '', startedAt: Date.now(), startedBy: state.currentUser.flypeId });
-      alert('Тех. работы включены!');
+      if (window.flypeFirebase) {
+        const { database, ref, set } = window.flypeFirebase;
+        await set(ref(database, 'maintenance'), { active: true, message: msg, startedAt: Date.now() });
+        alert('Включено');
+      }
     };
-    const maintOff = document.getElementById('maintenanceOffBtn');
-    if (maintOff) maintOff.onclick = async function() {
-      if (!window.flypeFirebase || !window.state || !window.state.currentUser || !state.currentUser.isAdmin) return;
-      const { database, ref, set } = window.flypeFirebase;
-      await set(ref(database, 'maintenance'), { active: false, message: '', stoppedAt: Date.now() });
-      alert('Тех. работы выключены!');
+  }
+  const maintOff = document.getElementById('maintenanceOffBtn');
+  if (maintOff) {
+    maintOff.onclick = async function() {
+      if (window.flypeFirebase) {
+        const { database, ref, set } = window.flypeFirebase;
+        await set(ref(database, 'maintenance'), { active: false, message: '', stoppedAt: Date.now() });
+        alert('Выключено');
+      }
     };
-  }, 1000);
+  }
 });
 </script>
 </body>
