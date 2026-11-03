@@ -1963,5 +1963,53 @@ window.addEventListener('load', () => {
   }
 });
 </script>
+<script>
+// Этот код выполнится, даже если основной скрипт упал
+document.addEventListener('DOMContentLoaded', () => {
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.onsubmit = function(e) {
+      e.preventDefault();
+      // Принудительно вызываем вход, если функция есть
+      if (typeof handleLogin === 'function') {
+        handleLogin(e);
+      } else {
+        // Если функции нет — пробуем базовый вход через Firebase
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPassword').value;
+        if (window.flypeFirebase) {
+          window.flypeFirebase.signInWithEmailAndPassword(window.flypeFirebase.auth, email, pass)
+          .then(res => {
+             localStorage.setItem('flype_current_user', res.user.uid);
+             location.reload();
+          }).catch(err => alert('Ошибка входа: ' + err.message));
+        }
+      }
+    };
+  }
+
+  const regForm = document.getElementById('registerForm');
+  if (regForm) {
+    regForm.onsubmit = function(e) {
+      e.preventDefault();
+      if (typeof handleRegister === 'function') handleRegister(e);
+    };
+  }
+
+  const tabs = document.querySelectorAll('.auth-tab');
+  tabs.forEach(tab => {
+    tab.onclick = function() {
+      tabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      const target = this.dataset.tab === 'login' ? 'loginForm' : 'registerForm';
+      document.getElementById(target).classList.add('active');
+    };
+  });
+
+  const closeProf = document.getElementById('closeProfileBtn');
+  if (closeProf) closeProf.onclick = () => document.getElementById('profilePanel').classList.remove('open');
+});
+</script>
 </body>
 </html>
