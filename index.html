@@ -2103,42 +2103,106 @@ window.addEventListener('load', () => {
 <script>
 window.addEventListener('load', () => {
   setTimeout(() => {
-    // 1. ТУМБЛЕР ТЁМНАЯ ТЕМА
+    // 1. ПРИНУДИТЕЛЬНОЕ ОТКРЫТИЕ МЕНЮ НАСТРОЕК
+    const profileBtn = document.getElementById('sidebarProfileBtn');
+    if (profileBtn) {
+      profileBtn.onclick = function() {
+        // Заполняем данные перед открытием
+        const u = window.state && window.state.currentUser ? window.state.currentUser : null;
+        if (u) {
+          document.getElementById('settingsFirstName').value = u.firstName || '';
+          document.getElementById('settingsLastName').value = u.lastName || '';
+          document.getElementById('settingsAbout').value = u.about || '';
+          document.getElementById('aboutCounter').textContent = (u.about || '').length;
+          document.getElementById('settingsUsername').textContent = '@' + (u.flypeId || '');
+          
+          const preview = document.getElementById('settingsAvatarPreview');
+          if (u.avatar) {
+            preview.innerHTML = '<img src="' + u.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+          } else {
+            preview.textContent = (u.firstName ? u.firstName.charAt(0).toUpperCase() : '?');
+          }
+        }
+        // Открываем меню
+        const overlay = document.getElementById('settingsOverlay');
+        if (overlay) overlay.classList.add('open');
+      };
+    }
+
+    // 2. СОХРАНЕНИЕ ПРОФИЛЯ
+    const saveBtn = document.getElementById('settingsSave');
+    if (saveBtn) {
+      saveBtn.onclick = async function() {
+        const u = window.state && window.state.currentUser ? window.state.currentUser : null;
+        if (!u) return;
+        
+        const fn = document.getElementById('settingsFirstName').value.trim();
+        const ln = document.getElementById('settingsLastName').value.trim();
+        const ab = document.getElementById('settingsAbout').value.trim();
+        const newAvatar = window.pendingAvatarData !== undefined ? window.pendingAvatarData : u.avatar;
+        
+        u.firstName = fn; u.lastName = ln; u.about = ab; u.avatar = newAvatar;
+        
+        if (window.flypeFirebase) {
+          const { database, ref, set } = window.flypeFirebase;
+          try { await set(ref(database, 'users/' + u.id), u); } catch (err) {}
+        }
+        if (typeof persistUsers === 'function') persistUsers();
+        if (typeof updateSidebarProfile === 'function') updateSidebarProfile();
+        
+        document.getElementById('settingsOverlay').classList.remove('open');
+        alert('Сохранено!');
+      };
+    }
+
+    // 3. ЗАГРУЗКА И УДАЛЕНИЕ АВАТАРКИ
+    const avBtn = document.getElementById('settingsAvatarBtn');
+    const avFile = document.getElementById('settingsAvatarFile');
+    if (avBtn && avFile) {
+      avBtn.onclick = () => avFile.click();
+      avFile.onchange = async (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        try {
+          const compressed = await compressImage(file, 256, 0.8);
+          window.pendingAvatarData = compressed;
+          document.getElementById('settingsAvatarPreview').innerHTML = '<img src="' + compressed + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+        } catch (err) { alert('Ошибка загрузки фото'); }
+      };
+    }
+    const avRem = document.getElementById('settingsAvatarRemoveBtn');
+    if (avRem) {
+      avRem.onclick = () => {
+        window.pendingAvatarData = '';
+        const preview = document.getElementById('settingsAvatarPreview');
+        const u = window.state && window.state.currentUser ? window.state.currentUser : null;
+        preview.textContent = u && u.firstName ? u.firstName.charAt(0).toUpperCase() : '?';
+      };
+    }
+
+    // 4. ТУМБЛЕРЫ И ТЕМЫ
     const darkTgl = document.getElementById('darkThemeToggle');
-    if (darkTgl) {
-      darkTgl.onchange = function(e) {
-        if (window.state && window.state.settings) {
-          state.settings.darkTheme = e.target.checked;
-          if (typeof applyTheme === 'function') applyTheme();
-          if (typeof persistSettings === 'function') persistSettings();
-        }
-      };
-    }
-
-    // 2. ТУМБЛЕР ЗВУКИ
+    if (darkTgl) darkTgl.onchange = (e) => {
+      if (window.state && window.state.settings) {
+        state.settings.darkTheme = e.target.checked;
+        if (typeof applyTheme === 'function') applyTheme();
+        if (typeof persistSettings === 'function') persistSettings();
+      }
+    };
     const soundTgl = document.getElementById('soundToggle');
-    if (soundTgl) {
-      soundTgl.onchange = function(e) {
-        if (window.state && window.state.settings) {
-          state.settings.sounds = e.target.checked;
-          if (typeof persistSettings === 'function') persistSettings();
-        }
-      };
-    }
-
-    // 3. ТУМБЛЕР FRUTIGER AERO (Старый Flype)
+    if (soundTgl) soundTgl.onchange = (e) => {
+      if (window.state && window.state.settings) {
+        state.settings.sounds = e.target.checked;
+        if (typeof persistSettings === 'function') persistSettings();
+      }
+    };
     const oldFlypeTgl = document.getElementById('oldFlypeToggle');
-    if (oldFlypeTgl) {
-      oldFlypeTgl.onchange = function(e) {
-        if (window.state && window.state.settings) {
-          state.settings.oldFlype = e.target.checked;
-          if (typeof applyTheme === 'function') applyTheme();
-          if (typeof persistSettings === 'function') persistSettings();
-        }
-      };
-    }
-
-    // 4. ВЫБОР ЦВЕТОВОЙ ГАММЫ
+    if (oldFlypeTgl) oldFlypeTgl.onchange = (e) => {
+      if (window.state && window.state.settings) {
+        state.settings.oldFlype = e.target.checked;
+        if (typeof applyTheme === 'function') applyTheme();
+        if (typeof persistSettings === 'function') persistSettings();
+      }
+    };
     document.querySelectorAll('.theme-swatch').forEach(swatch => {
       swatch.onclick = function() {
         if (window.state && window.state.settings) {
@@ -2151,7 +2215,7 @@ window.addEventListener('load', () => {
       };
     });
 
-    // 5. КНОПКА ПОДЕЛИТЬСЯ САЙТОМ
+    // 5. ПОДЕЛИТЬСЯ САЙТОМ
     const shareBtn = document.getElementById('shareSiteBtn');
     if (shareBtn) {
       shareBtn.onclick = function() {
@@ -2165,33 +2229,23 @@ window.addEventListener('load', () => {
       };
     }
 
-    // 6. ТЕХ. РАБОТЫ (Включить)
+    // 6. ТЕХ. РАБОТЫ
     const maintOn = document.getElementById('maintenanceOnBtn');
-    if (maintOn) {
-      maintOn.onclick = async function() {
-        if (!window.flypeFirebase || !window.state || !window.state.currentUser || !state.currentUser.isAdmin) return;
-        const msg = prompt('Сообщение для пользователей:', 'Скоро вернёмся!');
-        if (msg === null) return;
-        try {
-          const { database, ref, set } = window.flypeFirebase;
-          await set(ref(database, 'maintenance'), { active: true, message: msg || '', startedAt: Date.now(), startedBy: state.currentUser.flypeId });
-          alert('Тех. работы включены!');
-        } catch (err) { alert('Ошибка: ' + err.message); }
-      };
-    }
-
-    // 7. ТЕХ. РАБОТЫ (Выключить)
+    if (maintOn) maintOn.onclick = async function() {
+      if (!window.flypeFirebase || !window.state || !window.state.currentUser || !state.currentUser.isAdmin) return;
+      const msg = prompt('Сообщение для пользователей:', 'Скоро вернёмся!');
+      if (msg === null) return;
+      const { database, ref, set } = window.flypeFirebase;
+      await set(ref(database, 'maintenance'), { active: true, message: msg || '', startedAt: Date.now(), startedBy: state.currentUser.flypeId });
+      alert('Тех. работы включены!');
+    };
     const maintOff = document.getElementById('maintenanceOffBtn');
-    if (maintOff) {
-      maintOff.onclick = async function() {
-        if (!window.flypeFirebase || !window.state || !window.state.currentUser || !state.currentUser.isAdmin) return;
-        try {
-          const { database, ref, set } = window.flypeFirebase;
-          await set(ref(database, 'maintenance'), { active: false, message: '', stoppedAt: Date.now() });
-          alert('Тех. работы выключены!');
-        } catch (err) { alert('Ошибка: ' + err.message); }
-      };
-    }
+    if (maintOff) maintOff.onclick = async function() {
+      if (!window.flypeFirebase || !window.state || !window.state.currentUser || !state.currentUser.isAdmin) return;
+      const { database, ref, set } = window.flypeFirebase;
+      await set(ref(database, 'maintenance'), { active: false, message: '', stoppedAt: Date.now() });
+      alert('Тех. работы выключены!');
+    };
   }, 1000);
 });
 </script>
