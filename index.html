@@ -1482,7 +1482,9 @@ async function renderMessageBubble(msg, chatId) {
   let content = '';
   if (msg.type === 'voice') content = `<div class="voice-message" data-audio-id="${msg.id}"><button class="voice-message-play" data-play-id="${msg.id}"><i class="fas fa-play"></i></button><div class="voice-message-body"><div class="voice-message-wave">${Array.from({length:24}).map(()=>'<span></span>').join('')}</div><div class="voice-message-duration">${_fmtVoiceTime(msg.duration || 0)}</div></div><audio preload="none" data-audio-src="${msg.id}"></audio></div>`;
   else if (msg.type === 'image') content = `<div>${escapeHtml(msg.text || '')}</div><img class="msg-image" src="${msg.imageUrl}">`;
-  else if (msg.type === 'file') content = `<div class="file-attach"><i class="fas fa-file"></i><div style="flex:1;min-width:0;"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(msg.fileName)}</div><div style="font-size:11px;opacity:0.7;">${formatFileSize(msg.fileSize || 0)}</div></div></div>`;
+   else if (msg.type === 'file') {
+    content = `<div class="file-attach" onclick="window.open('${msg.fileUrl}', '_blank')" style="cursor:pointer;"><i class="fas fa-file"></i><div style="flex:1;min-width:0;"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(msg.fileName)}</div><div style="font-size:11px;opacity:0.7;">${formatFileSize(msg.fileSize || 0)}</div></div></div>`;
+  }
   else if (msg.type === 'report') { content = `<div style="white-space:pre-wrap;">${escapeHtml(msg.text || '')}</div>`; if (msg.evidence) content += `<div class="file-attach" style="margin-top:8px;"><i class="fas fa-paperclip"></i><div style="flex:1;min-width:0;"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(msg.evidence.name)}</div><div style="font-size:11px;opacity:0.7;">${formatFileSize(msg.evidence.size || 0)}</div></div></div>`; }
   else content = `<div>${escapeHtml(displayText || '')}</div>`;
   let checks = ''; if (isOut) checks = msg.read ? '<span class="checks"><i class="fas fa-check-double" style="color:var(--accent);"></i></span>' : '<span class="checks"><i class="fas fa-check" style="color:var(--text-muted);"></i></span>';
@@ -2093,6 +2095,50 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeProfileBtn) {
     closeProfileBtn.onclick = () => {
       document.getElementById('profilePanel').classList.remove('open');
+    };
+  }
+
+    // ---------- ОТПРАВКА ФАЙЛОВ (СКРЕПКА) ----------
+  const attachBtn = document.getElementById('attachBtn');
+  const fileInput = document.getElementById('fileInput');
+  if (attachBtn && fileInput) {
+    attachBtn.onclick = () => fileInput.click();
+    fileInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      if (file.size > 5 * 1024 * 1024) {
+        if (typeof Sound !== 'undefined') Sound.error();
+        if (typeof showToast === 'function') showToast('Файл слишком большой', 'Максимум 5 МБ', 'fa-exclamation-circle');
+        fileInput.value = '';
+        return;
+      }
+
+      if (file.type.startsWith('image/')) {
+        try {
+          if (typeof showToast === 'function') showToast('Загрузка...', 'Обработка изображения', 'fa-spinner', 2000);
+          const compressed = await compressImage(file, 800, 0.75);
+          if (typeof sendMessage === 'function') {
+            await sendMessage('', 'image', { imageUrl: compressed });
+          }
+        } catch (err) {
+          if (typeof Sound !== 'undefined') Sound.error();
+          if (typeof showToast === 'function') showToast('Ошибка', 'Не удалось обработать фото', 'fa-exclamation-circle');
+        }
+      } else {
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          if (typeof sendMessage === 'function') {
+            await sendMessage('', 'file', { 
+              fileUrl: ev.target.result, 
+              fileName: file.name, 
+              fileSize: file.size 
+            });
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+      fileInput.value = ''; // Очищаем, чтобы можно было отправить тот же файл снова
     };
   }
 
