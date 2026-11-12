@@ -454,10 +454,10 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 <button class="auth-tab active" data-tab="login">ВХОД</button>
 <button class="auth-tab" data-tab="register">РЕГИСТРАЦИЯ</button>
 </div>
-<form class="auth-form active" id="loginForm" novalidate>
+<form class="auth-form active" id="loginForm" onsubmit="return false;">
 <div class="input-group"><label for="loginEmail">Gmail</label><input type="email" id="loginEmail" placeholder="example@gmail.com" autocomplete="email"><div class="error-text" id="loginEmailError">Введите корректный Gmail</div></div>
 <div class="input-group"><label for="loginPassword">Пароль</label><input type="password" id="loginPassword" placeholder="Минимум 6 символов" autocomplete="off"><div class="error-text" id="loginPasswordError">Минимум 6 символов</div></div>
-<button type="submit" class="btn">Войти</button>
+<button type="button" id="realLoginBtn" class="btn">Войти</button>
 <div id="loginBlockNote" style="display:none;color:var(--danger);font-size:12px;text-align:center;padding:6px;"></div>
 </form>
 <form class="auth-form" id="registerForm" novalidate>
