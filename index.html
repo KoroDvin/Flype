@@ -2088,6 +2088,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+    // ---------- ЗАКРЫТИЕ ПРОФИЛЯ КРЕСТИКОМ ----------
+  const closeProfileBtn = document.getElementById('closeProfileBtn');
+  if (closeProfileBtn) {
+    closeProfileBtn.onclick = () => {
+      document.getElementById('profilePanel').classList.remove('open');
+    };
+  }
+
   // ---------- ЗВОНКИ ----------
   const callBtn = document.getElementById('callBtn');
   if (callBtn) callBtn.onclick = () => { if(typeof startCall === 'function') startCall(state.activeChatId, false); };
