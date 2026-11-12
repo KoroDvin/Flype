@@ -2008,35 +2008,27 @@ window.flypeFirebase = { database, ref, set, onValue, get, child, push, update, 
 console.log('✅ Firebase подключён. databaseURL:', firebaseConfig.databaseURL);
 </script>
 <script>
-// ================== ОБЪЕДИНЁННЫЙ ПУЛЬТ (бывшие блоки #1 и #3) ==================
+// ================== ОБЪЕДИНЁННЫЙ ПУЛЬТ (ИСПРАВЛЕННЫЙ) ==================
 document.addEventListener('DOMContentLoaded', () => {
   console.log('🛠️ Инициализация обработчиков UI');
 
-    // ================== ЖЕСТКАЯ ПРИВЯЗКА ВХОДА ==================
+  // ================== 1. ЖЕСТКАЯ ПРИВЯЗКА ВХОДА ==================
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
     loginForm.onsubmit = function(e) {
-      e.preventDefault(); // Останавливаем перезагрузку страницы
-      if (typeof handleLogin === 'function') {
-        handleLogin(e); // Вызываем вашу функцию входа
-      } else {
-        alert('Ошибка: функция handleLogin не найдена!');
-      }
+      e.preventDefault();
+      if (typeof handleLogin === 'function') handleLogin(e);
     };
   }
-
   const regForm = document.getElementById('registerForm');
   if (regForm) {
     regForm.onsubmit = function(e) {
       e.preventDefault();
-      if (typeof handleRegister === 'function') {
-        handleRegister(e);
-      }
+      if (typeof handleRegister === 'function') handleRegister(e);
     };
   }
-  // =============================================================
 
-  // ---------- ПРОФИЛЬ / НАСТРОЙКИ ----------
+  // ================== 2. ПРОФИЛЬ И НАСТРОЙКИ ==================
   const profileBtn = document.getElementById('sidebarProfileBtn');
   if (profileBtn) {
     profileBtn.onclick = function() {
@@ -2057,231 +2049,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // ---------- ВЫХОД ----------
   const logoutBtn = document.getElementById('logoutLink');
   if (logoutBtn) logoutBtn.onclick = () => { if (typeof handleLogout === 'function') handleLogout(); else { localStorage.clear(); location.reload(); } };
 
-  // ---------- ВКЛАДКИ ЧАТЫ/СТАТУСЫ ----------
-  document.querySelectorAll('.sidebar-tab').forEach(tab => {
-    tab.onclick = function() {
-      document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
-      this.classList.add('active');
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      const panel = document.getElementById(this.dataset.stab === 'chats' ? 'tabChats' : 'tabStatuses');
-      if (panel) panel.classList.add('active');
-    };
-  });
+  // Отмена настроек
+  const settingsCancel = document.getElementById('settingsCancel');
+  if (settingsCancel) settingsCancel.onclick = () => document.getElementById('settingsOverlay').classList.remove('open');
 
-  // ---------- КНОПКА "i" ----------
-  const infoBtn = document.getElementById('infoBtn');
-  if (infoBtn) {
-    infoBtn.onclick = () => {
-      if (!state.activeChatId) return;
-      const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) return;
-      const info = getChatInfo(chat);
-      document.getElementById('contactName').textContent = info.name || 'Неизвестный';
-      document.getElementById('contactStatus').textContent = info.online ? 'В сети' : 'Был(а) недавно';
-      document.getElementById('contactFlypeId').textContent = chat.type === 'group' ? `Группа · ${chat.participants.length} участников` : (info.flypeId ? '@' + info.flypeId : '—');
-      const av = document.getElementById('contactAvatar');
-      if (info.avatar) av.innerHTML = `<img src="${escapeHtml(info.avatar)}">`;
-      else av.textContent = initial(info.name);
-      document.getElementById('contactProfile').classList.remove('hidden');
-      document.getElementById('profilePanel').classList.add('open');
-    };
-  }
-
-    // ---------- ЗАКРЫТИЕ ПРОФИЛЯ КРЕСТИКОМ ----------
-  const closeProfileBtn = document.getElementById('closeProfileBtn');
-  if (closeProfileBtn) {
-    closeProfileBtn.onclick = () => {
-      document.getElementById('profilePanel').classList.remove('open');
-    };
-  }
-
-    // ---------- ОТПРАВКА ФАЙЛОВ (СКРЕПКА) ----------
-  const attachBtn = document.getElementById('attachBtn');
-  const fileInput = document.getElementById('fileInput');
-  if (attachBtn && fileInput) {
-    attachBtn.onclick = () => fileInput.click();
-    fileInput.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      if (file.size > 5 * 1024 * 1024) {
-        if (typeof Sound !== 'undefined') Sound.error();
-        if (typeof showToast === 'function') showToast('Файл слишком большой', 'Максимум 5 МБ', 'fa-exclamation-circle');
-        fileInput.value = '';
-        return;
-      }
-
-      if (file.type.startsWith('image/')) {
-        try {
-          if (typeof showToast === 'function') showToast('Загрузка...', 'Обработка изображения', 'fa-spinner', 2000);
-          const compressed = await compressImage(file, 800, 0.75);
-          if (typeof sendMessage === 'function') {
-            await sendMessage('', 'image', { imageUrl: compressed });
-          }
-        } catch (err) {
-          if (typeof Sound !== 'undefined') Sound.error();
-          if (typeof showToast === 'function') showToast('Ошибка', 'Не удалось обработать фото', 'fa-exclamation-circle');
-        }
-      } else {
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-          if (typeof sendMessage === 'function') {
-            await sendMessage('', 'file', { 
-              fileUrl: ev.target.result, 
-              fileName: file.name, 
-              fileSize: file.size 
-            });
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-      fileInput.value = ''; // Очищаем, чтобы можно было отправить тот же файл снова
-    };
-  }
-
-  // ---------- ЗВОНКИ ----------
-  const callBtn = document.getElementById('callBtn');
-  if (callBtn) callBtn.onclick = () => { if(typeof startCall === 'function') startCall(state.activeChatId, false); };
-  const videoBtn = document.getElementById('videoCallBtn');
-  if (videoBtn) videoBtn.onclick = () => { if(typeof startCall === 'function') startCall(state.activeChatId, true); };
-  const cancelBtn = document.getElementById('cancelCallBtn');
-  if (cancelBtn) cancelBtn.onclick = () => { if(typeof cancelCall === 'function') cancelCall(); };
-  const rejectBtn = document.getElementById('rejectCallBtn');
-  if (rejectBtn) rejectBtn.onclick = () => { if(typeof rejectCall === 'function') rejectCall(); };
-  const acceptBtn = document.getElementById('acceptCallBtn');
-  if (acceptBtn) acceptBtn.onclick = () => { if(typeof acceptCall === 'function') acceptCall(); };
-
-  // ---------- ОТПРАВКА ----------
-  const sendBtn = document.getElementById('sendBtn');
-  if (sendBtn) {
-    sendBtn.onclick = () => {
-      const input = document.getElementById('messageInput');
-      if (input.value.trim() && typeof sendMessage === 'function') {
-        sendMessage(input.value);
-        input.value = '';
-        input.style.height = 'auto';
-      }
-    };
-  }
-
-  // ---------- ЭМОДЗИ ----------
-  if (!document.getElementById('emojiBtn')) {
-    const inputArea = document.querySelector('.chat-input-area');
-    const voiceBtn = document.getElementById('voiceBtn');
-    if (inputArea && voiceBtn) {
-      const emojiBtn = document.createElement('button');
-      emojiBtn.className = 'input-btn';
-      emojiBtn.id = 'emojiBtn';
-      emojiBtn.title = 'Смайлы';
-      emojiBtn.innerHTML = '<i class="fas fa-smile"></i>';
-      inputArea.insertBefore(emojiBtn, voiceBtn);
-
-      const emojiPicker = document.createElement('div');
-      emojiPicker.className = 'emoji-picker hidden';
-      emojiPicker.id = 'emojiPicker';
-      emojiPicker.innerHTML = `<div class="emoji-picker-header"><span>Смайлы</span><button class="emoji-picker-close" id="emojiPickerClose"><i class="fas fa-times"></i></button></div><div class="emoji-picker-grid" id="emojiPickerGrid"></div>`;
-      document.body.appendChild(emojiPicker);
-
-      const EMOJIS = ['😁','😀','😄','😅','😊','😂','🙂','🙃','😉','☺️','😇','🥰','😍','🤩','😘','😙','😋','😛','😜','😝','🤑','🤗','🤭','😶','🤐','🤨','😐','🙄','😏','😬','🤥','🙁','😴','😷','🤒','🤕','🤢','🤮','🥵','🥶','🥴','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','☹️','😲','😳','🥺','😦','😧','😨','😰','😢','😭','😱','😵‍💫','😞','😥','😫','🥱','😤','😡','🤬','😈','👿'];
-      const grid = document.getElementById('emojiPickerGrid');
-      grid.innerHTML = EMOJIS.map(e => `<button class="emoji-item">${e}</button>`).join('');
-
-      emojiBtn.onclick = (e) => { e.stopPropagation(); emojiPicker.classList.toggle('hidden'); };
-      document.getElementById('emojiPickerClose').onclick = () => emojiPicker.classList.add('hidden');
-      grid.onclick = (e) => {
-        if (e.target.classList.contains('emoji-item')) {
-          const msgInput = document.getElementById('messageInput');
-          msgInput.value += e.target.innerText;
-          msgInput.focus();
-        }
-      };
-      document.addEventListener('click', (e) => {
-        if (!emojiPicker.classList.contains('hidden') && !emojiPicker.contains(e.target) && e.target !== emojiBtn) {
-          emojiPicker.classList.add('hidden');
-        }
-      });
-    }
-  }
-
-  // ---------- SYNC: отмена запроса ----------
-  const syncCancelBtn = document.getElementById('syncWaitingCancel');
-  if (syncCancelBtn) syncCancelBtn.onclick = () => { if (typeof cancelSyncRequest === 'function') cancelSyncRequest(); else document.getElementById('syncWaitingOverlay').classList.remove('open'); };
-
-  // ---------- SYNC: подтверждение передачи ключа ----------
-  const syncYesBtn = document.getElementById('syncConfirmYes');
-  if (syncYesBtn) {
-    syncYesBtn.onclick = async function() {
-      const u = state.currentUser; if (!u || !window.flypeFirebase) return;
-      const privateKey = localStorage.getItem('flype_private_key_' + u.id);
-      if (!privateKey) { Sound.error(); showToast('Ошибка', 'Приватный ключ не найден на этом устройстве', 'fa-exclamation-circle'); return; }
-      const days = parseInt(document.getElementById('syncDurationSelect').value || '24');
-      const ttl = days === 0 ? 0 : days * 24 * 60 * 60 * 1000;
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      let code = '';
-      for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
-      try {
-        const encryptedKey = await encryptPrivateKeyWithCode(privateKey, code);
-        const { database, ref, set, remove } = window.flypeFirebase;
-        await set(ref(database, 'sync_keys/' + u.id), {
-          encryptedKey,
-          createdAt: Date.now(),
-          expiresAt: Date.now() + SYNC_CODE_TTL,
-          accessTtl: ttl,
-          grantedBy: u.id
-        });
-        await remove(ref(database, 'sync_requests/' + u.id)).catch(() => {});
-        document.getElementById('syncConfirmOverlay').classList.remove('open');
-        const codeEl = document.getElementById('syncCodeValue');
-        if (codeEl) codeEl.textContent = code;
-        document.getElementById('syncCodeOverlay').classList.add('open');
-        Sound.send();
-        showToast('Код создан', 'Введите его на новом устройстве', 'fa-key', 5000);
-      } catch (err) {
-        console.error('❌ sync confirm:', err);
-        Sound.error(); showToast('Ошибка', 'Не удалось зашифровать ключ', 'fa-exclamation-circle');
-      }
-    };
-  }
-
-  // ---------- SYNC: отказ ----------
-  const syncNoBtn = document.getElementById('syncConfirmNo');
-  if (syncNoBtn) {
-    syncNoBtn.onclick = async function() {
-      const u = state.currentUser;
-      document.getElementById('syncConfirmOverlay').classList.remove('open');
-      if (u && window.flypeFirebase) {
-        try { const { database, ref, remove } = window.flypeFirebase; await remove(ref(database, 'sync_requests/' + u.id)).catch(() => {}); } catch (e) {}
-      }
-      showToast('Отклонено', 'Ключ не передан', 'fa-times-circle', 2500);
-    };
-  }
-
-  // ---------- НАСТРОЙКИ: тумблеры и сохранение ----------
-  const darkTgl = document.getElementById('darkThemeToggle');
-  if (darkTgl) darkTgl.onchange = (e) => { document.body.classList.toggle('dark', e.target.checked); state.settings.darkTheme = e.target.checked; persistSettings(); };
-  const soundTgl = document.getElementById('soundToggle');
-  if (soundTgl) soundTgl.onchange = (e) => { state.settings.sounds = e.target.checked; persistSettings(); };
-  const oldFlypeTgl = document.getElementById('oldFlypeToggle');
-  if (oldFlypeTgl) oldFlypeTgl.onchange = (e) => { document.body.classList.toggle('theme-oldflype', e.target.checked); state.settings.oldFlype = e.target.checked; persistSettings(); };
-  const ringtoneSelect = document.getElementById('ringtoneSelect');
-  if (ringtoneSelect) ringtoneSelect.onchange = (e) => { state.settings.ringtone = e.target.value; persistSettings(); };
-
-  document.querySelectorAll('.theme-swatch').forEach(swatch => {
-    swatch.onclick = function() {
-      const themes = ['theme-standard','theme-green','theme-red','theme-blue','theme-white','theme-orange','theme-purple','theme-pink','theme-turquoise','theme-gold'];
-      document.body.classList.remove(...themes);
-      document.body.classList.add('theme-' + this.dataset.theme);
-      state.settings.theme = this.dataset.theme;
-      persistSettings();
-      document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('selected'));
-      this.classList.add('selected');
-    };
-  });
-
-  // ---------- СОХРАНЕНИЕ ПРОФИЛЯ ----------
+  // Сохранение профиля
   const saveBtn = document.getElementById('settingsSave');
   if (saveBtn) {
     saveBtn.onclick = async function() {
@@ -2295,19 +2070,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (window.pendingAvatarData !== undefined) users[idx].avatar = window.pendingAvatarData;
       localStorage.setItem('flype_users', JSON.stringify(users));
       if (window.flypeFirebase) {
-        try { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'users/' + currentUserId), users[idx]); } catch (err) { console.error('Firebase save error:', err); }
+        try { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'users/' + currentUserId), users[idx]); } catch (err) {}
       }
       const name = `${users[idx].firstName} ${users[idx].lastName}`.trim();
-      document.getElementById('sidebarName').textContent = name;
+      if(document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = name;
       const sa = document.getElementById('sidebarAvatar');
-      if (users[idx].avatar) sa.innerHTML = `<img src="${users[idx].avatar}">`;
-      else sa.textContent = users[idx].firstName.charAt(0).toUpperCase();
+      if (sa) {
+        if (users[idx].avatar) sa.innerHTML = `<img src="${users[idx].avatar}">`;
+        else sa.textContent = users[idx].firstName.charAt(0).toUpperCase();
+      }
       document.getElementById('settingsOverlay').classList.remove('open');
-      alert('Профиль сохранён!');
+      if(typeof showToast === 'function') showToast('Успех', 'Профиль сохранён', 'fa-check-circle');
     };
   }
 
-  // ---------- АВАТАРКА ----------
+  // Аватарка
   const avBtn = document.getElementById('settingsAvatarBtn');
   const avFile = document.getElementById('settingsAvatarFile');
   if (avBtn && avFile) {
@@ -2319,8 +2096,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const max = 256;
-          let w = img.width, h = img.height;
+          const max = 256; let w = img.width, h = img.height;
           if (w > max) { h = h * max / w; w = max; }
           canvas.width = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
@@ -2337,21 +2113,319 @@ document.addEventListener('DOMContentLoaded', () => {
   const avRem = document.getElementById('settingsAvatarRemoveBtn');
   if (avRem) avRem.onclick = () => { window.pendingAvatarData = ''; document.getElementById('settingsAvatarPreview').textContent = '?'; };
 
-  // ---------- ПОДЕЛИТЬСЯ ----------
+  // ================== 3. УДАЛЕНИЕ ПРОФИЛЯ ==================
+  const settingsDeleteProfileBtn = document.getElementById('settingsDeleteProfileBtn');
+  if (settingsDeleteProfileBtn) {
+    settingsDeleteProfileBtn.onclick = () => {
+      document.getElementById('settingsOverlay').classList.remove('open');
+      document.getElementById('confirmDeleteProfileOverlay').classList.add('open');
+      const check = document.getElementById('deleteProfileCheck');
+      const btn = document.getElementById('deleteProfileConfirmBtn');
+      const timerEl = document.getElementById('deleteProfileTimerValue');
+      const timerWrap = document.getElementById('deleteProfileTimer');
+      check.checked = false; check.disabled = true; btn.disabled = true; btn.style.opacity = '0.5';
+      let timeLeft = 5; timerEl.textContent = timeLeft; timerWrap.style.display = 'block';
+      const interval = setInterval(() => {
+        timeLeft--; timerEl.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(interval); timerWrap.style.display = 'none'; check.disabled = false;
+        }
+      }, 1000);
+      check.onchange = () => {
+        btn.disabled = !check.checked;
+        btn.style.opacity = check.checked ? '1' : '0.5';
+      };
+      btn.onclick = async () => {
+        if (typeof deleteAccount === 'function') await deleteAccount();
+        else if (typeof deleteUserForever === 'function') {
+          await deleteUserForever(state.currentUser.id, state.currentUser.firstName);
+          localStorage.clear(); location.reload();
+        }
+      };
+    };
+  }
+  window.closeConfirmDeleteProfile = () => document.getElementById('confirmDeleteProfileOverlay').classList.remove('open');
+  const delCancelBtn = document.getElementById('deleteProfileCancelBtn');
+  if (delCancelBtn) delCancelBtn.onclick = window.closeConfirmDeleteProfile;
+
+  // ================== 4. СМЕНА НИКА ==================
+  const changeUsernameBtn = document.getElementById('changeUsernameBtn');
+  if (changeUsernameBtn) {
+    changeUsernameBtn.onclick = () => {
+      const u = state.currentUser;
+      if (!u) return;
+      const lastChange = u.idChangedAt || 0;
+      const cooldown = 30 * 24 * 60 * 60 * 1000;
+      if (Date.now() - lastChange < cooldown) {
+        const daysLeft = Math.ceil((cooldown - (Date.now() - lastChange)) / (24 * 60 * 60 * 1000));
+        return alert(`Ник можно менять раз в 30 дней. Осталось дней: ${daysLeft}`);
+      }
+      document.getElementById('newIdDigits').value = u.flypeId || '';
+      document.getElementById('newIdError').classList.remove('visible');
+      document.getElementById('changeIdOverlay').classList.add('open');
+    };
+  }
+  const changeIdCancel = document.getElementById('changeIdCancel');
+  if (changeIdCancel) changeIdCancel.onclick = () => document.getElementById('changeIdOverlay').classList.remove('open');
+  
+  const changeIdSave = document.getElementById('changeIdSave');
+  if (changeIdSave) {
+    changeIdSave.onclick = async () => {
+      const newId = document.getElementById('newIdDigits').value.trim().toLowerCase();
+      const errEl = document.getElementById('newIdError');
+      if (!/^[a-zA-Z][a-zA-Z0-9_]{3,19}$/.test(newId)) {
+        errEl.textContent = '4–20 символов: латиница, цифры, _. Начинается с буквы.';
+        errEl.classList.add('visible'); return;
+      }
+      const taken = await isUsernameTaken(newId);
+      if (taken) {
+        errEl.textContent = 'Этот ник уже занят.'; errEl.classList.add('visible'); return;
+      }
+      const u = state.currentUser;
+      u.flypeId = newId; u.idChangedAt = Date.now();
+      const users = JSON.parse(localStorage.getItem('flype_users') || '[]');
+      const idx = users.findIndex(x => x.id === u.id);
+      if (idx !== -1) { users[idx].flypeId = newId; users[idx].idChangedAt = u.idChangedAt; localStorage.setItem('flype_users', JSON.stringify(users)); }
+      if (window.flypeFirebase) {
+        const { database, ref, update } = window.flypeFirebase;
+        await update(ref(database, 'users/' + u.id), { flypeId: newId, idChangedAt: u.idChangedAt });
+      }
+      document.getElementById('settingsUsername').textContent = '@' + newId;
+      document.getElementById('changeIdOverlay').classList.remove('open');
+      showToast('Успех', 'Ник изменён', 'fa-check-circle');
+    };
+  }
+
+  // ================== 5. РИНГТОН (СПИСОК С КНОПКАМИ) ==================
+  const ringtoneSelect = document.getElementById('ringtoneSelect');
+  if (ringtoneSelect) {
+    // Меняем селект на красивый список
+    const oldHtml = ringtoneSelect.outerHTML;
+    const newHtml = `
+      <div id="ringtoneList" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg);border-radius:var(--radius);">
+          <span style="font-size:13px;">Flype Standart</span>
+          <button class="btn btn-secondary btn-play-ring" data-src="sounds/Flype-Standart.mp3" style="padding:2px 8px;font-size:11px;"><i class="fas fa-play"></i> Играть</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg);border-radius:var(--radius);">
+          <span style="font-size:13px;">Flype Start</span>
+          <button class="btn btn-secondary btn-play-ring" data-src="sounds/Flype-Start.mp3" style="padding:2px 8px;font-size:11px;"><i class="fas fa-play"></i> Играть</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg);border-radius:var(--radius);">
+          <span style="font-size:13px;">Flype New</span>
+          <button class="btn btn-secondary btn-play-ring" data-src="sounds/Flype-New.mp3" style="padding:2px 8px;font-size:11px;"><i class="fas fa-play"></i> Играть</button>
+        </div>
+      </div>
+    `;
+    ringtoneSelect.insertAdjacentHTML('afterend', newHtml);
+    ringtoneSelect.style.display = 'none'; // Скрываем старый селект
+
+    let currentAudio = null;
+    document.querySelectorAll('.btn-play-ring').forEach(btn => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        const src = btn.dataset.src;
+        if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+        if (btn.classList.contains('playing')) {
+          document.querySelectorAll('.btn-play-ring').forEach(b => { b.classList.remove('playing'); b.innerHTML = '<i class="fas fa-play"></i> Играть'; });
+          return;
+        }
+        document.querySelectorAll('.btn-play-ring').forEach(b => { b.classList.remove('playing'); b.innerHTML = '<i class="fas fa-play"></i> Играть'; });
+        currentAudio = new Audio(src);
+        currentAudio.volume = 0.5;
+        currentAudio.play().catch(()=>{});
+        btn.classList.add('playing');
+        btn.innerHTML = '<i class="fas fa-stop"></i> Стоп';
+        state.settings.ringtone = src;
+        if (typeof persistSettings === 'function') persistSettings();
+        currentAudio.onended = () => { btn.classList.remove('playing'); btn.innerHTML = '<i class="fas fa-play"></i> Играть'; };
+      };
+    });
+  }
+
+  // ================== 6. ОБМЕН КЛЮЧАМИ (SYNC) - ИСПРАВЛЕННЫЙ ==================
+  const requestKeyBtn = document.getElementById('requestKeyBtn');
+  if (requestKeyBtn) {
+    requestKeyBtn.onclick = async () => {
+      if (typeof requestKeyFromOtherDevice === 'function') await requestKeyFromOtherDevice();
+    };
+  }
+
+  // Отмена запроса на новом устройстве
+  const syncWaitingCancel = document.getElementById('syncWaitingCancel');
+  if (syncWaitingCancel) {
+    syncWaitingCancel.onclick = async () => {
+      document.getElementById('syncWaitingOverlay').classList.remove('open');
+      if (window.syncKeysListener) { window.syncKeysListener(); window.syncKeysListener = null; }
+      if (state.currentUser && window.flypeFirebase) {
+        try { const { database, ref, remove } = window.flypeFirebase; await remove(ref(database, 'sync_requests/' + state.currentUser.id)); } catch(e){}
+      }
+      showToast('Отменено', 'Запрос отозван', 'fa-times');
+    };
+  }
+
+  // Передача ключа на основном устройстве
+  const syncConfirmYes = document.getElementById('syncConfirmYes');
+  if (syncConfirmYes) {
+    syncConfirmYes.onclick = async () => {
+      const u = state.currentUser;
+      const privateKey = localStorage.getItem('flype_private_key_' + u.id);
+      if (!privateKey) return alert('Ошибка: приватный ключ не найден!');
+      const days = parseInt(document.getElementById('syncDurationSelect').value || '24');
+      const ttl = days === 0 ? 0 : days * 24 * 60 * 60 * 1000;
+      
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = ''; for (let i=0; i<8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+
+      try {
+        const encKey = await encryptPrivateKeyWithCode(privateKey, code);
+        const { database, ref, set, remove } = window.flypeFirebase;
+        await set(ref(database, 'sync_keys/' + u.id), {
+          encryptedKey: encKey, createdAt: Date.now(),
+          expiresAt: Date.now() + 5 * 60 * 1000, accessTtl: ttl
+        });
+        await remove(ref(database, 'sync_requests/' + u.id)).catch(()=>{});
+        document.getElementById('syncConfirmOverlay').classList.remove('open');
+        document.getElementById('syncCodeValue').textContent = code;
+        document.getElementById('syncCodeOverlay').classList.add('open');
+        showToast('Код создан', 'Введите на новом устройстве', 'fa-key');
+      } catch (e) { alert('Ошибка шифрования'); }
+    };
+  }
+  
+  const syncConfirmNo = document.getElementById('syncConfirmNo');
+  if (syncConfirmNo) {
+    syncConfirmNo.onclick = async () => {
+      document.getElementById('syncConfirmOverlay').classList.remove('open');
+      if (state.currentUser && window.flypeFirebase) {
+        try { const { database, ref, remove } = window.flypeFirebase; await remove(ref(database, 'sync_requests/' + state.currentUser.id)); } catch(e){}
+      }
+      showToast('Отклонено', '', 'fa-times');
+    };
+  }
+
+  // ================== 7. ОСТАЛЬНЫЕ КНОПКИ ==================
+  const infoBtn = document.getElementById('infoBtn');
+  if (infoBtn) {
+    infoBtn.onclick = () => {
+      if (!state.activeChatId) return;
+      const chat = state.chats.find(c => c.id === state.activeChatId);
+      const info = getChatInfo(chat);
+      document.getElementById('contactName').textContent = info.name || 'Неизвестный';
+      document.getElementById('contactStatus').textContent = info.online ? 'В сети' : 'Был(а) недавно';
+      document.getElementById('contactFlypeId').textContent = chat.type === 'group' ? `Группа · ${chat.participants.length} участников` : (info.flypeId ? '@' + info.flypeId : '—');
+      const av = document.getElementById('contactAvatar');
+      if (info.avatar) av.innerHTML = `<img src="${escapeHtml(info.avatar)}">`; else av.textContent = initial(info.name);
+      document.getElementById('contactProfile').classList.remove('hidden');
+      document.getElementById('profilePanel').classList.add('open');
+    };
+  }
+
+  const closeProfileBtn = document.getElementById('closeProfileBtn');
+  if (closeProfileBtn) closeProfileBtn.onclick = () => document.getElementById('profilePanel').classList.remove('open');
+
+  const callBtn = document.getElementById('callBtn');
+  if (callBtn) callBtn.onclick = () => { if(typeof startCall === 'function') startCall(state.activeChatId, false); };
+  const videoBtn = document.getElementById('videoCallBtn');
+  if (videoBtn) videoBtn.onclick = () => { if(typeof startCall === 'function') startCall(state.activeChatId, true); };
+  const cancelBtn = document.getElementById('cancelCallBtn');
+  if (cancelBtn) cancelBtn.onclick = () => { if(typeof cancelCall === 'function') cancelCall(); };
+  const rejectBtn = document.getElementById('rejectCallBtn');
+  if (rejectBtn) rejectBtn.onclick = () => { if(typeof rejectCall === 'function') rejectCall(); };
+  const acceptBtn = document.getElementById('acceptCallBtn');
+  if (acceptBtn) acceptBtn.onclick = () => { if(typeof acceptCall === 'function') acceptCall(); };
+
+  const sendBtn = document.getElementById('sendBtn');
+  if (sendBtn) {
+    sendBtn.onclick = () => {
+      const input = document.getElementById('messageInput');
+      if (input.value.trim() && typeof sendMessage === 'function') {
+        sendMessage(input.value); input.value = ''; input.style.height = 'auto';
+      }
+    };
+  }
+
+  // ================== 8. ФАЙЛЫ (СКРЕПКА) ==================
+  const attachBtn = document.getElementById('attachBtn');
+  const fileInput = document.getElementById('fileInput');
+  if (attachBtn && fileInput) {
+    attachBtn.onclick = () => fileInput.click();
+    fileInput.onchange = async (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { showToast('Файл большой', 'Макс 5 МБ', 'fa-exclamation-circle'); return; }
+      if (file.type.startsWith('image/')) {
+        try {
+          showToast('Загрузка...', 'Обработка', 'fa-spinner', 2000);
+          const compressed = await compressImage(file, 800, 0.75);
+          await sendMessage('', 'image', { imageUrl: compressed });
+        } catch (err) { Sound.error(); }
+      } else {
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          await sendMessage('', 'file', { fileUrl: ev.target.result, fileName: file.name, fileSize: file.size });
+        };
+        reader.readAsDataURL(file);
+      }
+      fileInput.value = '';
+    };
+  }
+
+  // ================== 9. ЭМОДЗИ ==================
+  if (!document.getElementById('emojiBtn')) {
+    const inputArea = document.querySelector('.chat-input-area');
+    const voiceBtn = document.getElementById('voiceBtn');
+    if (inputArea && voiceBtn) {
+      const emojiBtn = document.createElement('button');
+      emojiBtn.className = 'input-btn'; emojiBtn.id = 'emojiBtn'; emojiBtn.title = 'Смайлы';
+      emojiBtn.innerHTML = '<i class="fas fa-smile"></i>';
+      inputArea.insertBefore(emojiBtn, voiceBtn);
+
+      const emojiPicker = document.createElement('div');
+      emojiPicker.className = 'emoji-picker hidden'; emojiPicker.id = 'emojiPicker';
+      emojiPicker.innerHTML = `<div class="emoji-picker-header"><span>Смайлы</span><button class="emoji-picker-close" id="emojiPickerClose"><i class="fas fa-times"></i></button></div><div class="emoji-picker-grid" id="emojiPickerGrid"></div>`;
+      document.body.appendChild(emojiPicker);
+
+      const EMOJIS = ['😁','😀','😄','😅','😊','😂','🙂','🙃','😉','☺️','😇','🥰','😍','🤩','😘','😙','😋','😛','😜','😝','🤑','🤗','🤭','😶','🤐','🤨','😐','🙄','😏','😬','🤥','🙁','😴','😷','🤒','🤕','🤢','🤮','🥵','🥶','🥴','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','☹️','😲','😳','🥺','😦','😧','😨','😰','😢','😭','😱','😵‍💫','😞','😥','😫','🥱','😤','😡','🤬','😈','👿'];
+      document.getElementById('emojiPickerGrid').innerHTML = EMOJIS.map(e => `<button class="emoji-item">${e}</button>`).join('');
+
+      emojiBtn.onclick = (e) => { e.stopPropagation(); emojiPicker.classList.toggle('hidden'); };
+      document.getElementById('emojiPickerClose').onclick = () => emojiPicker.classList.add('hidden');
+      document.getElementById('emojiPickerGrid').onclick = (e) => {
+        if (e.target.classList.contains('emoji-item')) {
+          const msgInput = document.getElementById('messageInput');
+          msgInput.value += e.target.innerText; msgInput.focus();
+        }
+      };
+      document.addEventListener('click', (e) => {
+        if (!emojiPicker.classList.contains('hidden') && !emojiPicker.contains(e.target) && e.target !== emojiBtn) emojiPicker.classList.add('hidden');
+      });
+    }
+  }
+
+  // ================== 10. ТУМБЛЕРЫ НАСТРОЕК ==================
+  const darkTgl = document.getElementById('darkThemeToggle');
+  if (darkTgl) darkTgl.onchange = (e) => { document.body.classList.toggle('dark', e.target.checked); state.settings.darkTheme = e.target.checked; persistSettings(); };
+  const soundTgl = document.getElementById('soundToggle');
+  if (soundTgl) soundTgl.onchange = (e) => { state.settings.sounds = e.target.checked; persistSettings(); };
+  const oldFlypeTgl = document.getElementById('oldFlypeToggle');
+  if (oldFlypeTgl) oldFlypeTgl.onchange = (e) => { document.body.classList.toggle('theme-oldflype', e.target.checked); state.settings.oldFlype = e.target.checked; persistSettings(); };
+
+  document.querySelectorAll('.theme-swatch').forEach(swatch => {
+    swatch.onclick = function() {
+      const themes = ['theme-standard','theme-green','theme-red','theme-blue','theme-white','theme-orange','theme-purple','theme-pink','theme-turquoise','theme-gold'];
+      document.body.classList.remove(...themes); document.body.classList.add('theme-' + this.dataset.theme);
+      state.settings.theme = this.dataset.theme; persistSettings();
+      document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('selected')); this.classList.add('selected');
+    };
+  });
+
   const shareBtn = document.getElementById('shareSiteBtn');
   if (shareBtn) shareBtn.onclick = () => { const url = 'https://korodvin.github.io/Flype/'; navigator.clipboard.writeText(url).then(() => alert('Ссылка скопирована!')).catch(() => alert('Не удалось скопировать.')); };
 
-  // ---------- ТЕХ. РАБОТЫ ----------
   const maintOn = document.getElementById('maintenanceOnBtn');
-  if (maintOn) maintOn.onclick = async () => {
-    const msg = prompt('Сообщение:', 'Скоро вернёмся!');
-    if (msg === null) return;
-    if (window.flypeFirebase) { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'maintenance'), { active: true, message: msg, startedAt: Date.now() }); alert('Включено'); }
-  };
+  if (maintOn) maintOn.onclick = async () => { const msg = prompt('Сообщение:', 'Скоро вернёмся!'); if (msg !== null && window.flypeFirebase) { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'maintenance'), { active: true, message: msg, startedAt: Date.now() }); alert('Включено'); } };
   const maintOff = document.getElementById('maintenanceOffBtn');
-  if (maintOff) maintOff.onclick = async () => {
-    if (window.flypeFirebase) { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'maintenance'), { active: false, message: '', stoppedAt: Date.now() }); alert('Выключено'); }
-  };
+  if (maintOff) maintOff.onclick = async () => { if (window.flypeFirebase) { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'maintenance'), { active: false, message: '', stoppedAt: Date.now() }); alert('Выключено'); } };
 });
 </script>
 </body>
