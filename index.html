@@ -567,12 +567,10 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;">Звуки</span><label class="switch"><input type="checkbox" id="soundToggle" checked><span class="slider"></span></label></div>
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><span style="font-size:13px;">Прежний Flype (Frutiger Aero)</span><label class="switch"><input type="checkbox" id="oldFlypeToggle"><span class="slider"></span></label></div>
 <div style="margin-bottom:10px;">
-<div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Рингтон звонка:</div>
-<select id="ringtoneSelect" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13px;outline:none;">
-<option value="sounds/Flype-Standart.mp3">Flype Standart</option>
-<option value="sounds/Flype-Start.mp3">Flype Start</option>
-<option value="sounds/Flype-New.mp3">Flype New</option>
-</select>
+  <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Рингтон звонка:</div>
+  <div id="ringtoneListContainer" style="display:flex;flex-direction:column;gap:6px;">
+    <!-- Список будет генерироваться через JS -->
+  </div>
 </div>
 <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Цветовая тема:</div>
 <div class="theme-picker">
@@ -2196,51 +2194,80 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // ================== 5. РИНГТОН (СПИСОК С КНОПКАМИ) ==================
-  const ringtoneSelect = document.getElementById('ringtoneSelect');
-  if (ringtoneSelect) {
-    // Меняем селект на красивый список
-    const oldHtml = ringtoneSelect.outerHTML;
-    const newHtml = `
-      <div id="ringtoneList" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg);border-radius:var(--radius);">
-          <span style="font-size:13px;">Flype Standart</span>
-          <button class="btn btn-secondary btn-play-ring" data-src="sounds/Flype-Standart.mp3" style="padding:2px 8px;font-size:11px;"><i class="fas fa-play"></i> Играть</button>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg);border-radius:var(--radius);">
-          <span style="font-size:13px;">Flype Start</span>
-          <button class="btn btn-secondary btn-play-ring" data-src="sounds/Flype-Start.mp3" style="padding:2px 8px;font-size:11px;"><i class="fas fa-play"></i> Играть</button>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg);border-radius:var(--radius);">
-          <span style="font-size:13px;">Flype New</span>
-          <button class="btn btn-secondary btn-play-ring" data-src="sounds/Flype-New.mp3" style="padding:2px 8px;font-size:11px;"><i class="fas fa-play"></i> Играть</button>
-        </div>
-      </div>
-    `;
-    ringtoneSelect.insertAdjacentHTML('afterend', newHtml);
-    ringtoneSelect.style.display = 'none'; // Скрываем старый селект
-
+  // ================== 5. РИНГТОН (СПИСОК С ГАЛОЧКАМИ) ==================
+  const ringtoneContainer = document.getElementById('ringtoneListContainer');
+  if (ringtoneContainer) {
+    const ringtones = [
+      { id: 'sounds/Flype-Standart.mp3', name: 'Flype Standart' },
+      { id: 'sounds/Flype-Start.mp3', name: 'Flype Start' },
+      { id: 'sounds/Flype-New.mp3', name: 'Flype New' }
+    ];
+    
     let currentAudio = null;
-    document.querySelectorAll('.btn-play-ring').forEach(btn => {
-      btn.onclick = (e) => {
-        e.preventDefault();
-        const src = btn.dataset.src;
-        if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-        if (btn.classList.contains('playing')) {
-          document.querySelectorAll('.btn-play-ring').forEach(b => { b.classList.remove('playing'); b.innerHTML = '<i class="fas fa-play"></i> Играть'; });
-          return;
-        }
-        document.querySelectorAll('.btn-play-ring').forEach(b => { b.classList.remove('playing'); b.innerHTML = '<i class="fas fa-play"></i> Играть'; });
-        currentAudio = new Audio(src);
-        currentAudio.volume = 0.5;
-        currentAudio.play().catch(()=>{});
-        btn.classList.add('playing');
-        btn.innerHTML = '<i class="fas fa-stop"></i> Стоп';
-        state.settings.ringtone = src;
-        if (typeof persistSettings === 'function') persistSettings();
-        currentAudio.onended = () => { btn.classList.remove('playing'); btn.innerHTML = '<i class="fas fa-play"></i> Играть'; };
-      };
-    });
+    const currentRingtone = state.settings.ringtone || 'sounds/Flype-Standart.mp3';
+
+    const renderRingtones = () => {
+      ringtoneContainer.innerHTML = ringtones.map(rt => {
+        const isSelected = state.settings.ringtone === rt.id || (!state.settings.ringtone && rt.id === 'sounds/Flype-Standart.mp3');
+        return `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg);border-radius:var(--radius);">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="radio" name="ringtone_radio" class="ringtone-radio" data-id="${rt.id}" ${isSelected ? 'checked' : ''} style="cursor:pointer;width:16px;height:16px;">
+              <span style="font-size:13px;cursor:pointer;" onclick="document.querySelector('input[data-id=\\'${rt.id}\\']').click();">${rt.name}</span>
+            </div>
+            <button class="btn btn-secondary btn-play-ring" data-src="${rt.id}" style="padding:2px 8px;font-size:11px;min-width:70px;"><i class="fas fa-play"></i> Играть</button>
+          </div>
+        `;
+      }).join('');
+
+      // Обработка галочек (выбор рингтона)
+      ringtoneContainer.querySelectorAll('.ringtone-radio').forEach(radio => {
+        radio.onchange = (e) => {
+          state.settings.ringtone = e.target.dataset.id;
+          if (typeof persistSettings === 'function') persistSettings();
+          if (typeof showToast === 'function') showToast('Рингтон выбран', 'Сохранено в настройках', 'fa-check-circle', 2000);
+        };
+      });
+
+      // Обработка кнопок "Играть/Стоп"
+      ringtoneContainer.querySelectorAll('.btn-play-ring').forEach(btn => {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          const src = btn.dataset.src;
+          
+          // Если это тот же трек и он играет — останавливаем
+          if (currentAudio && currentAudio.src.includes(src) && !currentAudio.paused) {
+            currentAudio.pause();
+            currentAudio = null;
+            btn.classList.remove('playing');
+            btn.innerHTML = '<i class="fas fa-play"></i> Играть';
+            return;
+          }
+
+          // Останавливаем предыдущий, если играл
+          if (currentAudio) { 
+            currentAudio.pause(); 
+            currentAudio = null; 
+            ringtoneContainer.querySelectorAll('.btn-play-ring').forEach(b => { b.classList.remove('playing'); b.innerHTML = '<i class="fas fa-play"></i> Играть'; });
+          }
+
+          // Запускаем новый
+          currentAudio = new Audio(src);
+          currentAudio.volume = 0.5;
+          currentAudio.play().catch(()=>{});
+          btn.classList.add('playing');
+          btn.innerHTML = '<i class="fas fa-stop"></i> Стоп';
+
+          currentAudio.onended = () => {
+            btn.classList.remove('playing');
+            btn.innerHTML = '<i class="fas fa-play"></i> Играть';
+            currentAudio = null;
+          };
+        };
+      });
+    };
+
+    renderRingtones();
   }
 
   // ================== 6. ОБМЕН КЛЮЧАМИ (SYNC) - ИСПРАВЛЕННЫЙ ==================
