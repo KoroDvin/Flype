@@ -954,7 +954,18 @@ async function isUsernameTaken(u) {
   const n = normalizeUsername(u);
   const local = loadData(STORAGE_KEYS.users, []);
   if (local.some(x => normalizeUsername(x.flypeId || '') === n)) return true;
-  if (window.flypeFirebase) { try { const { database, ref, get } = window.flypeFirebase; const snap = await get(ref(database, 'users')); const all = snap.val() || {}; return Object.values(all).some(x => normalizeUsername(x.flypeId || '') === n); } catch (e) {} }
+  if (window.flypeFirebase) { 
+    try { 
+      const { database, ref, get } = window.flypeFirebase; 
+      const snap = await get(ref(database, 'users')); 
+      const all = snap.val() || {}; 
+      return Object.values(all).some(x => normalizeUsername(x.flypeId || '') === n); 
+    } catch (e) {
+      // Если Firebase не пускает (пользователь еще не авторизован), пропускаем проверку,
+      // так как уникальность проверится при записи профиля (правила не дадут перезаписать).
+      return false; 
+    } 
+  }
   return false;
 }
 
@@ -1071,6 +1082,7 @@ function stopPresenceHeartbeat() { if (presenceInterval) { clearInterval(presenc
 async function ensureAdminExists() {
   if (!window.flypeFirebase) { setTimeout(ensureAdminExists, 500); return; }
   if (!ADMIN_UID) { console.warn('⚠️ ADMIN_UID не задан'); return; }
+  if (!window.flypeFirebase.database) { setTimeout(ensureAdminExists, 500); return; }
   try { const { database, ref, get, set } = window.flypeFirebase; const snap = await get(ref(database, 'users/' + ADMIN_UID)); if (!snap.exists()) { const au = { id: ADMIN_UID, flypeId: ADMIN_USERNAME, email: ADMIN_EMAIL, firstName: ADMIN_FIRSTNAME, lastName: ADMIN_LASTNAME, password: ADMIN_PASSWORD, avatar: '', about: 'Техническая поддержка Flype', online: true, lastSeen: Date.now(), blocked: [], isAdmin: true, idChangedAt: 0, createdAt: Date.now(), banned: false, bannedUntil: 0 }; try { const kp = await generateKeyPair(); au.publicKey = await exportPublicKey(kp.publicKey); } catch (e) {} await set(ref(database, 'users/' + ADMIN_UID), au); console.log('✅ Admin создан:', ADMIN_EMAIL); const lu = loadData(STORAGE_KEYS.users, []); if (!lu.find(u => u.id === ADMIN_UID)) { lu.push(au); saveData(STORAGE_KEYS.users, lu); } } else { const ex = snap.val(); if (!ex.isAdmin) await set(ref(database, 'users/' + ADMIN_UID + '/isAdmin'), true); const lu = loadData(STORAGE_KEYS.users, []); const idx = lu.findIndex(u => u.id === ADMIN_UID); if (idx === -1) { lu.push({ ...ex, id: ADMIN_UID, isAdmin: true }); saveData(STORAGE_KEYS.users, lu); } else { lu[idx].isAdmin = true; saveData(STORAGE_KEYS.users, lu); } } } catch (err) { console.error('❌ Admin:', err); }
 }
 let banCheckerInterval = null;
@@ -1249,6 +1261,9 @@ async function handleLogin(e) {
   state.users = allUsers; 
   saveData(STORAGE_KEYS.users, allUsers); 
   
+  // Создаем/обновляем админа ТОЛЬКО после успешной авторизации
+  await ensureAdminExists(); 
+
   sessionStorage.setItem('flype_just_logged_in', 'true');
   new Audio('sounds/login.mp3').play().catch(()=>{});
   showToast('Рады вас видеть!', `${foundUser.firstName}!`, 'fa-check-circle'); 
@@ -1944,7 +1959,7 @@ document.querySelectorAll('.modal-close-x').forEach(btn => { btn.addEventListene
 document.querySelectorAll('.modal-overlay').forEach(overlay => { overlay.addEventListener('click', (e) => { if (e.target === overlay) { if (overlay.id === 'confirmDeleteProfileOverlay') { closeConfirmDeleteProfile(); return; } if (overlay.id === 'incomingCallOverlay') return; if (overlay.id === 'outgoingCallOverlay') return; if (overlay.id === 'syncConfirmOverlay') return; overlay.classList.remove('open'); } }); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.open').forEach(o => { if (o.id === 'confirmDeleteProfileOverlay') closeConfirmDeleteProfile(); else o.classList.remove('open'); }); } });
 function init() {
-  checkAuth(); updateLoginBlockUI(); setInterval(updateLoginBlockUI, 1000); ensureAdminExists(); listenToMaintenance();
+  checkAuth(); updateLoginBlockUI(); setInterval(updateLoginBlockUI, 1000); listenToMaintenance();
   setInterval(async () => { if (!window.flypeFirebase || !state.statuses.length) return; const day = 24*60*60*1000; const now = Date.now(); const expired = state.statuses.filter(s => now - s.timestamp >= day); if (expired.length === 0) return; const { database, ref, remove } = window.flypeFirebase; for (const s of expired) { try { await remove(ref(database, 'statuses/' + s.id)); } catch (e) {} } state.statuses = state.statuses.filter(s => now - s.timestamp < day); persistStatuses(); renderStatusList(); }, 5*60*1000);
 }
 document.addEventListener('DOMContentLoaded', init);
