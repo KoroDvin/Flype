@@ -651,10 +651,19 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 </div>
 
 <div class="modal-overlay" id="syncConfirmOverlay">
-<div class="modal" style="text-align:center;max-width:380px;">
+<div class="modal" style="text-align:center;max-width:400px;">
 <div style="font-size:48px;color:var(--accent);margin-bottom:16px;"><i class="fas fa-shield-alt"></i></div>
 <h3>Передать ключ?</h3>
 <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;">Другое устройство запрашивает доступ к вашим сообщениям.</p>
+<div class="input-group" style="text-align:left;margin-bottom:12px;">
+<label>Срок доступа</label>
+<select id="syncDurationSelect" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13px;outline:none;">
+<option value="24">24 часа</option>
+<option value="48">48 часов</option>
+<option value="72">72 часа</option>
+<option value="0">Бесконечно</option>
+</select>
+</div>
 <p style="font-size:12px;color:var(--danger);line-height:1.5;margin-bottom:16px;padding:10px;background:var(--bg);border-radius:var(--radius);">⚠️ Если это были <b>не вы</b> — нажмите <b>«Нет»</b>.</p>
 <div class="modal-actions"><button class="btn btn-secondary" id="syncConfirmNo" style="flex:1;">Нет</button><button class="btn" id="syncConfirmYes" style="flex:1;">Да, передать</button></div>
 </div>
@@ -669,7 +678,6 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 <p style="font-size:11.5px;color:var(--text-muted);">Код действует 5 минут</p>
 </div>
 </div>
-
 <div class="modal-overlay" id="changeIdOverlay">
 <div class="modal">
 <button class="modal-close-x" data-close="changeIdOverlay"><i class="fas fa-times"></i></button>
@@ -867,6 +875,7 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 
 <div class="toast-container" id="toastContainer"></div>
 <div class="auth-footer" id="authFooter">© 2026 Flype. Все права защищены.</div>
+
 <script>
 const STORAGE_KEYS = { users: 'flype_users', currentUserId: 'flype_current_user', chats: 'flype_chats', messages: 'flype_messages', statuses: 'flype_statuses', settings: 'flype_settings' };
 const ADMIN_UID = 'oqqFsE0hg3Rg2tJnCjLdWNd8o892';
@@ -885,6 +894,7 @@ const SYNC_REQUEST_TTL = 24*60*60*1000;
 const SYNC_CODE_TTL = 5*60*1000;
 const SYNC_UNLOCK_TTL = 24*60*60*1000;
 const MAX_MESSAGES_PER_CHAT = 500;
+const MAX_VOICE_PER_CHAT = 30;
 let syncKeysListener = null;
 
 const SOUND_FILES = { 
@@ -909,7 +919,12 @@ function playSoundFile(name, volume = 0.5) {
   if (soundFailed.has(name)) return;
   try { if (!soundCache[name]) { soundCache[name] = new Audio(src); soundCache[name].preload = 'auto'; soundCache[name].addEventListener('error', () => { soundFailed.add(name); }, { once: true }); } const player = soundCache[name].cloneNode(); player.volume = volume; player.play().catch(() => {}); } catch (e) {}
 }
-const Sound = { messageIn() { playSoundFile('notification', 0.6); }, notification() { playSoundFile('notification', 0.6); }, messageOut() {}, send() {}, system() { playSoundFile('systemNotification', 0.5); }, error() { playSoundFile('error', 0.5); }, callConnect() { playSoundFile('callConnect', 0.6); }, callStart() { playSoundFile('callStart', 0.7); }, callEnded() { playSoundFile('callEnded', 0.6); }, callFailed() { playSoundFile('callFailed', 0.6); }, connectionLost() { playSoundFile('connectionLost', 0.6); }, statusSent() { playSoundFile('statusSent', 0.5); }, statusFailed() { playSoundFile('statusFailed', 0.5); }, logout() { playSoundFile('logout', 0.5); } };
+// Звуки звонка — играют даже при выключенных звуках
+function playCallSound(name, volume = 0.6) {
+  const src = SOUND_FILES[name]; if (!src) return;
+  try { const p = new Audio(src); p.volume = volume; p.play().catch(() => {}); } catch (e) {}
+}
+const Sound = { messageIn() { playSoundFile('notification', 0.6); }, notification() { playSoundFile('notification', 0.6); }, messageOut() {}, send() {}, system() { playSoundFile('systemNotification', 0.5); }, error() { playSoundFile('error', 0.5); }, callConnect() { playCallSound('callConnect', 0.6); }, callStart() { playCallSound('callStart', 0.7); }, callEnded() { playCallSound('callEnded', 0.6); }, callFailed() { playCallSound('callFailed', 0.6); }, connectionLost() { playSoundFile('connectionLost', 0.6); }, statusSent() { playSoundFile('statusSent', 0.5); }, statusFailed() { playSoundFile('statusFailed', 0.5); }, logout() { playSoundFile('logout', 0.5); } };
 
 async function compressImage(file, maxWidth = 800, quality = 0.7) {
   return new Promise((resolve, reject) => {
@@ -1027,7 +1042,6 @@ function showMainScreen() {
     loadState(); renderAll(); listenToUsers(); listenToChats(); listenToCalls(); listenToMaintenance(); listenToStatuses(); startBanChecker(); updateSidebarProfile(); updateAdminPanel(); startPresenceHeartbeat();
     listenToSyncRequests(); checkSyncTimer();
     
-    // Тут проверяем, только что вошли или просто зашли
     if (state.currentUser) {
       const isJustLoggedIn = sessionStorage.getItem('flype_just_logged_in') === 'true';
       if (isJustLoggedIn) {
@@ -1083,7 +1097,7 @@ async function requestKeyFromOtherDevice() {
   try {
     await set(ref(database, 'sync_requests/' + u.id), { requestedAt: Date.now(), expiresAt: Date.now() + SYNC_REQUEST_TTL, deviceInfo: navigator.userAgent.substring(0, 80) });
     document.getElementById('syncWaitingOverlay').classList.add('open');
-    if (syncKeysListener) syncKeysListener();
+    if (syncKeysListener) { syncKeysListener(); syncKeysListener = null; }
     syncKeysListener = onValue(ref(database, 'sync_keys/' + u.id), (snapshot) => {
       const data = snapshot.val();
       if (data && data.expiresAt > Date.now()) {
@@ -1096,6 +1110,20 @@ async function requestKeyFromOtherDevice() {
       }
     });
   } catch (err) { Sound.error(); showToast('Ошибка', 'Не удалось отправить запрос', 'fa-exclamation-circle'); }
+}
+async function cancelSyncRequest() {
+  const u = state.currentUser; if (!u) return;
+  try {
+    if (window.flypeFirebase) {
+      const { database, ref, remove } = window.flypeFirebase;
+      await remove(ref(database, 'sync_requests/' + u.id)).catch(() => {});
+    }
+    if (syncKeysListener) { syncKeysListener(); syncKeysListener = null; }
+    document.getElementById('syncWaitingOverlay').classList.remove('open');
+    showToast('Запрос отменён', '', 'fa-times-circle', 2500);
+  } catch (e) {
+    document.getElementById('syncWaitingOverlay').classList.remove('open');
+  }
 }
 function listenToSyncRequests() {
   if (!window.flypeFirebase) { setTimeout(listenToSyncRequests, 500); return; }
@@ -1113,9 +1141,27 @@ function listenToSyncRequests() {
 async function tryDecryptSyncKey(encryptedKey, code) {
   const privateKey = await decryptPrivateKeyWithCode(encryptedKey, code);
   localStorage.setItem('flype_private_key_' + state.currentUser.id, privateKey);
-  localStorage.setItem('flype_sync_unlock_until', String(Date.now() + SYNC_UNLOCK_TTL));
+  // Получаем accessTtl из Firebase (0 = бесконечно)
+  let ttl = SYNC_UNLOCK_TTL;
+  try {
+    if (window.flypeFirebase) {
+      const { database, ref, get } = window.flypeFirebase;
+      const snap = await get(ref(database, 'sync_keys/' + state.currentUser.id));
+      const data = snap.val();
+      if (data && typeof data.accessTtl === 'number') {
+        ttl = data.accessTtl === 0 ? 0 : data.accessTtl;
+      }
+    }
+  } catch (e) {}
+  if (ttl === 0) {
+    localStorage.removeItem('flype_sync_unlock_until');
+    localStorage.setItem('flype_is_primary', 'true');
+  } else {
+    localStorage.setItem('flype_sync_unlock_until', String(Date.now() + ttl));
+  }
   Sound.send();
-  showToast('Синхронизировано!', 'Сообщения расшифрованы на 24 часа', 'fa-check-circle', 5000);
+  const label = ttl === 0 ? 'доступ навсегда' : `доступ ${Math.round(ttl / 3600000)} ч`;
+  showToast('Синхронизировано!', `Сообщения расшифрованы (${label})`, 'fa-check-circle', 5000);
   renderMessages(state.activeChatId);
   if (window.flypeFirebase) { try { const { database, ref, remove } = window.flypeFirebase; await remove(ref(database, 'sync_keys/' + state.currentUser.id)); } catch (e) {} }
 }
@@ -1289,7 +1335,7 @@ function listenToMessages(chatId) {
 }
 
 let currentCall = null, callListenerUnsubscribe = null, ringtoneAudio = null, outgoingCallTimer = null, outgoingCallRef = null, outgoingCallTimerInterval = null;
-function startRingtone() { stopRingtone(); if (!state.settings.sounds) return; try { const src = state.settings.ringtone || SOUND_FILES.ringtone; ringtoneAudio = new Audio(src); ringtoneAudio.loop = true; ringtoneAudio.volume = 0.7; ringtoneAudio.play().catch(() => {}); } catch (e) {} }
+function startRingtone() { stopRingtone(); try { const src = state.settings.ringtone || SOUND_FILES.ringtone; ringtoneAudio = new Audio(src); ringtoneAudio.loop = true; ringtoneAudio.volume = 0.7; ringtoneAudio.play().catch(() => {}); } catch (e) {} }
 function stopRingtone() { if (ringtoneAudio) { try { ringtoneAudio.pause(); ringtoneAudio.currentTime = 0; } catch (e) {} ringtoneAudio = null; } }
 function listenToCalls() {
   if (!window.flypeFirebase) { setTimeout(listenToCalls, 500); return; }
@@ -1613,6 +1659,133 @@ async function sendMessage(text, type = 'text', extra = {}) {
     }
   } catch (err) { Sound.statusFailed(); showToast('Ошибка', 'Не удалось отправить', 'fa-exclamation-circle'); }
 }
+
+// ================== ГОЛОСОВЫЕ СООБЩЕНИЯ ==================
+let voiceMediaRecorder = null;
+let voiceChunks = [];
+let voiceStartTime = 0;
+let voiceTimerInterval = null;
+let voiceRecordingCancelled = false;
+let voiceStreamRef = null;
+
+function _fmtVoiceDuration(sec) { const m = Math.floor(sec/60), s = Math.floor(sec%60); return m + ':' + String(s).padStart(2,'0'); }
+
+async function startVoiceRecording() {
+  if (!state.activeChatId) return;
+  if (voiceMediaRecorder) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    Sound.error(); showToast('Ошибка', 'Микрофон не поддерживается', 'fa-microphone-slash'); return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    voiceStreamRef = stream;
+    voiceChunks = [];
+    voiceRecordingCancelled = false;
+    const mr = new MediaRecorder(stream);
+    voiceMediaRecorder = mr;
+    mr.ondataavailable = (e) => { if (e.data && e.data.size > 0) voiceChunks.push(e.data); };
+    mr.onstop = async () => {
+      const durationSec = Math.max(1, Math.round((Date.now() - voiceStartTime) / 1000));
+      const wasCancelled = voiceRecordingCancelled;
+      const chunks = voiceChunks.slice();
+      voiceChunks = [];
+      voiceMediaRecorder = null;
+      if (voiceStreamRef) { try { voiceStreamRef.getTracks().forEach(t => t.stop()); } catch (e) {} voiceStreamRef = null; }
+      document.getElementById('voiceRecordingOverlay').classList.add('hidden');
+      if (voiceTimerInterval) { clearInterval(voiceTimerInterval); voiceTimerInterval = null; }
+      if (wasCancelled) { showToast('Отменено', 'Запись удалена', 'fa-times', 2000); return; }
+      if (chunks.length === 0) { showToast('Пусто', 'Ничего не записано', 'fa-exclamation-circle', 2000); return; }
+      try {
+        const blob = new Blob(chunks, { type: chunks[0].type || 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const dataUrl = reader.result;
+          await _sendVoiceMessage(dataUrl, durationSec);
+        };
+        reader.readAsDataURL(blob);
+      } catch (err) { console.error('voice blob:', err); Sound.statusFailed(); }
+    };
+    voiceStartTime = Date.now();
+    mr.start();
+    // UI
+    const ov = document.getElementById('voiceRecordingOverlay');
+    ov.classList.remove('hidden');
+    const timeEl = document.getElementById('voiceRecordingTime');
+    timeEl.textContent = '0:00';
+    if (voiceTimerInterval) clearInterval(voiceTimerInterval);
+    voiceTimerInterval = setInterval(() => {
+      const d = Math.max(0, Math.floor((Date.now() - voiceStartTime) / 1000));
+      timeEl.textContent = _fmtVoiceDuration(d);
+    }, 250);
+    if (navigator.vibrate) navigator.vibrate(30);
+  } catch (err) {
+    console.error('❌ mic:', err);
+    Sound.error(); showToast('Микрофон', 'Разрешите доступ к микрофону', 'fa-microphone-slash', 4000);
+    if (voiceStreamRef) { try { voiceStreamRef.getTracks().forEach(t => t.stop()); } catch (e) {} voiceStreamRef = null; }
+    voiceMediaRecorder = null;
+  }
+}
+function stopVoiceRecording(cancel = false) {
+  if (!voiceMediaRecorder) return;
+  voiceRecordingCancelled = cancel;
+  try { voiceMediaRecorder.stop(); } catch (e) {}
+}
+async function _sendVoiceMessage(audioData, duration) {
+  if (!state.activeChatId || !window.flypeFirebase) return;
+  const chatId = state.activeChatId;
+  const uid = state.currentUser.id;
+  const chat = state.chats.find(c => c.id === chatId); if (!chat) return;
+  try {
+    const { database, ref, push, set, update, get, remove } = window.flypeFirebase;
+    const msg = { chatId, senderId: uid, text: '', encrypted: false, timestamp: Date.now(), read: false, type: 'voice', audioUrl: audioData, duration };
+    const nm = push(ref(database, 'messages')); await set(nm, msg);
+    try { await update(ref(database, 'chats/' + chatId), { lastMessageAt: msg.timestamp, lastMessage: '🎤 Голосовое' }); } catch (e) {}
+    if (!state.messages.find(m => m.id === nm.key)) state.messages.push({ id: nm.key, ...msg });
+    const lc = state.chats.find(c => c.id === chatId);
+    if (lc) { lc.lastMessageAt = msg.timestamp; lc.lastMessage = '🎤 Голосовое'; }
+    persistMessages(); persistChats();
+    if (state.activeChatId === chatId) renderMessages(chatId);
+    renderChatList();
+    // Лимит: не более MAX_VOICE_PER_CHAT голосовых от одного пользователя в чате
+    try {
+      const snap = await get(ref(database, 'messages'));
+      const all = snap.val() || {};
+      const voiceMsgs = Object.entries(all).map(([id, m]) => ({ id, ...m }))
+        .filter(m => m.chatId === chatId && m.type === 'voice' && m.senderId === uid)
+        .sort((a, b) => a.timestamp - b.timestamp);
+      if (voiceMsgs.length > MAX_VOICE_PER_CHAT) {
+        const toDelete = voiceMsgs.slice(0, voiceMsgs.length - MAX_VOICE_PER_CHAT);
+        for (const m of toDelete) {
+          try { await remove(ref(database, 'messages/' + m.id)); } catch (e) {}
+          state.messages = state.messages.filter(x => x.id !== m.id);
+        }
+        persistMessages();
+        if (state.activeChatId === chatId) renderMessages(chatId);
+        showToast('Лимит голосовых', `Старые удалены (макс. ${MAX_VOICE_PER_CHAT})`, 'fa-info-circle', 3000);
+      }
+    } catch (e) { console.warn('voice limit:', e); }
+    Sound.statusSent();
+    showToast('Отправлено', 'Голосовое сообщение', 'fa-microphone', 2000);
+  } catch (err) { console.error('❌ Voice send:', err); Sound.statusFailed(); showToast('Ошибка', 'Не удалось отправить', 'fa-exclamation-circle'); }
+}
+// обработчик кнопки микрофона — нажал-держишь-отпустил
+(function bindVoiceBtn() {
+  const btn = document.getElementById('voiceBtn');
+  if (!btn) return;
+  let pressing = false;
+  const down = (e) => { if (e) e.preventDefault(); if (pressing) return; pressing = true; startVoiceRecording(); };
+  const up = (e) => { if (e) e.preventDefault(); if (!pressing) return; pressing = false; stopVoiceRecording(false); };
+  btn.addEventListener('mousedown', down);
+  btn.addEventListener('mouseup', up);
+  btn.addEventListener('mouseleave', () => { if (pressing) { pressing = false; stopVoiceRecording(false); } });
+  btn.addEventListener('touchstart', down, { passive: false });
+  btn.addEventListener('touchend', up, { passive: false });
+  btn.addEventListener('touchcancel', () => { if (pressing) { pressing = false; stopVoiceRecording(true); } });
+  const cancelBtn = document.getElementById('voiceRecordingCancel');
+  if (cancelBtn) cancelBtn.addEventListener('click', () => stopVoiceRecording(true));
+})();
+// ================== /ГОЛОСОВЫЕ ==================
+
 let pendingReportTargetId = null, pendingReportEvidence = null, adminActionReportId = null;
 document.getElementById('reportUserBtn').addEventListener('click', () => { if (!state.activeChatId) return; const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat || chat.type !== 'private') return; const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (!other) return; if (other.isAdmin) { Sound.error(); showToast('Недоступно', 'На администратора нельзя пожаловаться', 'fa-shield-alt', 3000); return; } openReportModal(other); });
 async function openReportModal(targetUser) {
@@ -1818,35 +1991,36 @@ window.flypeFirebase = { database, ref, set, onValue, get, child, push, update, 
 console.log('✅ Firebase подключён. databaseURL:', firebaseConfig.databaseURL);
 </script>
 <script>
-window.addEventListener('load', () => {
-  console.log('🛠️ Финальный патч: Восстановление кнопок');
+// ================== ОБЪЕДИНЁННЫЙ ПУЛЬТ (бывшие блоки #1 и #3) ==================
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('🛠️ Инициализация обработчиков UI');
 
-  // 1. ПРОФИЛЬ
+  // ---------- ПРОФИЛЬ / НАСТРОЙКИ ----------
   const profileBtn = document.getElementById('sidebarProfileBtn');
   if (profileBtn) {
-    profileBtn.onclick = () => {
-      if (typeof openSettings === 'function') openSettings();
-      else {
-        const u = state.currentUser;
-        if(!u) return;
+    profileBtn.onclick = function() {
+      const currentUserId = localStorage.getItem('flype_current_user');
+      const users = JSON.parse(localStorage.getItem('flype_users') || '[]');
+      const u = users.find(x => x.id === currentUserId);
+      if (u) {
         document.getElementById('settingsFirstName').value = u.firstName || '';
         document.getElementById('settingsLastName').value = u.lastName || '';
+        document.getElementById('settingsAbout').value = u.about || '';
+        document.getElementById('aboutCounter').textContent = (u.about || '').length;
         document.getElementById('settingsUsername').textContent = '@' + (u.flypeId || '');
-        document.getElementById('settingsOverlay').classList.add('open');
+        const preview = document.getElementById('settingsAvatarPreview');
+        if (u.avatar) preview.innerHTML = `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        else preview.textContent = (u.firstName ? u.firstName.charAt(0).toUpperCase() : '?');
       }
+      document.getElementById('settingsOverlay').classList.add('open');
     };
   }
 
-  // 2. ВЫХОД
+  // ---------- ВЫХОД ----------
   const logoutBtn = document.getElementById('logoutLink');
-  if (logoutBtn) {
-    logoutBtn.onclick = () => {
-      if (typeof handleLogout === 'function') handleLogout();
-      else { localStorage.clear(); location.reload(); }
-    };
-  }
+  if (logoutBtn) logoutBtn.onclick = () => { if (typeof handleLogout === 'function') handleLogout(); else { localStorage.clear(); location.reload(); } };
 
-  // 3. ВКЛАДКИ ЧАТЫ/СТАТУСЫ
+  // ---------- ВКЛАДКИ ЧАТЫ/СТАТУСЫ ----------
   document.querySelectorAll('.sidebar-tab').forEach(tab => {
     tab.onclick = function() {
       document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
@@ -1857,7 +2031,7 @@ window.addEventListener('load', () => {
     };
   });
 
-  // 4. КНОПКА "i" (О контакте)
+  // ---------- КНОПКА "i" ----------
   const infoBtn = document.getElementById('infoBtn');
   if (infoBtn) {
     infoBtn.onclick = () => {
@@ -1867,15 +2041,15 @@ window.addEventListener('load', () => {
       document.getElementById('contactName').textContent = info.name || 'Неизвестный';
       document.getElementById('contactStatus').textContent = info.online ? 'В сети' : 'Был(а) недавно';
       document.getElementById('contactFlypeId').textContent = chat.type === 'group' ? `Группа · ${chat.participants.length} участников` : (info.flypeId ? '@' + info.flypeId : '—');
-      const av = document.getElementById('contactAvatar'); 
-      if (info.avatar) av.innerHTML = `<img src="${escapeHtml(info.avatar)}">`; 
+      const av = document.getElementById('contactAvatar');
+      if (info.avatar) av.innerHTML = `<img src="${escapeHtml(info.avatar)}">`;
       else av.textContent = initial(info.name);
-      document.getElementById('contactProfile').classList.remove('hidden'); 
+      document.getElementById('contactProfile').classList.remove('hidden');
       document.getElementById('profilePanel').classList.add('open');
     };
   }
 
-  // 5. ЗВОНКИ
+  // ---------- ЗВОНКИ ----------
   const callBtn = document.getElementById('callBtn');
   if (callBtn) callBtn.onclick = () => { if(typeof startCall === 'function') startCall(state.activeChatId, false); };
   const videoBtn = document.getElementById('videoCallBtn');
@@ -1887,7 +2061,7 @@ window.addEventListener('load', () => {
   const acceptBtn = document.getElementById('acceptCallBtn');
   if (acceptBtn) acceptBtn.onclick = () => { if(typeof acceptCall === 'function') acceptCall(); };
 
-  // 6. ОТПРАВКА СООБЩЕНИЙ
+  // ---------- ОТПРАВКА ----------
   const sendBtn = document.getElementById('sendBtn');
   if (sendBtn) {
     sendBtn.onclick = () => {
@@ -1900,7 +2074,7 @@ window.addEventListener('load', () => {
     };
   }
 
-  // 7. ВОЗВРАЩАЕМ СМАЙЛЫ (создаём кнопку динамически)
+  // ---------- ЭМОДЗИ ----------
   if (!document.getElementById('emojiBtn')) {
     const inputArea = document.querySelector('.chat-input-area');
     const voiceBtn = document.getElementById('voiceBtn');
@@ -1931,154 +2105,90 @@ window.addEventListener('load', () => {
           msgInput.focus();
         }
       };
+      document.addEventListener('click', (e) => {
+        if (!emojiPicker.classList.contains('hidden') && !emojiPicker.contains(e.target) && e.target !== emojiBtn) {
+          emojiPicker.classList.add('hidden');
+        }
+      });
     }
   }
 
-  // 8. УБИРАЕМ ДУБЛИРОВАНИЕ ГОЛОСОВЫХ (Перехватываем _sendVoiceMessage)
-  if (window._sendVoiceMessage) {
-    const origVoiceSend = window._sendVoiceMessage;
-    window._sendVoiceMessage = async function(audioData, duration) {
-      if (!state.activeChatId || !window.flypeFirebase) return;
-      const chatId = state.activeChatId;
-      const uid = state.currentUser.id;
+  // ---------- SYNC: отмена запроса ----------
+  const syncCancelBtn = document.getElementById('syncWaitingCancel');
+  if (syncCancelBtn) syncCancelBtn.onclick = () => { if (typeof cancelSyncRequest === 'function') cancelSyncRequest(); else document.getElementById('syncWaitingOverlay').classList.remove('open'); };
+
+  // ---------- SYNC: подтверждение передачи ключа ----------
+  const syncYesBtn = document.getElementById('syncConfirmYes');
+  if (syncYesBtn) {
+    syncYesBtn.onclick = async function() {
+      const u = state.currentUser; if (!u || !window.flypeFirebase) return;
+      const privateKey = localStorage.getItem('flype_private_key_' + u.id);
+      if (!privateKey) { Sound.error(); showToast('Ошибка', 'Приватный ключ не найден на этом устройстве', 'fa-exclamation-circle'); return; }
+      const days = parseInt(document.getElementById('syncDurationSelect').value || '24');
+      const ttl = days === 0 ? 0 : days * 24 * 60 * 60 * 1000;
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
       try {
-        const { database, ref, push, set, update } = window.flypeFirebase;
-        const msg = { chatId, senderId: uid, text: '', encrypted: false, timestamp: Date.now(), read: false, type: 'voice', audioUrl: audioData, duration };
-        const nm = push(ref(database, 'messages')); await set(nm, msg);
-        try { await update(ref(database, 'chats/' + chatId), { lastMessageAt: msg.timestamp, lastMessage: '🎤 Голосовое' }); } catch (e) {}
-        
-        // Добавляем локально, чтобы не было дубля
-        if (!state.messages.find(m => m.id === nm.key)) {
-          state.messages.push({ id: nm.key, ...msg });
-        }
-        const lc = state.chats.find(c => c.id === chatId);
-        if (lc) { lc.lastMessageAt = msg.timestamp; lc.lastMessage = '🎤 Голосовое'; }
-        persistMessages(); persistChats();
-        if (state.activeChatId === chatId) renderMessages(chatId);
-        renderChatList();
-        Sound.statusSent();
-        showToast('Отправлено', 'Голосовое сообщение', 'fa-microphone', 2000);
-      } catch (err) { console.error('❌ Voice send:', err); Sound.statusFailed(); showToast('Ошибка', 'Не удалось отправить', 'fa-exclamation-circle'); }
-    };
-  }
-});
-</script>
-<script>
-// Этот код выполнится, даже если основной скрипт упал
-document.addEventListener('DOMContentLoaded', () => {
-  const loginForm = document.getElementById('loginForm');
-  if (loginForm) {
-    loginForm.onsubmit = function(e) {
-      e.preventDefault();
-      // Принудительно вызываем вход, если функция есть
-      if (typeof handleLogin === 'function') {
-        handleLogin(e);
-      } else {
-        // Если функции нет — пробуем базовый вход через Firebase
-        const email = document.getElementById('loginEmail').value.trim();
-        const pass = document.getElementById('loginPassword').value;
-        if (window.flypeFirebase) {
-          window.flypeFirebase.signInWithEmailAndPassword(window.flypeFirebase.auth, email, pass)
-          .then(res => {
-             localStorage.setItem('flype_current_user', res.user.uid);
-             location.reload();
-          }).catch(err => alert('Ошибка входа: ' + err.message));
-        }
+        const encryptedKey = await encryptPrivateKeyWithCode(privateKey, code);
+        const { database, ref, set, remove } = window.flypeFirebase;
+        await set(ref(database, 'sync_keys/' + u.id), {
+          encryptedKey,
+          createdAt: Date.now(),
+          expiresAt: Date.now() + SYNC_CODE_TTL,
+          accessTtl: ttl,
+          grantedBy: u.id
+        });
+        await remove(ref(database, 'sync_requests/' + u.id)).catch(() => {});
+        document.getElementById('syncConfirmOverlay').classList.remove('open');
+        const codeEl = document.getElementById('syncCodeValue');
+        if (codeEl) codeEl.textContent = code;
+        document.getElementById('syncCodeOverlay').classList.add('open');
+        Sound.send();
+        showToast('Код создан', 'Введите его на новом устройстве', 'fa-key', 5000);
+      } catch (err) {
+        console.error('❌ sync confirm:', err);
+        Sound.error(); showToast('Ошибка', 'Не удалось зашифровать ключ', 'fa-exclamation-circle');
       }
     };
   }
 
-  const regForm = document.getElementById('registerForm');
-  if (regForm) {
-    regForm.onsubmit = function(e) {
-      e.preventDefault();
-      if (typeof handleRegister === 'function') handleRegister(e);
-    };
-  }
-
-  const tabs = document.querySelectorAll('.auth-tab');
-  tabs.forEach(tab => {
-    tab.onclick = function() {
-      tabs.forEach(t => t.classList.remove('active'));
-      this.classList.add('active');
-      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-      const target = this.dataset.tab === 'login' ? 'loginForm' : 'registerForm';
-      document.getElementById(target).classList.add('active');
-    };
-  });
-
-  const closeProf = document.getElementById('closeProfileBtn');
-  if (closeProf) closeProf.onclick = () => document.getElementById('profilePanel').classList.remove('open');
-});
-</script>
-<script>
-// Не ждём load, делаем сразу после загрузки DOM
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('🛠️ Универсальный пульт настроек');
-
-  // 1. ОТКРЫТИЕ НАСТРОЕК (Берём данные прямо из localStorage)
-  const profileBtn = document.getElementById('sidebarProfileBtn');
-  if (profileBtn) {
-    profileBtn.onclick = function() {
-      const currentUserId = localStorage.getItem('flype_current_user');
-      const users = JSON.parse(localStorage.getItem('flype_users') || '[]');
-      const u = users.find(x => x.id === currentUserId);
-      
-      if (u) {
-        document.getElementById('settingsFirstName').value = u.firstName || '';
-        document.getElementById('settingsLastName').value = u.lastName || '';
-        document.getElementById('settingsAbout').value = u.about || '';
-        document.getElementById('aboutCounter').textContent = (u.about || '').length;
-        document.getElementById('settingsUsername').textContent = '@' + (u.flypeId || '');
-        
-        const preview = document.getElementById('settingsAvatarPreview');
-        if (u.avatar) preview.innerHTML = `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-        else preview.textContent = (u.firstName ? u.firstName.charAt(0).toUpperCase() : '?');
+  // ---------- SYNC: отказ ----------
+  const syncNoBtn = document.getElementById('syncConfirmNo');
+  if (syncNoBtn) {
+    syncNoBtn.onclick = async function() {
+      const u = state.currentUser;
+      document.getElementById('syncConfirmOverlay').classList.remove('open');
+      if (u && window.flypeFirebase) {
+        try { const { database, ref, remove } = window.flypeFirebase; await remove(ref(database, 'sync_requests/' + u.id)).catch(() => {}); } catch (e) {}
       }
-      document.getElementById('settingsOverlay').classList.add('open');
+      showToast('Отклонено', 'Ключ не передан', 'fa-times-circle', 2500);
     };
   }
 
-  // 2. ТУМБЛЕР ТЁМНАЯ ТЕМА
+  // ---------- НАСТРОЙКИ: тумблеры и сохранение ----------
   const darkTgl = document.getElementById('darkThemeToggle');
-  if (darkTgl) {
-    darkTgl.onchange = function(e) {
-      document.body.classList.toggle('dark', e.target.checked);
-      localStorage.setItem('flype_dark_theme', e.target.checked ? 'true' : 'false');
-    };
-  }
-
-  // 3. ТУМБЛЕР ЗВУКИ
+  if (darkTgl) darkTgl.onchange = (e) => { document.body.classList.toggle('dark', e.target.checked); state.settings.darkTheme = e.target.checked; persistSettings(); };
   const soundTgl = document.getElementById('soundToggle');
-  if (soundTgl) {
-    soundTgl.onchange = function(e) {
-      localStorage.setItem('flype_sounds', e.target.checked ? 'true' : 'false');
-    };
-  }
-
-  // 4. ТУМБЛЕР FRUTIGER AERO
+  if (soundTgl) soundTgl.onchange = (e) => { state.settings.sounds = e.target.checked; persistSettings(); };
   const oldFlypeTgl = document.getElementById('oldFlypeToggle');
-  if (oldFlypeTgl) {
-    oldFlypeTgl.onchange = function(e) {
-      document.body.classList.toggle('theme-oldflype', e.target.checked);
-      localStorage.setItem('flype_oldflype', e.target.checked ? 'true' : 'false');
-    };
-  }
+  if (oldFlypeTgl) oldFlypeTgl.onchange = (e) => { document.body.classList.toggle('theme-oldflype', e.target.checked); state.settings.oldFlype = e.target.checked; persistSettings(); };
+  const ringtoneSelect = document.getElementById('ringtoneSelect');
+  if (ringtoneSelect) ringtoneSelect.onchange = (e) => { state.settings.ringtone = e.target.value; persistSettings(); };
 
-  // 5. ЦВЕТОВЫЕ ТЕМЫ
   document.querySelectorAll('.theme-swatch').forEach(swatch => {
     swatch.onclick = function() {
       const themes = ['theme-standard','theme-green','theme-red','theme-blue','theme-white','theme-orange','theme-purple','theme-pink','theme-turquoise','theme-gold'];
       document.body.classList.remove(...themes);
       document.body.classList.add('theme-' + this.dataset.theme);
-      localStorage.setItem('flype_theme', this.dataset.theme);
-      
+      state.settings.theme = this.dataset.theme;
+      persistSettings();
       document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('selected'));
       this.classList.add('selected');
     };
   });
 
-  // 6. СОХРАНЕНИЕ ПРОФИЛЯ (Пишем напрямую в localStorage)
+  // ---------- СОХРАНЕНИЕ ПРОФИЛЯ ----------
   const saveBtn = document.getElementById('settingsSave');
   if (saveBtn) {
     saveBtn.onclick = async function() {
@@ -2086,39 +2196,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const users = JSON.parse(localStorage.getItem('flype_users') || '[]');
       const idx = users.findIndex(x => x.id === currentUserId);
       if (idx === -1) return alert('Пользователь не найден');
-
       users[idx].firstName = document.getElementById('settingsFirstName').value.trim();
       users[idx].lastName = document.getElementById('settingsLastName').value.trim();
       users[idx].about = document.getElementById('settingsAbout').value.trim();
-      
-      if (window.pendingAvatarData !== undefined) {
-        users[idx].avatar = window.pendingAvatarData;
-      }
-      
-      // Сохраняем локально
+      if (window.pendingAvatarData !== undefined) users[idx].avatar = window.pendingAvatarData;
       localStorage.setItem('flype_users', JSON.stringify(users));
-      
-      // Сохраняем в Firebase (если есть)
       if (window.flypeFirebase) {
-        try {
-          const { database, ref, set } = window.flypeFirebase;
-          await set(ref(database, 'users/' + currentUserId), users[idx]);
-        } catch (err) { console.error('Firebase save error:', err); }
+        try { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'users/' + currentUserId), users[idx]); } catch (err) { console.error('Firebase save error:', err); }
       }
-      
-      // Обновляем сайдбар
       const name = `${users[idx].firstName} ${users[idx].lastName}`.trim();
       document.getElementById('sidebarName').textContent = name;
       const sa = document.getElementById('sidebarAvatar');
       if (users[idx].avatar) sa.innerHTML = `<img src="${users[idx].avatar}">`;
       else sa.textContent = users[idx].firstName.charAt(0).toUpperCase();
-      
       document.getElementById('settingsOverlay').classList.remove('open');
       alert('Профиль сохранён!');
     };
   }
 
-  // 7. ЗАГРУЗКА И УДАЛЕНИЕ АВАТАРКИ
+  // ---------- АВАТАРКА ----------
   const avBtn = document.getElementById('settingsAvatarBtn');
   const avFile = document.getElementById('settingsAvatarFile');
   if (avBtn && avFile) {
@@ -2146,45 +2242,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
   const avRem = document.getElementById('settingsAvatarRemoveBtn');
-  if (avRem) {
-    avRem.onclick = () => {
-      window.pendingAvatarData = '';
-      document.getElementById('settingsAvatarPreview').textContent = '?';
-    };
-  }
+  if (avRem) avRem.onclick = () => { window.pendingAvatarData = ''; document.getElementById('settingsAvatarPreview').textContent = '?'; };
 
-  // 8. ПОДЕЛИТЬСЯ САЙТОМ
+  // ---------- ПОДЕЛИТЬСЯ ----------
   const shareBtn = document.getElementById('shareSiteBtn');
-  if (shareBtn) {
-    shareBtn.onclick = function() {
-      const url = 'https://korodvin.github.io/Flype/';
-      navigator.clipboard.writeText(url).then(() => alert('Ссылка скопирована!')).catch(() => alert('Не удалось скопировать.'));
-    };
-  }
+  if (shareBtn) shareBtn.onclick = () => { const url = 'https://korodvin.github.io/Flype/'; navigator.clipboard.writeText(url).then(() => alert('Ссылка скопирована!')).catch(() => alert('Не удалось скопировать.')); };
 
-  // 9. ТЕХ. РАБОТЫ
+  // ---------- ТЕХ. РАБОТЫ ----------
   const maintOn = document.getElementById('maintenanceOnBtn');
-  if (maintOn) {
-    maintOn.onclick = async function() {
-      const msg = prompt('Сообщение:', 'Скоро вернёмся!');
-      if (msg === null) return;
-      if (window.flypeFirebase) {
-        const { database, ref, set } = window.flypeFirebase;
-        await set(ref(database, 'maintenance'), { active: true, message: msg, startedAt: Date.now() });
-        alert('Включено');
-      }
-    };
-  }
+  if (maintOn) maintOn.onclick = async () => {
+    const msg = prompt('Сообщение:', 'Скоро вернёмся!');
+    if (msg === null) return;
+    if (window.flypeFirebase) { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'maintenance'), { active: true, message: msg, startedAt: Date.now() }); alert('Включено'); }
+  };
   const maintOff = document.getElementById('maintenanceOffBtn');
-  if (maintOff) {
-    maintOff.onclick = async function() {
-      if (window.flypeFirebase) {
-        const { database, ref, set } = window.flypeFirebase;
-        await set(ref(database, 'maintenance'), { active: false, message: '', stoppedAt: Date.now() });
-        alert('Выключено');
-      }
-    };
-  }
+  if (maintOff) maintOff.onclick = async () => {
+    if (window.flypeFirebase) { const { database, ref, set } = window.flypeFirebase; await set(ref(database, 'maintenance'), { active: false, message: '', stoppedAt: Date.now() }); alert('Выключено'); }
+  };
 });
 </script>
 </body>
