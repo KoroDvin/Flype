@@ -2010,6 +2010,30 @@ console.log('✅ Firebase подключён. databaseURL:', firebaseConfig.data
 document.addEventListener('DOMContentLoaded', () => {
   console.log('🛠️ Инициализация обработчиков UI');
 
+    // ================== ЖЕСТКАЯ ПРИВЯЗКА ВХОДА ==================
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.onsubmit = function(e) {
+      e.preventDefault(); // Останавливаем перезагрузку страницы
+      if (typeof handleLogin === 'function') {
+        handleLogin(e); // Вызываем вашу функцию входа
+      } else {
+        alert('Ошибка: функция handleLogin не найдена!');
+      }
+    };
+  }
+
+  const regForm = document.getElementById('registerForm');
+  if (regForm) {
+    regForm.onsubmit = function(e) {
+      e.preventDefault();
+      if (typeof handleRegister === 'function') {
+        handleRegister(e);
+      }
+    };
+  }
+  // =============================================================
+
   // ---------- ПРОФИЛЬ / НАСТРОЙКИ ----------
   const profileBtn = document.getElementById('sidebarProfileBtn');
   if (profileBtn) {
