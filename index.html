@@ -2305,14 +2305,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const n = `${u.firstName} ${u.lastName}`.trim(); const isChecked = hidden.includes(u.id);
         return `<label style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--bg);border-radius:var(--radius);cursor:pointer;"><input type="checkbox" class="privacy-user-check" data-id="${u.id}" ${isChecked ? 'checked' : ''} style="width:16px;height:16px;"><div class="avatar sm">${u.avatar ? `<img src="${u.avatar}">` : initial(n)}</div><span style="font-size:13px;">${escapeHtml(n)}</span></label>`;
       }).join('');
-      list.querySelectorAll('.privacy-user-check').forEach(chk => {
+            list.querySelectorAll('.privacy-user-check').forEach(chk => {
         chk.onchange = async (e) => {
           const uid = e.target.dataset.id; let current = state.currentUser.hiddenStatusFor || [];
           if (e.target.checked) current.push(uid); else current = current.filter(id => id !== uid);
           state.currentUser.hiddenStatusFor = current;
+          
+          // Обновляем данные в Firebase
           if (window.flypeFirebase) { const { database, ref, update } = window.flypeFirebase; await update(ref(database, 'users/' + state.currentUser.id), { hiddenStatusFor: current }); }
-          const localUsers = JSON.parse(localStorage.getItem('flype_users') || '[]'); const idx = localUsers.findIndex(u => u.id === state.currentUser.id);
+          
+          // Обновляем локальное хранилище
+          const localUsers = JSON.parse(localStorage.getItem('flype_users') || '[]'); 
+          const idx = localUsers.findIndex(u => u.id === state.currentUser.id);
           if (idx !== -1) { localUsers[idx].hiddenStatusFor = current; localStorage.setItem('flype_users', JSON.stringify(localUsers)); }
+          
+          // ФИКС: Обновляем массив state.users в оперативной памяти, чтобы интерфейс сразу это увидел
+          const stateUserIdx = state.users.findIndex(u => u.id === state.currentUser.id);
+          if (stateUserIdx !== -1) { 
+            state.users[stateUserIdx].hiddenStatusFor = current; 
+          }
+          
+          // Принудительно перерисовываем список статусов
+          if (typeof renderStatusList === 'function') renderStatusList();
         };
       });
       document.getElementById('statusPrivacyOverlay').classList.add('open');
