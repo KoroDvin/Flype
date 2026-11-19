@@ -18,7 +18,86 @@ body.theme-purple{--accent:#7B2FBE;--accent-hover:#6325A0;--accent-darker:#4A1B7
 body.theme-pink{--accent:#E91E63;--accent-hover:#C2185B;--accent-darker:#880E4F;--accent-light:#FCE4EC;--accent-hover-light:#F8BBD0;--accent-border:#F48FB1;--accent-shadow:rgba(233,30,99,0.35);--text-blue:#880E4F;}
 body.theme-turquoise{--accent:#00BCD4;--accent-hover:#0097A7;--accent-darker:#006064;--accent-light:#E0F7FA;--accent-hover-light:#B2EBF2;--accent-border:#80DEEA;--accent-shadow:rgba(0,188,212,0.35);--text-blue:#006064;}
 body.theme-gold{--accent:#F4B400;--accent-hover:#DFA300;--accent-darker:#B8860B;--accent-light:#FFF8E1;--accent-hover-light:#FFECB3;--accent-border:#FFE082;--accent-shadow:rgba(244,180,0,0.35);--text-blue:#B8860B;}
+body.theme-oldflype{--accent:#4AB8E8;--accent-hover:#3A9DD0;--accent-darker:#2A7BA8;--accent-light:#D4EEFA;--accent-hover-light:#B8E1F5;--accent-border:#A0D4EC;--accent-shadow:rgba(74,184,232,0.45);--text-blue:#2A7BA8;--online:#5FD35F;}
+body.theme-oldflype .sidebar-profile::after{background:radial-gradient(circle at 50% 80%,rgba(95,211,95,0.4) 0%,transparent 50%),linear-gradient(180deg,#A8E0F5 0%,#4AB8E8 50%,#2A7BA8 100%)!important;}
+body.theme-oldflype .sidebar-profile::before{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 80' preserveAspectRatio='none'><g fill='%23FFFFFF' fill-opacity='0.9'><ellipse cx='20' cy='80' rx='55' ry='30'/><ellipse cx='75' cy='82' rx='60' ry='32'/><ellipse cx='135' cy='80' rx='65' ry='30'/><ellipse cx='200' cy='82' rx='62' ry='32'/><ellipse cx='265' cy='80' rx='60' ry='30'/></g><g fill='%23FFFFFF' fill-opacity='0.6'><ellipse cx='45' cy='88' rx='75' ry='34'/><ellipse cx='145' cy='89' rx='80' ry='36'/><ellipse cx='245' cy='88' rx='75' ry='34'/></g><rect x='0' y='80' width='280' height='2' fill='%23FFFFFF'/></svg>")!important;}
+body.theme-oldflype .btn{background:linear-gradient(180deg,rgba(255,255,255,0.5) 0%,var(--accent) 50%,var(--accent-hover) 100%);border:1px solid rgba(255,255,255,0.7);box-shadow:0 2px 4px rgba(74,184,232,0.4),inset 0 1px 2px rgba(255,255,255,0.8);text-shadow:0 1px 2px rgba(0,0,0,0.2);border-radius:20px;color:#FFFFFF!important;}
+body.theme-oldflype .btn:hover{background:linear-gradient(180deg,rgba(255,255,255,0.7) 0%,var(--accent-hover) 50%,var(--accent-darker) 100%);}
+body.theme-oldflype .message-row.out .message-bubble{background:linear-gradient(180deg,rgba(255,255,255,0.7) 0%,var(--accent-light) 100%);border:1px solid rgba(255,255,255,0.9);box-shadow:0 3px 8px rgba(74,184,232,0.3),inset 0 1px 2px rgba(255,255,255,0.9);border-radius:18px;}
+body.theme-oldflype .message-row.in .message-bubble{background:linear-gradient(180deg,rgba(255,255,255,0.95) 0%,#E8F4F9 100%);border:1px solid rgba(255,255,255,0.9);box-shadow:0 3px 8px rgba(0,0,0,0.08),inset 0 1px 2px rgba(255,255,255,0.9);border-radius:18px;}
+body.theme-oldflype .avatar::after{content:'';position:absolute;top:4px;left:6px;width:40%;height:30%;background:linear-gradient(180deg,rgba(255,255,255,0.8),rgba(255,255,255,0));border-radius:50%;pointer-events:none;}
+body.theme-oldflype .chat-header,body.theme-oldflype .chat-input-area{background:linear-gradient(180deg,rgba(255,255,255,0.9) 0%,rgba(255,255,255,0.7) 100%);backdrop-filter:blur(10px);}
+body.theme-oldflype .action-circle,body.theme-oldflype .input-btn,body.theme-oldflype .send-btn{background:linear-gradient(180deg,rgba(255,255,255,0.7) 0%,var(--accent) 50%,var(--accent-hover) 100%);border:1px solid rgba(255,255,255,0.8);box-shadow:0 2px 6px rgba(74,184,232,0.5),inset 0 1px 2px rgba(255,255,255,0.9);}
 body.dark{--white:#1A1D21;--bg:#0F1216;--chat-bg:#0F1216;--panel-bg:#1A1D21;--border:#2A2F36;--border-light:#23272D;--text:#FFFFFF;--text-secondary:#B8BDC6;--text-muted:#7A838C;--text-blue:var(--accent);--accent-light:#1A2A3D;--accent-hover-light:#22364F;--accent-border:#2A4058;}
+body.dark.theme-white{--accent:#7A838C;--accent-hover:#5A636C;--accent-darker:#4A5560;--accent-light:#23272D;--accent-hover-light:#2A2F36;--accent-border:#2A2F36;--text-blue:#E4E6EB;}
+body.dark .main-header,body.dark .sidebar,body.dark .chat-area,body.dark .chat-header,body.dark .chat-input-area,body.dark .modal,body.dark .profile-panel,body.dark .message-menu{background:var(--white)!important;color:var(--text);border-color:var(--border-light);}
+body.dark .messages,body.dark .empty-chat,body.dark .typing-indicator{background:var(--bg)!important;}
+body.dark .toast{background:var(--white);color:var(--text);border-color:var(--border);}
+body.dark .message-row.in .message-bubble{background:#23272D!important;color:#FFFFFF!important;border:1px solid #2A2F36!important;}
+body.dark .message-row.out .message-bubble{background:var(--accent)!important;color:#FFFFFF!important;border:1px solid var(--accent)!important;}
+body.dark.theme-white .message-row.out .message-bubble{background:#2A2F36!important;color:#FFFFFF!important;border:1px solid #2A2F36!important;}
+body.dark .message-bubble .msg-time,body.dark .message-bubble .checks i{color:rgba(255,255,255,0.75)!important;}
+body.dark .message-bubble .sender-name{color:var(--accent)!important;}
+body.dark .message-bubble .file-attach{background:rgba(255,255,255,0.08)!important;}
+body.dark .chat-item:hover,body.dark .status-item:hover{background:#23272D!important;}
+body.dark .chat-item.active{background:rgba(0,175,240,0.15)!important;border-left-color:var(--accent)!important;}
+body.dark.theme-white .chat-item.active{background:rgba(122,131,140,0.15)!important;}
+body.dark .chat-info .name,body.dark .status-info .name,body.dark .sidebar-profile .info .name{color:#FFFFFF!important;}
+body.dark .chat-info .last-msg,body.dark .status-info .time{color:var(--text-secondary)!important;}
+body.dark .contacts-group-title,body.dark .sidebar-contacts-header{color:var(--text-secondary)!important;}
+body.dark .sidebar-profile{background:#1A1D21!important;border-bottom-color:#2A2F36!important;}
+body.dark .sidebar-link{color:#FFFFFF!important;}
+body.dark .sidebar-link:hover{background:rgba(0,175,240,0.15)!important;}
+body.dark .sidebar-link i{color:var(--accent)!important;}
+body.dark #logoutLink,body.dark #logoutLink i{color:#FF6B6B!important;}
+body.dark .sidebar-search input,body.dark .input-group input,body.dark .input-group textarea,body.dark .input-group select,body.dark .chat-input-area textarea,body.dark #addMemberSearch{background:#23272D!important;color:#FFFFFF!important;border-color:#2A2F36!important;}
+body.dark .sidebar-search input::placeholder,body.dark .input-group input::placeholder,body.dark .input-group textarea::placeholder,body.dark .chat-input-area textarea::placeholder,body.dark #addMemberSearch::placeholder{color:#7A838C!important;}
+body.dark .btn-secondary{background:#23272D!important;color:#FFFFFF!important;border-color:#2A2F36!important;}
+body.dark .btn-secondary:hover{background:#2A2F36!important;border-color:var(--accent)!important;}
+body.dark .btn,body.dark .btn:hover,body.dark .btn-secondary,body.dark .btn-secondary:hover{color:#FFFFFF!important;}
+body.dark .modal h3{color:#FFFFFF!important;}
+body.dark .modal-close-x{color:#B8BDC6!important;}
+body.dark .modal-close-x:hover{background:#23272D!important;color:#FFFFFF!important;}
+body.dark .profile-id,body.dark .flype-id-box{background:#23272D!important;color:var(--accent)!important;border-color:var(--accent-border)!important;}
+body.dark .profile-action{color:#FFFFFF!important;}
+body.dark .profile-action:hover{background:#23272D!important;}
+body.dark .toast .toast-text,body.dark .toast .toast-text strong{color:#FFFFFF!important;}
+body.dark .toast .toast-text span{color:var(--text-secondary)!important;}
+body.dark .modal .input-group label,body.dark .modal .profile-section h4{color:var(--text-secondary)!important;}
+body.dark .theme-swatch.selected{border-color:#FFFFFF;box-shadow:0 0 0 2px #1A1D21 inset;}
+body.dark .sidebar-tab{color:var(--text-secondary)!important;}
+body.dark .sidebar-tab.active{color:var(--accent)!important;border-bottom-color:var(--accent)!important;}
+body.dark .group-members-bar{background:var(--bg)!important;}
+body.dark .group-member{background:var(--white)!important;border-color:var(--border)!important;color:#FFFFFF!important;}
+body.dark .empty-chat h1{color:var(--accent)!important;}
+body.dark .empty-chat p{color:var(--text-secondary)!important;}
+body.dark .report-message{background:#2A2F36!important;color:#FFFFFF!important;border-color:#3A4048!important;}
+body.dark .report-message .file-attach{background:rgba(255,255,255,0.08)!important;}
+body.dark .chat-item.active,body.dark .status-item.active,body.dark .sidebar-link:active,body.dark .chat-item:active{background:rgba(0,175,240,0.15)!important;}
+body.dark.theme-white .chat-item.active,body.dark.theme-white .chat-item:active{background:rgba(122,131,140,0.15)!important;}
+body.dark .sidebar-actions .btn-secondary{color:#FFFFFF!important;}
+body.dark .admin-action-btn{background:#23272D;color:#FFFFFF;border-color:#2A2F36;}
+body.dark #adminPanel{background:#23272D!important;border-color:#2A2F36!important;}
+body.dark #adminPanel>div:first-child{color:var(--accent)!important;}
+body.dark #adminPanel .btn-secondary{background:#1A1D21!important;border-color:#2A2F36!important;color:#FFFFFF!important;}
+body.dark hr{border-top-color:#2A2F36!important;}
+body.dark .profile-panel{background:#1A1D21!important;border-left-color:#2A2F36!important;}
+body.dark .profile-panel .profile-head{border-bottom-color:#2A2F36!important;}
+body.dark .profile-panel .profile-head .name{color:#FFFFFF!important;}
+body.dark .profile-panel .profile-head .status{color:var(--text-secondary)!important;}
+body.dark .profile-panel .profile-head .status.online{color:var(--accent)!important;}
+body.dark .profile-section{border-bottom-color:#2A2F36!important;}
+body.dark .profile-section h4{color:var(--text-secondary)!important;}
+body.dark .chat-header{background:#1A1D21!important;border-bottom-color:#2A2F36!important;}
+body.dark .chat-header .chat-title .name{color:#FFFFFF!important;}
+body.dark .chat-header .chat-title .status{color:var(--text-secondary)!important;}
+body.dark .chat-header .chat-title .status.online{color:var(--accent)!important;}
+body.dark .chat-header .back-btn{color:#B8BDC6!important;}
+body.dark .chat-header .back-btn:hover{background:#23272D!important;}
+body.dark .chat-input-area{background:#1A1D21!important;border-top-color:#2A2F36!important;}
+body.dark .reaction-badge{background:rgba(255,255,255,0.1);}
+body.dark .reaction-badge.mine{background:var(--accent-light);}
+body.dark .reaction-picker{background:var(--white);border-color:var(--border);}
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;height:100dvh;overflow:hidden;font-size:13px;-webkit-font-smoothing:antialiased;transition:background 0.3s,color 0.3s;}
 .screen{display:none;flex-direction:column;height:100vh;height:100dvh;}
@@ -29,6 +108,7 @@ html,body{font-family:var(--font);background:var(--bg);color:var(--text);height:
 .btn-secondary{background:var(--white);color:var(--text);border-color:var(--border);}
 .btn-secondary:hover{background:var(--bg);border-color:var(--text-muted);}
 .btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{background:#B3261E;}
 .btn:disabled{opacity:0.5;cursor:not-allowed;}
 body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 #authScreen{justify-content:center;align-items:center;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-hover) 100%);padding:20px;overflow-y:auto;}
@@ -46,6 +126,7 @@ body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 .input-group input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;transition:border-color 0.15s,box-shadow 0.15s;}
 .input-group input::placeholder{color:var(--text-muted);}
 .input-group input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-shadow);}
+.input-group input.error{border-color:var(--danger);}
 .error-text{color:var(--danger);font-size:11.5px;display:none;}
 .error-text.visible{display:block;}
 .auth-footer{text-align:center;font-size:11px;color:rgba(255,255,255,0.85);padding:16px;position:fixed;bottom:0;left:0;right:0;}
@@ -53,104 +134,330 @@ body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 #mainScreen.active{display:flex;}
 .main-body{display:flex;flex:1;overflow:hidden;background:var(--white);position:relative;}
 .sidebar{width:280px;min-width:220px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-.sidebar-profile{padding:14px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-light);background:var(--white);cursor:pointer;min-height:70px;}
-.sidebar-profile .avatar{width:42px;height:42px;font-size:16px;transition:transform 0.2s;}
+.sidebar-profile{padding:14px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-light);background:var(--white);cursor:pointer;transition:background 0.35s ease;position:relative;overflow:hidden;min-height:70px;}
+.sidebar-profile::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 10% 110%,rgba(255,255,255,0.35) 0%,rgba(255,255,255,0.25) 12%,rgba(255,255,255,0.15) 22%,rgba(255,255,255,0.08) 32%,rgba(255,255,255,0.03) 42%,transparent 55%),radial-gradient(circle at 10% 110%,var(--accent) 0%,var(--accent) 20%,transparent 21%),linear-gradient(180deg,var(--accent-darker) 0%,var(--accent) 50%,var(--accent-hover) 100%);opacity:0;transition:opacity 0.35s ease;pointer-events:none;z-index:0;}
+.sidebar-profile::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 80' preserveAspectRatio='none'><g fill='%23FFFFFF'><ellipse cx='20' cy='80' rx='55' ry='30'/><ellipse cx='75' cy='82' rx='60' ry='32'/><ellipse cx='135' cy='80' rx='65' ry='30'/><ellipse cx='200' cy='82' rx='62' ry='32'/><ellipse cx='265' cy='80' rx='60' ry='30'/></g><g fill='%23FFFFFF'><ellipse cx='45' cy='88' rx='75' ry='34'/><ellipse cx='145' cy='89' rx='80' ry='36'/><ellipse cx='245' cy='88' rx='75' ry='34'/></g><rect x='0' y='80' width='280' height='2' fill='%23FFFFFF'/></svg>");background-size:cover;background-position:center bottom;background-repeat:no-repeat;opacity:0;transition:opacity 0.35s ease;pointer-events:none;z-index:1;}
+.sidebar-profile:hover::before{opacity:1;}
+.sidebar-profile:hover::after{opacity:1;}
+.sidebar-profile .avatar,.sidebar-profile .info{position:relative;z-index:2;}
+.sidebar-profile:hover .info .name{color:#FFFFFF;text-shadow:0 1px 3px rgba(0,0,0,0.35);}
+.sidebar-profile:hover .info .status{color:rgba(255,255,255,0.95);}
+.sidebar-profile:hover .info .status::before{color:#FFFFFF;}
+.sidebar-profile:hover .avatar{transform:scale(1.05);box-shadow:0 0 0 3px rgba(255,255,255,0.5);border-color:rgba(255,255,255,0.8);}
+body.dark .sidebar-profile:hover{background:#0F1216!important;}
+body.dark .sidebar-profile::after{background:radial-gradient(circle at 10% 110%,rgba(255,255,255,0.08) 0%,rgba(255,255,255,0.05) 12%,rgba(255,255,255,0.03) 22%,transparent 32%),radial-gradient(circle at 10% 110%,var(--accent) 0%,var(--accent) 18%,transparent 19%),linear-gradient(180deg,#0F1216 0%,#0A0D10 50%,#0F1216 100%);}
+body.dark .sidebar-profile::before{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 80' preserveAspectRatio='none'><g fill='%231A1D21'><ellipse cx='20' cy='80' rx='55' ry='30'/><ellipse cx='75' cy='82' rx='60' ry='32'/><ellipse cx='135' cy='80' rx='65' ry='30'/><ellipse cx='200' cy='82' rx='62' ry='32'/><ellipse cx='265' cy='80' rx='60' ry='30'/></g><g fill='%2323272D'><ellipse cx='45' cy='88' rx='75' ry='34'/><ellipse cx='145' cy='89' rx='80' ry='36'/><ellipse cx='245' cy='88' rx='75' ry='34'/></g><rect x='0' y='80' width='280' height='2' fill='%232A2F36'/></svg>");}
+body.dark .sidebar-profile:hover .info .name{color:#FFFFFF;}
+body.dark .sidebar-profile:hover .info .status{color:rgba(255,255,255,0.85);}
+.sidebar-profile .avatar{width:42px;height:42px;font-size:16px;transition:transform 0.2s,box-shadow 0.2s;}
 .sidebar-profile .info{flex:1;min-width:0;}
 .sidebar-profile .info .name{font-size:13.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sidebar-profile .info .status{font-size:11.5px;color:var(--online);margin-top:1px;}
+.sidebar-profile .info .status{font-size:11.5px;color:var(--online);margin-top:1px;display:flex;align-items:center;gap:4px;}
+.sidebar-profile .info .status::before{content:'●';color:var(--online);font-size:9px;}
 .sidebar-search{padding:8px 12px;border-bottom:1px solid var(--border-light);position:relative;}
 .sidebar-search i{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:12px;}
 .sidebar-search input{width:100%;padding:6px 10px 6px 28px;border:1px solid var(--border);border-radius:3px;font-size:12.5px;font-family:var(--font);outline:none;background:var(--white);color:var(--text);}
+.sidebar-search input:focus{border-color:var(--accent);}
 .sidebar-links{padding:4px 0;border-bottom:1px solid var(--border-light);}
-.sidebar-link{display:flex;align-items:center;gap:10px;padding:8px 16px;font-size:13px;color:var(--text);cursor:pointer;}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:8px 16px;font-size:13px;color:var(--text);cursor:pointer;transition:background 0.1s,transform 0.05s;}
+.sidebar-link:hover{background:var(--accent-light);}
+.sidebar-link:active{transform:scale(0.98);}
 .sidebar-link i{width:16px;color:var(--accent);font-size:13px;}
 .sidebar-contacts-header{padding:10px 14px 6px;font-size:11px;text-transform:uppercase;color:var(--text-secondary);font-weight:600;letter-spacing:0.5px;}
 .sidebar-tabs{display:flex;padding:0 14px;gap:14px;border-bottom:1px solid var(--border-light);font-size:11px;font-weight:600;text-transform:uppercase;}
-.sidebar-tab{padding:6px 0;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;}
+.sidebar-tab{padding:6px 0;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.5px;font-family:var(--font);font-size:11px;font-weight:600;}
 .sidebar-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .sidebar-content{flex:1;overflow-y:auto;}
+.sidebar-content::-webkit-scrollbar{width:6px;}
+.sidebar-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 .tab-panel{display:none;flex-direction:column;}
 .tab-panel.active{display:flex;}
 .sidebar-actions{padding:8px 12px;display:flex;gap:6px;border-bottom:1px solid var(--border-light);}
 .sidebar-actions .btn{padding:6px 10px;font-size:12px;flex:1;}
 .contacts-group-title{padding:8px 16px 4px;font-size:11.5px;font-weight:600;color:var(--text-secondary);}
-.chat-item{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;border-left:3px solid transparent;}
+.chat-item{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;transition:background 0.1s,transform 0.05s;border-left:3px solid transparent;position:relative;overflow:hidden;}
+.chat-item::before{content:'';position:absolute;top:0;left:-100%;bottom:0;width:100%;background:linear-gradient(90deg,transparent,var(--accent-shadow),transparent);transition:left 0.4s ease;pointer-events:none;}
+.chat-item:hover::before{left:100%;}
 .chat-item:hover{background:var(--bg);}
+.chat-item:hover .avatar{animation:avatarWiggle 0.4s ease;}
 .chat-item.active{background:var(--accent-light);border-left-color:var(--accent);}
-.avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;overflow:hidden;}
+.chat-item:active{background:var(--accent-hover-light);}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;position:relative;overflow:hidden;transition:transform 0.15s;}
 .avatar img{width:100%;height:100%;object-fit:cover;}
 .avatar.sm{width:30px;height:30px;font-size:12px;}
 .avatar.lg{width:80px;height:80px;font-size:28px;}
+.online-dot{position:absolute;bottom:0;right:0;width:11px;height:11px;background:var(--online);border-radius:50%;border:2px solid var(--white);animation:dotPop 0.3s ease,onlinePulse 2s 0.3s infinite;}
 .chat-info{flex:1;min-width:0;}
 .chat-info .name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .chat-info .last-msg{font-size:11.5px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
 .chat-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
 .chat-meta .time{font-size:10.5px;color:var(--text-muted);}
-.unread-badge{background:var(--accent);color:#fff;font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:9px;min-width:16px;text-align:center;}
-.status-item{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;}
+.unread-badge{background:var(--accent);color:#fff;font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:9px;min-width:16px;text-align:center;animation:badgePulse 1.8s infinite;}
+.status-item{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;transition:background 0.1s;}
 .status-item:hover{background:var(--bg);}
 .status-avatar{width:38px;height:38px;border-radius:50%;padding:2px;background:linear-gradient(45deg,var(--accent),var(--online));flex-shrink:0;}
+.status-avatar.viewed{background:var(--border);}
 .status-avatar .inner{width:100%;height:100%;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;border:2px solid var(--white);overflow:hidden;}
 .status-avatar .inner img{width:100%;height:100%;object-fit:cover;}
+.status-info .name{font-size:13px;font-weight:500;}
+.status-info .time{font-size:11px;color:var(--text-secondary);margin-top:1px;}
 .chat-area{flex:1;display:flex;flex-direction:column;background:var(--chat-bg);min-width:0;position:relative;}
 .chat-header{background:var(--white);padding:10px 18px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border-light);flex-shrink:0;min-height:64px;flex-wrap:wrap;}
 .chat-header .back-btn{display:none;width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:var(--text-secondary);font-size:15px;cursor:pointer;align-items:center;justify-content:center;}
+.chat-header .back-btn:hover{background:var(--bg);}
 .chat-header .avatar{width:46px;height:46px;font-size:18px;}
-.chat-header .chat-title{flex:1;min-width:0;}
+.chat-header .chat-title{flex:1;min-width:0;animation:titleSlide 0.3s ease;}
 .chat-header .chat-title .name{font-size:15px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .chat-header .chat-title .status{font-size:12px;color:var(--text-secondary);margin-top:2px;}
 .chat-header .chat-title .status.online{color:var(--online);}
-.chat-header .actions{display:flex;gap:6px;margin-right:30px;}
-.action-circle{width:42px;height:42px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.chat-header .actions{display:flex;gap:6px; margin-right: 30px;}
+.action-circle{width:42px;height:42px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.15s ease,background 0.15s,box-shadow 0.15s;}
+.action-circle:hover{background:var(--accent-hover);transform:scale(1.08);box-shadow:0 4px 12px var(--accent-shadow);}
+.action-circle:active{animation:circleRipple 0.5s ease;}
+.group-members-bar{background:var(--bg);padding:8px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-light);font-size:12px;flex-shrink:0;overflow-x:auto;}
+.group-members-bar::-webkit-scrollbar{height:4px;}
+.group-member{display:flex;align-items:center;gap:5px;padding:3px 10px;background:var(--white);border-radius:12px;border:1px solid var(--border-light);white-space:nowrap;flex-shrink:0;animation:membersStagger 0.3s ease backwards;}
+.group-member i{color:var(--online);font-size:11px;}
+.group-member .avatar{width:20px;height:20px;font-size:9px;}
 .messages{flex:1;overflow-y:auto;overflow-x:hidden;padding:16px 24px;display:flex;flex-direction:column;gap:2px;background:var(--chat-bg);}
+.messages::-webkit-scrollbar{width:8px;}
+.messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
 .empty-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-secondary);gap:10px;padding:40px;text-align:center;background:var(--chat-bg);}
 .empty-chat h1{font-size:24px;font-weight:300;color:var(--accent);margin-bottom:6px;}
+.empty-chat p{font-size:13.5px;}
 .message-row{display:flex;margin-top:6px;}
-.message-row.out{justify-content:flex-end;}
-.message-row.in{justify-content:flex-start;}
+.message-row.out{justify-content:flex-end;animation:messageEnterRight 0.3s cubic-bezier(0.22,1,0.36,1);}
+.message-row.in{justify-content:flex-start;animation:messageEnterLeft 0.3s cubic-bezier(0.22,1,0.36,1);}
 .message-bubble{max-width:65%;padding:10px 14px;border-radius:14px;font-size:13.5px;line-height:1.45;word-wrap:break-word;word-break:break-word;overflow-wrap:anywhere;position:relative;}
 .message-row.out .message-bubble{background:var(--accent-light);color:var(--text);border:1px solid var(--accent-border);}
 .message-row.in .message-bubble{background:#F4F6F8;color:var(--text);border:1px solid var(--border-light);}
+body.dark .message-row.in .message-bubble{background:#2E353B;border-color:#3A4248;}
+body.dark .message-row.out .message-bubble{background:var(--accent-light);border-color:var(--accent-border);}
 .message-bubble .sender-name{font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text-blue);}
+.message-bubble .sender-name.color-0{color:#0078D4;}
+.message-bubble .sender-name.color-1{color:#E85D22;}
+.message-bubble .sender-name.color-2{color:#6B4FBB;}
+.message-bubble .sender-name.color-3{color:#C4307E;}
+.message-bubble .sender-name.color-4{color:#0F9D58;}
 .message-bubble .msg-time{font-size:11px;color:var(--text-muted);margin-top:6px;display:flex;align-items:center;justify-content:flex-end;gap:4px;}
-.chat-input-area{background:var(--white);padding:10px 16px 14px;display:flex;align-items:flex-end;gap:10px;border-top:1px solid var(--border-light);flex-shrink:0;position:relative;}
-.chat-input-area .input-btn{width:38px;height:38px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.message-bubble .checks{font-size:12px;}
+.message-bubble img.msg-image{max-width:100%;border-radius:8px;margin-top:4px;cursor:pointer;display:block;}
+.message-bubble .file-attach{display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,0.6);border-radius:6px;margin-top:4px;font-size:12.5px;}
+.message-bubble .file-attach i{font-size:20px;color:var(--accent);}
+.encrypted-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;opacity:0.6;margin-right:4px;}
+.message-bubble .reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;margin-bottom:2px;}
+.reaction-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;background:rgba(0,0,0,0.06);border-radius:10px;font-size:12px;cursor:pointer;transition:background 0.15s,transform 0.1s;user-select:none;}
+.reaction-badge:hover{background:rgba(0,0,0,0.12);transform:scale(1.05);}
+.reaction-badge.mine{background:var(--accent-light);border:1px solid var(--accent-border);}
+.reaction-badge .count{font-size:11px;font-weight:600;color:var(--text-secondary);}
+.reaction-badge.mine .count{color:var(--accent-darker);}
+.msg-edited{font-size:10px;color:var(--text-muted);font-style:italic;margin-left:4px;}
+.typing-indicator{display:flex;align-items:center;gap:6px;padding:4px 24px 8px;font-size:12px;color:var(--text-secondary);min-height:22px;background:var(--chat-bg);}
+.typing-dots{display:flex;gap:3px;}
+.typing-dots span{width:5px;height:5px;background:var(--accent);border-radius:50%;animation:typingPulse 1.2s infinite;}
+.typing-dots span:nth-child(2){animation-delay:0.15s;}
+.typing-dots span:nth-child(3){animation-delay:0.3s;}
+.chat-input-area{background:var(--white);padding:10px 16px 14px;padding-bottom:calc(14px + env(safe-area-inset-bottom));display:flex;align-items:flex-end;gap:10px;border-top:1px solid var(--border-light);flex-shrink:0;position:relative;}
+.chat-input-area .input-btn{width:38px;height:38px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s,transform 0.1s;flex-shrink:0;}
+.chat-input-area .input-btn:hover{background:var(--accent-hover);transform:scale(1.05);}
+.chat-input-area .input-btn:active{transform:scale(0.95);}
 .chat-input-area textarea{flex:1;border:1px solid var(--border);border-radius:18px;padding:10px 16px;font-family:var(--font);font-size:13.5px;resize:none;outline:none;background:var(--white);color:var(--text);max-height:110px;min-height:38px;line-height:1.4;}
-.chat-input-area .send-btn{width:38px;height:38px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chat-input-area textarea:focus{border-color:var(--accent);}
+.chat-input-area .send-btn{width:38px;height:38px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s,transform 0.1s;flex-shrink:0;position:relative;overflow:hidden;}
+.chat-input-area .send-btn:hover{background:var(--accent-hover);transform:scale(1.05);}
+.chat-input-area .send-btn:active{transform:scale(0.95);}
+.send-btn.sending i{animation:sendFly 0.4s ease forwards;}
 .profile-panel{width:280px;background:var(--white);border-left:1px solid var(--border);display:none;flex-direction:column;overflow-y:auto;flex-shrink:0;position:relative;}
 .profile-panel.open{display:flex;}
 .profile-panel .profile-head{padding:24px 20px;text-align:center;border-bottom:1px solid var(--border-light);}
-.profile-panel .profile-head .avatar{margin:0 auto 12px;}
+.profile-panel .profile-head .avatar{margin:0 auto 12px;animation:avatarBreathe 3s ease-in-out infinite;}
 .profile-panel .profile-head .name{font-size:16px;font-weight:600;}
 .profile-panel .profile-head .status{font-size:12px;color:var(--text-secondary);margin-top:4px;}
+.profile-panel .profile-head .status.online{color:var(--online);}
 .profile-section{padding:14px 18px;border-bottom:1px solid var(--border-light);}
 .profile-section h4{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:8px;font-weight:600;}
 .profile-id{background:var(--accent-light);border-radius:var(--radius);padding:8px 12px;font-family:'Courier New',monospace;font-size:13px;font-weight:600;color:var(--accent-darker);text-align:center;word-break:break-all;border:1px solid var(--accent-border);}
-.profile-action{display:flex;align-items:center;gap:10px;padding:9px 6px;border-radius:var(--radius);cursor:pointer;color:var(--text);font-size:13px;border:none;background:transparent;width:100%;font-family:var(--font);text-align:left;}
+.profile-action{display:flex;align-items:center;gap:10px;padding:9px 6px;border-radius:var(--radius);cursor:pointer;transition:background 0.15s,transform 0.05s;color:var(--text);font-size:13px;border:none;background:transparent;width:100%;font-family:var(--font);text-align:left;}
 .profile-action:hover{background:var(--bg);}
+.profile-action:active{transform:scale(0.98);}
 .profile-action i{width:18px;text-align:center;color:var(--accent);font-size:14px;}
-.profile-action.danger i,.profile-action.danger{color:var(--danger);}
+.profile-action.danger i{color:var(--danger);}
+.profile-action.danger{color:var(--danger);}
+.message-menu{position:fixed;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:4px 0;z-index:1500;min-width:190px;border:1px solid var(--border);}
+.message-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 16px;border:none;background:transparent;font-family:var(--font);font-size:13px;color:var(--text);cursor:pointer;text-align:left;}
+.message-menu button:hover{background:var(--accent-light);}
+.message-menu button i{width:16px;text-align:center;color:var(--text-secondary);font-size:13px;}
+.message-menu button.danger{color:var(--danger);}
+.message-menu button.danger i{color:var(--danger);}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
 .modal-overlay.open{display:flex;animation:fadeIn 0.2s ease;}
+.modal-overlay.open .modal{animation:modalPop 0.35s cubic-bezier(0.34,1.56,0.64,1);}
 .modal{background:var(--white);border-radius:var(--radius-lg);padding:24px 22px;width:100%;max-width:400px;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto;position:relative;}
 .modal h3{font-size:16px;margin-bottom:18px;text-align:center;color:var(--text);font-weight:600;}
 .modal .modal-actions{display:flex;gap:8px;margin-top:20px;}
 .modal .modal-actions .btn{flex:1;}
 .modal-close-x{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;border:none;background:transparent;color:var(--text-secondary);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .modal-close-x:hover{background:var(--bg);}
+.status-view-modal{max-width:360px;padding:0;overflow:hidden;background:#1C1C1C;}
+.status-view-modal .sv-header{display:flex;align-items:center;gap:10px;padding:12px 16px;color:#fff;}
+.status-view-modal .sv-header .name{font-size:14px;font-weight:600;}
+.status-view-modal .sv-header .time{font-size:11px;opacity:0.7;}
+.status-view-modal .sv-body{min-height:260px;display:flex;align-items:center;justify-content:center;padding:24px;color:#fff;font-size:18px;text-align:center;background:linear-gradient(135deg,var(--accent),var(--accent-hover));}
+.status-view-modal .sv-body img{max-width:100%;max-height:320px;border-radius:10px;}
 .toast-container{position:fixed;top:16px;right:16px;z-index:2000;display:flex;flex-direction:column;gap:6px;}
-.toast{background:var(--white);color:var(--text);padding:12px 16px;border-radius:var(--radius);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;min-width:240px;max-width:320px;border-left:3px solid var(--accent);animation:toastSlideIn 0.4s;}
+.toast{background:var(--white);color:var(--text);padding:12px 16px;border-radius:var(--radius);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;min-width:240px;max-width:320px;border-left:3px solid var(--accent);animation:toastSlideIn 0.4s cubic-bezier(0.34,1.56,0.64,1);}
 .toast i{font-size:18px;color:var(--accent);}
+.toast .toast-text{font-size:12.5px;line-height:1.4;}
 .toast .toast-text strong{display:block;margin-bottom:2px;font-size:13px;}
-.hidden{display:none!important;}
+.toast.fade-out{animation:fadeOutRight 0.25s ease forwards;}
+.switch{position:relative;display:inline-block;width:40px;height:22px;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;cursor:pointer;inset:0;background:#BDC1C6;transition:.2s;border-radius:22px;}
+.slider:before{position:absolute;content:"";height:16px;width:16px;left:3px;bottom:3px;background:white;transition:.2s;border-radius:50%;}
+input:checked+.slider{background:var(--accent);}
+input:checked+.slider:before{transform:translateX(18px);}
+.theme-picker{display:flex;gap:8px;flex-wrap:wrap;padding:6px 0;}
+.theme-swatch{width:36px;height:36px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform 0.15s,border-color 0.15s;position:relative;}
+.theme-swatch:hover{transform:scale(1.1);}
+.theme-swatch.selected{border-color:var(--text);box-shadow:0 0 0 2px var(--white) inset;}
+.theme-swatch.selected::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;text-shadow:0 1px 2px rgba(0,0,0,0.3);}
+.swatch-standard{background:linear-gradient(135deg,#00AFF0,#0078A8);}
+.swatch-green{background:linear-gradient(135deg,#25D366,#128C7E);}
+.swatch-red{background:linear-gradient(135deg,#E53935,#B71C1C);}
+.swatch-blue{background:linear-gradient(135deg,#1565C0,#0A3880);}
+.swatch-white{background:linear-gradient(135deg,#F4F6F8,#8A939B);}
+.swatch-orange{background:linear-gradient(135deg,#FF6B35,#C74A15);}
+.swatch-purple{background:linear-gradient(135deg,#7B2FBE,#4A1B78);}
+.swatch-pink{background:linear-gradient(135deg,#E91E63,#880E4F);}
+.swatch-turquoise{background:linear-gradient(135deg,#00BCD4,#006064);}
+.swatch-gold{background:linear-gradient(135deg,#F4B400,#B8860B);}
+@media (max-width:900px){
+.sidebar{width:100%;min-width:0;position:absolute;inset:0;z-index:30;transition:transform 0.25s ease;}
+.sidebar.hidden{transform:translateX(-100%);}
+.chat-area{width:100%;position:absolute;inset:0;z-index:20;transition:transform 0.25s ease;}
+.chat-header .back-btn{display:flex;}
+.profile-panel{position:absolute;top:0;right:0;bottom:0;z-index:40;width:300px;box-shadow:var(--shadow-lg);}
+}
+@media (max-width:500px){
+.chat-header{padding:8px 12px;}
+.chat-header .avatar{width:40px;height:40px;font-size:15px;}
+.chat-header .actions { margin-right: 20px; }
+.action-circle{width:36px;height:36px;font-size:14px;}
+.sidebar-profile{padding:10px;}
+.message-bubble{max-width:85%;word-break:break-word;overflow-wrap:anywhere;}
+.messages{padding:12px 14px;}
+.profile-panel{width:100%;}
+.auth-card{padding:28px 20px;}
+.auth-logo span{font-size:34px;}
+.emoji-picker{width:calc(100vw - 24px);right:12px;left:12px;max-height:280px;}
+.voice-recording-box{padding:20px 24px;min-width:220px;}
+.voice-recording-time{font-size:26px;}
+}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes fadeOutRight{to{opacity:0;transform:translateX(40px);}}
 @keyframes screenEnter{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-@keyframes toastSlideIn{from{opacity:0;transform:translateX(40px) scale(0.9);}to{opacity:1;transform:translateX(0) scale(1);}}
+@keyframes modalPop{0%{opacity:0;transform:scale(0.9) translateY(20px);}60%{opacity:1;transform:scale(1.02) translateY(-2px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes circleRipple{0%{transform:scale(1);box-shadow:0 0 0 0 var(--accent-shadow);}70%{transform:scale(1.08);box-shadow:0 0 0 12px transparent;}100%{transform:scale(1);box-shadow:0 0 0 0 transparent;}}
+@keyframes onlinePulse{0%,100%{box-shadow:0 0 0 0 rgba(127,186,0,0.7);}50%{box-shadow:0 0 0 6px rgba(127,186,0,0);}}
+@keyframes badgePulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 var(--accent-shadow);}50%{transform:scale(1.15);box-shadow:0 0 0 8px transparent;}}
+@keyframes avatarWiggle{0%,100%{transform:rotate(0deg) scale(1);}30%{transform:rotate(-4deg) scale(1.05);}70%{transform:rotate(4deg) scale(1.05);}}
+@keyframes messageEnterRight{0%{opacity:0;transform:translateX(20px) scale(0.95);}100%{opacity:1;transform:translateX(0) scale(1);}}
+@keyframes messageEnterLeft{0%{opacity:0;transform:translateX(-20px) scale(0.95);}100%{opacity:1;transform:translateX(0) scale(1);}}
+@keyframes toastSlideIn{0%{opacity:0;transform:translateX(40px) scale(0.9);}60%{opacity:1;transform:translateX(-4px) scale(1.02);}100%{opacity:1;transform:translateX(0) scale(1);}}
 @keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+@keyframes titleSlide{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:translateX(0);}}
+@keyframes membersStagger{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes typingPulse{0%,60%,100%{transform:scale(1);background:var(--accent);}30%{transform:scale(1.5);background:var(--accent-darker);}}
+@keyframes avatarBreathe{0%,100%{transform:scale(1);}50%{transform:scale(1.03);}}
+@keyframes dotPop{from{transform:scale(0);}to{transform:scale(1);}}
+@keyframes sendFly{0%{transform:translateX(0) rotate(0deg);opacity:1;}100%{transform:translateX(30px) rotate(15deg);opacity:0;}}
+@keyframes lightboxZoom{from{opacity:0;transform:scale(0.8);}to{opacity:1;transform:scale(1);}}
+@keyframes incomingCallPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(52,168,83,0.7);}50%{transform:scale(1.06);box-shadow:0 0 0 24px rgba(52,168,83,0);}}
+@keyframes pulseGreen{0%,100%{box-shadow:0 0 0 0 rgba(52,168,83,0.5);}50%{box-shadow:0 0 0 15px rgba(52,168,83,0);}}
+@keyframes voicePulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.3);opacity:0.6;}}
+@keyframes voiceWave{0%,100%{transform:scaleY(0.5);}50%{transform:scaleY(1.4);}}
+#lightboxOverlay.open #lightboxImg{animation:lightboxZoom 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+#incomingCallAvatar{animation:incomingCallPulse 1.6s infinite;}
+@media (prefers-reduced-motion:reduce){*{animation-duration:0.01ms!important;transition-duration:0.01ms!important;}}
+.admin-actions-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.admin-action-btn{padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:6px;transition:background 0.15s,transform 0.05s;}
+.admin-action-btn:hover{background:var(--bg);}
+.admin-action-btn:active{transform:scale(0.97);}
+.admin-action-btn.warn{border-color:#F4B400;color:#B8860B;}
+.admin-action-btn.temp-ban{border-color:#E85D22;color:#E85D22;}
+.admin-action-btn.perm-ban{border-color:var(--danger);color:var(--danger);}
+.report-message{background:#FFF8E1!important;border:1px solid #FFD54F!important;color:#1C1C1C!important;font-size:13px;line-height:1.5;}
+body.dark .report-message{background:#3A2F1C!important;border-color:#7A6520!important;color:#F5E6B8!important;}
+.emoji-picker{position:absolute;bottom:60px;right:16px;width:340px;max-height:340px;background:var(--white);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-lg);z-index:900;display:flex;flex-direction:column;overflow:hidden;}
+.emoji-picker-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-light);font-size:13px;font-weight:600;color:var(--text);}
+.emoji-picker-close{width:24px;height:24px;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.emoji-picker-close:hover{background:var(--bg);color:var(--text);}
+.emoji-picker-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:8px;overflow-y:auto;flex:1;}
+.emoji-picker-grid::-webkit-scrollbar{width:6px;}
+.emoji-picker-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.emoji-item{font-size:22px;line-height:1;padding:4px;border:none;background:transparent;cursor:pointer;border-radius:6px;transition:background 0.1s,transform 0.1s;display:flex;align-items:center;justify-content:center;aspect-ratio:1;}
+.emoji-item:hover{background:var(--accent-light);transform:scale(1.15);}
+body.dark .emoji-picker{background:#1A1D21;border-color:#2A2F36;}
+body.dark .emoji-picker-header{border-bottom-color:#2A2F36;color:#FFFFFF;}
+body.dark .emoji-picker-close:hover{background:#23272D;color:#FFFFFF;}
+body.dark .emoji-item:hover{background:#23272D;}
+.voice-recording-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1800;display:flex;align-items:center;justify-content:center;}
+.voice-recording-box{background:var(--white);border-radius:16px;padding:24px 32px;text-align:center;box-shadow:var(--shadow-lg);min-width:240px;position:relative;}
+.voice-recording-dot{width:16px;height:16px;background:#D93025;border-radius:50%;margin:0 auto 14px;animation:voicePulse 1s infinite;}
+.voice-recording-time{font-size:32px;font-weight:600;color:var(--text);font-family:'Courier New',monospace;margin-bottom:6px;}
+.voice-recording-hint{font-size:12px;color:var(--text-secondary);}
+.voice-recording-cancel{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;font-size:13px;}
+.voice-recording-cancel:hover{background:var(--bg);color:var(--danger);}
+body.dark .voice-recording-box{background:#1A1D21;}
+body.dark .voice-recording-time{color:#FFFFFF;}
+body.dark .voice-recording-cancel:hover{background:#23272D;}
+.voice-message{display:flex;align-items:center;gap:10px;min-width:180px;}
+.voice-message-play{width:36px;height:36px;border-radius:50%;border:none;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:transform 0.1s;}
+.voice-message-play:hover{transform:scale(1.08);}
+.voice-message-play.playing{background:var(--accent-darker);}
+.voice-message-body{flex:1;min-width:0;}
+.voice-message-wave{height:24px;display:flex;align-items:center;gap:2px;margin-bottom:2px;}
+.voice-message-wave span{display:block;width:3px;background:var(--accent);border-radius:2px;height:30%;transition:height 0.15s;}
+.voice-message-wave.playing span{animation:voiceWave 0.6s infinite ease-in-out;}
+.voice-message-wave span:nth-child(2n){animation-delay:0.1s;height:60%;}
+.voice-message-wave span:nth-child(3n){animation-delay:0.2s;height:90%;}
+.voice-message-wave span:nth-child(5n){animation-delay:0.3s;height:45%;}
+.voice-message-duration{font-size:11px;color:var(--text-muted);}
+.hidden{display:none!important;}
 </style>
 </head>
 <body class="theme-standard">
-<button id="globalRefreshBtn" title="Обновить страницу" style="position:fixed; top:16px; right:16px; z-index:9999; width:36px; height:36px; border-radius:50%; border:none; background:transparent; color:var(--text-muted); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'"><i class="fas fa-sync-alt"></i></button>
+<button id="globalRefreshBtn" title="Обновить страницу" style="position:fixed; top:16px; right:16px; z-index:9999; width:36px; height:36px; border-radius:50%; border:none; background:transparent; color:var(--text-muted); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:color 0.2s, transform 0.2s;" onmouseover="this.style.color='var(--accent)'; this.style.transform='rotate(180deg)'" onmouseout="this.style.color='var(--text-muted)'; this.style.transform='rotate(0deg)'">
+  <i class="fas fa-sync-alt"></i>
+</button>
+<div id="bannedScreen" class="screen" style="background:linear-gradient(135deg,#E53935 0%,#B71C1C 100%);justify-content:center;align-items:center;padding:20px;">
+<div class="auth-card" style="text-align:center;max-width:480px;">
+<div style="font-size:64px;color:#D93025;margin-bottom:20px;"><i class="fas fa-ban"></i></div>
+<h1 style="font-size:24px;font-weight:600;color:var(--text);margin-bottom:12px;">Доступ заблокирован</h1>
+<p id="bannedReason" style="font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;"></p>
+<div id="bannedUntil" style="font-size:13px;color:#D93025;font-weight:600;padding:12px;background:var(--bg);border-radius:var(--radius);margin-bottom:20px;"></div>
+<div style="font-size:11px;color:var(--text-muted);">© 2026 Flype. Все права защищены.</div>
+</div>
+</div>
+
+<div id="maintenanceScreen" class="screen" style="background:linear-gradient(135deg,var(--accent) 0%,var(--accent-hover) 100%);justify-content:center;align-items:center;padding:20px;">
+<div class="auth-card" style="text-align:center;max-width:480px;">
+<div style="font-size:64px;color:var(--accent);margin-bottom:20px;"><i class="fas fa-tools" style="animation:avatarBreathe 3s ease-in-out infinite;"></i></div>
+<h1 style="font-size:24px;font-weight:600;color:var(--text);margin-bottom:12px;">Ведутся технические работы</h1>
+<p style="font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:20px;">Извините, Flype пока недоступен. Мы скоро вернёмся — приносим извинения за неудобства.</p>
+<div id="maintenanceMessage" style="font-size:13px;color:var(--text-muted);font-style:italic;padding:10px;background:var(--bg);border-radius:var(--radius);margin-bottom:20px;"></div>
+<div style="font-size:11px;color:var(--text-muted);">© 2026 Flype. Все права защищены.</div>
+</div>
+</div>
+
+<div id="brickScreen" class="screen" style="justify-content:center;align-items:center;background:var(--bg);padding:20px;z-index:9999;position:fixed;inset:0;">
+  <div class="auth-card" style="text-align:center;max-width:420px;">
+    <div style="font-size:64px;color:var(--accent);margin-bottom:20px;"><i class="fas fa-lock"></i></div>
+    <h1 style="font-size:22px;font-weight:600;color:var(--text);margin-bottom:12px;">Ключи шифрования не найдены</h1>
+    <p style="font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:20px;">На этом устройстве нет ваших приватных ключей. Все сообщения и статусы скрыты для вашей безопасности.</p>
+    <button class="btn" id="brickRequestKeyBtn" style="width:100%;margin-bottom:10px;"><i class="fas fa-key"></i> Запросить ключ с основного устройства</button>
+  </div>
+</div>
 
 <div id="authScreen" class="screen active">
 <div class="auth-card">
@@ -161,16 +468,17 @@ body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 <button class="auth-tab" data-tab="register">РЕГИСТРАЦИЯ</button>
 </div>
 <form class="auth-form active" id="loginForm" onsubmit="return false;">
-<div class="input-group"><label>Gmail</label><input type="email" id="loginEmail" placeholder="example@gmail.com"></div>
-<div class="input-group"><label>Пароль</label><input type="password" id="loginPassword" placeholder="Минимум 6 символов"></div>
+<div class="input-group"><label for="loginEmail">Gmail</label><input type="email" id="loginEmail" placeholder="example@gmail.com" autocomplete="email"><div class="error-text" id="loginEmailError">Введите корректный Gmail</div></div>
+<div class="input-group"><label for="loginPassword">Пароль</label><input type="password" id="loginPassword" placeholder="Минимум 6 символов" autocomplete="off"><div class="error-text" id="loginPasswordError">Минимум 6 символов</div></div>
 <button type="button" id="realLoginBtn" class="btn">Войти</button>
+<div id="loginBlockNote" style="display:none;color:var(--danger);font-size:12px;text-align:center;padding:6px;"></div>
 </form>
 <form class="auth-form" id="registerForm" onsubmit="return false;">
-<div class="input-group"><label>Имя</label><input type="text" id="regFirstName" placeholder="Иван"></div>
-<div class="input-group"><label>Фамилия</label><input type="text" id="regLastName" placeholder="Иванов"></div>
-<div class="input-group"><label>Gmail</label><input type="email" id="regEmail" placeholder="example@gmail.com"></div>
-<div class="input-group"><label>Ник</label><input type="text" id="regUsername" placeholder="admin001"></div>
-<div class="input-group"><label>Пароль</label><input type="password" id="regPassword" placeholder="Минимум 6 символов"></div>
+<div class="input-group"><label for="regFirstName">Имя</label><input type="text" id="regFirstName" placeholder="Иван" autocomplete="off"><div class="error-text" id="regFirstNameError">Введите имя</div></div>
+<div class="input-group"><label for="regLastName">Фамилия</label><input type="text" id="regLastName" placeholder="Иванов" autocomplete="off"><div class="error-text" id="regLastNameError">Введите фамилию</div></div>
+<div class="input-group"><label for="regEmail">Gmail</label><input type="email" id="regEmail" placeholder="example@gmail.com" autocomplete="email"><div class="error-text" id="regEmailError">Введите корректный Gmail</div></div>
+<div class="input-group"><label for="regUsername">Ник (Flype ID)</label><div style="display:flex;align-items:center;gap:6px;"><span style="font-family:'Courier New',monospace;font-size:15px;color:var(--text-secondary);">@</span><input type="text" id="regUsername" placeholder="admin001" maxlength="20" autocomplete="off" style="flex:1;font-family:'Courier New',monospace;font-size:14px;"></div><div style="font-size:11px;color:var(--text-muted);margin-top:3px;">4–20 символов: латиница, цифры, _. Начинается с буквы.</div><div class="error-text" id="regUsernameError">Такой ник уже занят</div></div>
+<div class="input-group"><label for="regPassword">Пароль</label><input type="password" id="regPassword" placeholder="Минимум 6 символов" autocomplete="off"><div class="error-text" id="regPasswordError">Минимум 6 символов</div></div>
 <button type="button" id="realRegisterBtn" class="btn">Зарегистрироваться</button>
 </form>
 </div>
@@ -179,7 +487,7 @@ body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 <div id="mainScreen" class="screen">
 <div class="main-body">
 <aside class="sidebar" id="sidebar">
-<div class="sidebar-profile" id="sidebarProfileBtn">
+<div class="sidebar-profile" id="sidebarProfileBtn" title="Настройки профиля">
 <div class="avatar" id="sidebarAvatar">?</div>
 <div class="info"><div class="name" id="sidebarName">—</div><div class="status" id="sidebarStatus">В сети</div></div>
 </div>
@@ -206,24 +514,31 @@ body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 </aside>
 
 <main class="chat-area" id="chatArea">
-<div class="empty-chat" id="emptyChat"><h1>Flype™</h1><p>Выберите контакт слева</p></div>
+<div class="empty-chat" id="emptyChat"><h1>Flype™</h1><p>Выберите контакт слева или создайте новый чат</p></div>
 <div class="chat-header hidden" id="chatHeader">
 <button class="back-btn" id="backToSidebar"><i class="fas fa-arrow-left"></i></button>
 <div class="avatar" id="chatHeaderAvatar">?</div>
 <div class="chat-title">
 <div class="name" id="chatHeaderName">—</div>
 <div class="status" id="chatHeaderStatus">—</div>
+<div class="chat-search-bar hidden" id="chatSearchBar" style="margin-top:6px;"><input type="text" id="chatSearchInput" placeholder="Поиск в чате..." style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:12.5px;background:var(--white);color:var(--text);"></div>
 </div>
 <div class="actions">
+<button class="action-circle" id="searchInChatBtn" title="Поиск в чате"><i class="fas fa-search"></i></button>
+<button class="action-circle" id="videoCallBtn" title="Видеозвонок"><i class="fas fa-video"></i></button>
+<button class="action-circle" id="callBtn" title="Позвонить"><i class="fas fa-phone-alt"></i></button>
 <button class="action-circle" id="infoBtn" title="Информация"><i class="fas fa-info-circle"></i></button>
 </div>
 </div>
+<div class="group-members-bar hidden" id="groupMembersBar"></div>
 <div class="messages hidden" id="messagesContainer"></div>
+<div class="typing-indicator hidden" id="typingIndicator"><div class="typing-dots"><span></span><span></span><span></span></div><span id="typingText">печатает...</span></div>
 <div class="chat-input-area hidden" id="chatInputArea">
-<button class="input-btn" id="attachBtn"><i class="fas fa-paperclip"></i></button>
-<input type="file" id="fileInput" class="hidden" accept="image/*">
+<button class="input-btn" id="attachBtn" title="Прикрепить файл"><i class="fas fa-paperclip"></i></button>
+<input type="file" id="fileInput" class="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.zip">
 <textarea id="messageInput" placeholder="Введите сообщение..." rows="1"></textarea>
-<button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+<button class="input-btn" id="voiceBtn" title="Голосовое"><i class="fas fa-microphone"></i></button>
+<button class="send-btn" id="sendBtn" title="Отправить"><i class="fas fa-paper-plane"></i></button>
 </div>
 </main>
 
@@ -234,11 +549,20 @@ body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 <div class="avatar lg" id="contactAvatar">?</div>
 <div class="name" id="contactName">—</div>
 <div class="status" id="contactStatus">—</div>
+<div class="status" id="contactAbout" style="font-style:italic;margin-top:6px;font-size:12px;"></div>
 </div>
 <div class="profile-section"><h4>Ник</h4><div class="profile-id" id="contactFlypeId">—</div></div>
+<div class="profile-section" id="groupMembersSection" style="display:none;">
+<h4>Участники</h4>
+<div id="groupMembersList" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;"></div>
+<button class="profile-action" id="addGroupMemberBtn" style="color:var(--accent-darker);"><i class="fas fa-user-plus"></i> Добавить участника</button>
+</div>
 <div class="profile-section">
 <h4>Действия</h4>
+<button class="profile-action" id="exportChatBtn"><i class="fas fa-download"></i> Экспорт чата</button>
+<button class="profile-action" id="reportUserBtn" style="color:#E85D22;"><i class="fas fa-flag" style="color:#E85D22;"></i> Пожаловаться</button>
 <button class="profile-action danger" id="deleteChatSelfBtn"><i class="fas fa-eye-slash"></i> Удалить чат у себя</button>
+<button class="profile-action danger" id="deleteContactBtn"><i class="fas fa-user-minus"></i> Удалить контакт</button>
 <button class="profile-action danger" id="blockContactBtn"><i class="fas fa-ban"></i> Заблокировать</button>
 </div>
 </div>
@@ -251,23 +575,158 @@ body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 <button class="modal-close-x" data-close="settingsOverlay"><i class="fas fa-times"></i></button>
 <h3>Настройки</h3>
 <div style="display:flex;flex-direction:column;gap:12px;">
+<div class="input-group">
+<label>Оформление</label>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;">Тёмная тема</span><label class="switch"><input type="checkbox" id="darkThemeToggle"><span class="slider"></span></label></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;">Звуки</span><label class="switch"><input type="checkbox" id="soundToggle" checked><span class="slider"></span></label></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><span style="font-size:13px;">Прежний Flype (Frutiger Aero)</span><label class="switch"><input type="checkbox" id="oldFlypeToggle"><span class="slider"></span></label></div>
+<div style="margin-bottom:10px;">
+<div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Рингтон звонка:</div>
+<div id="ringtoneListContainer" style="display:flex;flex-direction:column;gap:6px;"></div>
+</div>
+<div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Цветовая тема:</div>
+<div class="theme-picker">
+<div class="theme-swatch swatch-standard selected" data-theme="standard" title="Стандартная"></div>
+<div class="theme-swatch swatch-green" data-theme="green" title="Зелёная"></div>
+<div class="theme-swatch swatch-red" data-theme="red" title="Красная"></div>
+<div class="theme-swatch swatch-blue" data-theme="blue" title="Синяя"></div>
+<div class="theme-swatch swatch-white" data-theme="white" title="Белая"></div>
+<div class="theme-swatch swatch-orange" data-theme="orange" title="Оранжевая"></div>
+<div class="theme-swatch swatch-purple" data-theme="purple" title="Фиолетовая"></div>
+<div class="theme-swatch swatch-pink" data-theme="pink" title="Розовая"></div>
+<div class="theme-swatch swatch-turquoise" data-theme="turquoise" title="Бирюзовая"></div>
+<div class="theme-swatch swatch-gold" data-theme="gold" title="Золотая"></div>
+</div>
+</div>
+<hr style="border:none;border-top:1px solid var(--border-light);margin:2px 0;">
 <div class="input-group"><label>Имя</label><input type="text" id="settingsFirstName"></div>
 <div class="input-group"><label>Фамилия</label><input type="text" id="settingsLastName"></div>
-<div class="input-group"><label>О себе</label><input type="text" id="settingsAbout" maxlength="60"></div>
+<div class="input-group"><label>О себе (до 60 символов)</label><input type="text" id="settingsAbout" maxlength="60" placeholder="Например: Люблю программировать"><div style="font-size:11px;color:var(--text-muted);margin-top:3px;"><span id="aboutCounter">0</span>/60</div></div>
 <div class="input-group">
 <label>Аватарка</label>
 <div style="display:flex;align-items:center;gap:10px;">
-<div class="avatar" id="settingsAvatarPreview" style="width:56px;height:56px;font-size:20px;">?</div>
+<div class="avatar" id="settingsAvatarPreview" style="width:56px;height:56px;font-size:20px;flex-shrink:0;">?</div>
 <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
 <button type="button" class="btn btn-secondary" id="settingsAvatarBtn" style="padding:6px 10px;font-size:12px;"><i class="fas fa-upload"></i> Загрузить</button>
+<button type="button" class="btn btn-secondary" id="settingsAvatarRemoveBtn" style="padding:6px 10px;font-size:12px;color:var(--danger);"><i class="fas fa-trash-alt"></i> Удалить</button>
 <input type="file" id="settingsAvatarFile" accept="image/*" class="hidden">
 </div>
 </div>
+<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG или GIF. Максимум ~1 МБ (сжимается автоматически).</div>
 </div>
-<div class="input-group"><label>Ваш ник</label><div class="profile-id" id="settingsUsername" style="font-size:14px;">@—</div></div>
-<button type="button" class="btn btn-secondary" id="makePrimaryBtn" style="font-size:12px;"><i class="fas fa-crown"></i> Сделать основным</button>
+<div class="input-group">
+<label>Ваш ник</label>
+<div class="profile-id" id="settingsUsername" style="font-size:14px;">@—</div>
+<button type="button" class="btn btn-secondary" id="changeUsernameBtn" style="font-size:12px;"><i class="fas fa-exchange-alt"></i> Изменить ник</button>
+<div id="changeIdTimer" style="font-size:11px;color:var(--text-muted);text-align:center;display:none;"></div>
+</div>
+<hr style="border:none;border-top:1px solid var(--border-light);margin:4px 0;">
+<div id="deviceStatusBox" style="padding:10px; background:var(--bg); border-radius:var(--radius); margin-bottom:10px; font-size:12px;">
+  <i class="fas fa-shield-alt" style="color:var(--accent);"></i> 
+  Статус устройства: <span id="deviceStatusText" style="font-weight:600;">Проверка...</span>
+</div>
+<button type="button" class="btn btn-secondary" id="requestKeyBtn" style="font-size:12px;"><i class="fas fa-mobile-alt"></i> Запросить ключ с другого устройства</button>
+<button type="button" class="btn btn-secondary" id="makePrimaryBtn" style="font-size:12px;margin-top:6px;"><i class="fas fa-crown"></i> Сделать это устройство основным</button>
+<button type="button" class="btn btn-secondary" id="statusPrivacyBtn" style="font-size:12px;margin-top:6px;"><i class="fas fa-user-secret"></i> Настройки приватности статусов</button>
+<button type="button" class="btn btn-secondary" id="shareSiteBtn" style="font-size:12px;margin-top:6px;"><i class="fas fa-share-alt"></i> Поделиться сайтом</button>
+<hr style="border:none;border-top:1px solid var(--border-light);margin:4px 0;">
+<div id="adminPanel" class="hidden" style="padding:12px;background:var(--accent-light);border-radius:var(--radius);border:1px solid var(--accent-border);">
+<div style="font-size:11px;font-weight:700;color:var(--accent-darker);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;"><i class="fas fa-shield-alt"></i> Админ-панель</div>
+<button type="button" class="btn btn-secondary" id="maintenanceOnBtn" style="width:100%;font-size:12px;margin-bottom:6px;color:var(--danger);border-color:var(--danger);"><i class="fas fa-tools"></i> Ввести в режим тех. работ</button>
+<button type="button" class="btn btn-secondary" id="maintenanceOffBtn" style="width:100%;font-size:12px;color:var(--success);border-color:var(--success);margin-bottom:6px;"><i class="fas fa-check-circle"></i> Выключить тех. работы</button>
+<button type="button" class="btn btn-secondary" id="adminPurgeBtn" style="width:100%;font-size:12px;color:var(--danger);border-color:var(--danger);"><i class="fas fa-broom"></i> Очистка данных</button>
+</div>
+<button type="button" class="profile-action danger" id="settingsDeleteProfileBtn" style="justify-content:center;"><i class="fas fa-user-times"></i> Удалить профиль</button>
 </div>
 <div class="modal-actions"><button class="btn btn-secondary" id="settingsCancel">Отмена</button><button class="btn" id="settingsSave">Сохранить</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="editMessageOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="editMessageOverlay"><i class="fas fa-times"></i></button>
+<h3>Редактировать сообщение</h3>
+<div class="input-group">
+<textarea id="editMessageText" rows="4" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;resize:vertical;outline:none;"></textarea>
+</div>
+<div class="modal-actions">
+<button class="btn btn-secondary" id="editMessageCancel">Отмена</button>
+<button class="btn" id="editMessageSave">Сохранить</button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="syncWaitingOverlay">
+<div class="modal" style="text-align:center;max-width:360px;">
+<button class="modal-close-x" data-close="syncWaitingOverlay"><i class="fas fa-times"></i></button>
+<div style="font-size:48px;color:var(--accent);margin-bottom:16px;"><i class="fas fa-hourglass-half" style="animation:avatarBreathe 2s infinite;"></i></div>
+<h3>Запрос отправлен</h3>
+<p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">Ожидаем подтверждения на основном устройстве.</p>
+<p style="font-size:11.5px;color:var(--text-muted);">Запрос действует 24 часа</p>
+<div class="modal-actions" style="margin-top:14px;"><button class="btn btn-secondary" id="syncWaitingCancel" style="flex:1;">Отменить запрос</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="syncConfirmOverlay">
+<div class="modal" style="text-align:center;max-width:400px;">
+<div style="font-size:48px;color:var(--accent);margin-bottom:16px;"><i class="fas fa-shield-alt"></i></div>
+<h3>Передать ключ?</h3>
+<p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;">Другое устройство запрашивает доступ к вашим сообщениям.</p>
+<div class="input-group" style="text-align:left;margin-bottom:12px;">
+<label>Срок доступа</label>
+<select id="syncDurationSelect" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13px;outline:none;">
+<option value="24">24 часа</option>
+<option value="48">48 часов</option>
+<option value="72">72 часа</option>
+<option value="0">Бесконечно</option>
+</select>
+</div>
+<p style="font-size:12px;color:var(--danger);line-height:1.5;margin-bottom:16px;padding:10px;background:var(--bg);border-radius:var(--radius);">⚠️ Если это были <b>не вы</b> — нажмите <b>«Нет»</b>.</p>
+<div class="modal-actions"><button class="btn btn-secondary" id="syncConfirmNo" style="flex:1;">Нет</button><button class="btn" id="syncConfirmYes" style="flex:1;">Да, передать</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="syncCodeOverlay">
+<div class="modal" style="text-align:center;max-width:380px;">
+<button class="modal-close-x" data-close="syncCodeOverlay"><i class="fas fa-times"></i></button>
+<h3>Код для передачи</h3>
+<p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;">Введите этот код на другом устройстве:</p>
+<div id="syncCodeValue" style="font-size:32px;font-weight:700;letter-spacing:6px;text-align:center;padding:20px;background:var(--accent-light);border-radius:var(--radius);margin:14px 0;font-family:'Courier New',monospace;color:var(--accent-darker);">—</div>
+<p style="font-size:11.5px;color:var(--text-muted);">Код действует 5 минут</p>
+</div>
+</div>
+
+<div class="modal-overlay" id="transferPrimaryOverlay">
+<div class="modal" style="max-width:420px;">
+<button class="modal-close-x" data-close="transferPrimaryOverlay"><i class="fas fa-times"></i></button>
+<h3 style="color:var(--danger);">⚠️ Передать права основного устройства?</h3>
+<p style="text-align:center;color:var(--text-secondary);font-size:12.5px;line-height:1.5;margin-bottom:14px;">После передачи это устройство больше не сможет передавать ключи шифрования.</p>
+<label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:10px;background:var(--bg);border-radius:var(--radius);margin-bottom:6px;">
+<input type="checkbox" id="transferPrimaryCheck" disabled style="margin-top:2px;width:16px;height:16px;cursor:pointer;flex-shrink:0;">
+<span style="font-size:12.5px;color:var(--text);line-height:1.4;">Я знаю, что делаю. Понимаю, что обратно передать права без согласия нового основного устройства будет невозможно.</span>
+</label>
+<div id="transferPrimaryTimer" style="text-align:center;font-size:11.5px;color:var(--text-muted);margin-bottom:12px;">Подождите <span id="transferPrimaryTimerValue">5</span> сек...</div>
+<div class="input-group"><label>Введите пароль</label><input type="password" id="transferPrimaryPassword" placeholder="Ваш пароль"></div>
+<div class="input-group" style="margin-top:8px;"><label>Введите слово <strong>ПЕРЕДАТЬ</strong></label><input type="text" id="transferPrimaryConfirm" placeholder="ПЕРЕДАТЬ" autocomplete="off"></div>
+<div class="modal-actions" style="margin-top:14px;"><button class="btn btn-secondary" id="transferPrimaryCancelBtn">Отмена</button><button class="btn btn-danger" id="transferPrimaryConfirmBtn" disabled style="opacity:0.5;"><i class="fas fa-exchange-alt"></i> Передать права</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="changeIdOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="changeIdOverlay"><i class="fas fa-times"></i></button>
+<h3>Изменить ник</h3>
+<p style="text-align:center;color:var(--text-secondary);font-size:12.5px;line-height:1.5;margin-bottom:14px;">Ник можно менять <strong>раз в 30 дней</strong>.</p>
+<div class="input-group">
+<label>Новый ник</label>
+<div style="display:flex;align-items:center;gap:6px;">
+<span style="font-family:'Courier New',monospace;font-size:15px;color:var(--text-secondary);">@</span>
+<input type="text" id="newIdDigits" placeholder="admin001" maxlength="20" autocomplete="off" style="flex:1;font-family:'Courier New',monospace;font-size:14px;">
+</div>
+<div style="font-size:11px;color:var(--text-muted);margin-top:3px;">4–20 символов: латиница, цифры, _.</div>
+<div class="error-text" id="newIdError"></div>
+</div>
+<div class="modal-actions"><button class="btn btn-secondary" id="changeIdCancel">Отмена</button><button class="btn" id="changeIdSave">Сохранить</button></div>
 </div>
 </div>
 
@@ -275,7 +734,7 @@ body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 <div class="modal">
 <button class="modal-close-x" data-close="newChatOverlay"><i class="fas fa-times"></i></button>
 <h3>Новый чат</h3>
-<div class="input-group"><label>Поиск по нику или имени</label><input type="text" id="newChatSearch" placeholder="Имя..."></div>
+<div class="input-group"><label>Поиск по нику или имени</label><input type="text" id="newChatSearch" placeholder="Например: @admin001 или Иван"></div>
 <div id="newChatResults" style="max-height:220px;overflow-y:auto;margin-top:10px;"></div>
 <div class="modal-actions"><button class="btn btn-secondary" id="newChatCancel">Закрыть</button></div>
 </div>
@@ -285,9 +744,24 @@ body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 <div class="modal">
 <button class="modal-close-x" data-close="newGroupOverlay"><i class="fas fa-times"></i></button>
 <h3>Создать группу</h3>
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+<div class="avatar" id="newGroupAvatarPreview" style="width:56px;height:56px;font-size:20px;flex-shrink:0;">?</div>
+<div style="flex:1;"><button type="button" class="btn btn-secondary" id="newGroupAvatarBtn" style="width:100%;font-size:12px;"><i class="fas fa-upload"></i> Аватарка группы</button><input type="file" id="newGroupAvatarFile" accept="image/*" class="hidden"></div>
+</div>
 <div class="input-group"><label>Название</label><input type="text" id="groupName" placeholder="Друзья"></div>
-<div style="margin-top:10px;"><label style="font-size:12px;">Выберите участников:</label><div id="newGroupContacts" style="max-height:180px;overflow-y:auto;margin-top:6px;border:1px solid var(--border-light);border-radius:var(--radius);"></div></div>
+<div class="input-group" style="margin-top:8px;"><label>Описание (до 100 символов)</label><input type="text" id="groupDescription" maxlength="100" placeholder="О чём группа?"></div>
+<div style="margin-top:10px;"><label style="font-size:12px;color:var(--text-secondary);">Выберите участников:</label><div id="newGroupContacts" style="max-height:180px;overflow-y:auto;margin-top:6px;border:1px solid var(--border-light);border-radius:var(--radius);"></div></div>
 <div class="modal-actions"><button class="btn btn-secondary" id="newGroupCancel">Отмена</button><button class="btn" id="newGroupCreate">Создать</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="addMemberOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="addMemberOverlay"><i class="fas fa-times"></i></button>
+<h3>Добавить в группу</h3>
+<input type="text" id="addMemberSearch" placeholder="Поиск по нику или имени" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;font-family:var(--font);font-size:13px;background:var(--white);color:var(--text);">
+<div id="addMemberResults" style="max-height:240px;overflow-y:auto;"></div>
+<div class="modal-actions"><button class="btn btn-secondary" id="addMemberCancel">Закрыть</button></div>
 </div>
 </div>
 
@@ -295,9 +769,174 @@ body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 <div class="modal">
 <button class="modal-close-x" data-close="addStatusOverlay"><i class="fas fa-times"></i></button>
 <h3>Новый статус</h3>
-<div class="input-group"><label>Описание</label><input type="text" id="statusText" placeholder="Что нового?" maxlength="100"></div>
+<div class="input-group"><label>Описание (текст)</label><input type="text" id="statusText" placeholder="Что нового?" maxlength="100"></div>
+<div class="input-group" style="margin-top:8px;">
+<label>Фото (до 3-х) или Видео (до 2-х, макс 1 мин)</label>
+<div id="statusMediaPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
+<button type="button" class="btn btn-secondary" id="statusMediaBtn" style="padding:6px 10px;font-size:12px;"><i class="fas fa-upload"></i> Выбрать файлы</button>
+<input type="file" id="statusMediaFile" accept="image/*,video/*" multiple class="hidden">
+</div>
 <div class="modal-actions"><button class="btn btn-secondary" id="addStatusCancel">Отмена</button><button class="btn" id="addStatusCreate">Опубликовать</button></div>
 </div>
+</div>
+
+<div class="modal-overlay" id="notifyStatusOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="notifyStatusOverlay"><i class="fas fa-times"></i></button>
+<h3>Отправить статус в чат</h3>
+<div class="input-group"><label>Поиск по чатам</label><input type="text" id="notifyStatusSearch" placeholder="Имя или название..."></div>
+<div id="notifyStatusResults" style="max-height:240px;overflow-y:auto;margin-top:10px;"></div>
+<div class="modal-actions"><button class="btn btn-secondary" id="notifyStatusCancel">Закрыть</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="statusViewOverlay">
+<div class="modal status-view-modal" style="background:#000 !important;">
+<button class="modal-close-x" data-close="statusViewOverlay" style="color:#fff;"><i class="fas fa-times"></i></button>
+<div class="sv-header" style="background:linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);position:absolute;top:0;left:0;right:0;z-index:10;"><div class="avatar sm" id="svAvatar">?</div><div><div class="name" id="svName">—</div><div class="time" id="svTime">—</div></div></div>
+<div class="sv-body" id="svBody" style="padding:0;background:#000;display:flex;flex-direction:column;justify-content:center;min-height:400px;position:relative;"></div>
+<div id="svText" style="position:absolute;bottom:0;left:0;right:0;padding:20px;background:linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);color:#fff;font-size:15px;text-align:center;z-index:10;"></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="statusPrivacyOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="statusPrivacyOverlay"><i class="fas fa-times"></i></button>
+<h3>Кто не видит мои статусы</h3>
+<div id="statusPrivacyList" style="max-height:300px;overflow-y:auto;margin-bottom:14px;display:flex;flex-direction:column;gap:6px;"></div>
+<div class="modal-actions"><button class="btn btn-secondary" id="statusPrivacyCancel">Закрыть</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="incomingCallOverlay" style="z-index:1200;">
+<div class="modal" style="background:#1C1C1C;color:#fff;text-align:center;max-width:360px;">
+<div class="avatar lg" id="incomingCallAvatar" style="width:90px;height:90px;font-size:34px;margin:0 auto 18px;">?</div>
+<div style="font-size:20px;font-weight:600;margin-bottom:4px;" id="incomingCallName">—</div>
+<div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:20px;" id="incomingCallType">Входящий звонок...</div>
+<div style="display:flex;justify-content:center;gap:14px;">
+<button id="rejectCallBtn" style="width:56px;height:56px;border-radius:50%;border:none;background:#D93025;color:#fff;font-size:20px;cursor:pointer;"><i class="fas fa-phone-slash"></i></button>
+<button id="acceptCallBtn" style="width:56px;height:56px;border-radius:50%;border:none;background:#34A853;color:#fff;font-size:20px;cursor:pointer;animation:pulseGreen 1.5s infinite;"><i class="fas fa-phone"></i></button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="outgoingCallOverlay" style="z-index:1200;">
+<div class="modal" style="background:#1C1C1C;color:#fff;text-align:center;max-width:360px;">
+<div class="avatar lg" id="outgoingCallAvatar" style="width:90px;height:90px;font-size:34px;margin:0 auto 18px;">?</div>
+<div style="font-size:20px;font-weight:600;margin-bottom:4px;" id="outgoingCallName">—</div>
+<div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:8px;" id="outgoingCallType">Вызов...</div>
+<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:20px;" id="outgoingCallTimer">00:00</div>
+<div style="display:flex;justify-content:center;gap:14px;"><button id="cancelCallBtn" style="width:56px;height:56px;border-radius:50%;border:none;background:#D93025;color:#fff;font-size:20px;cursor:pointer;"><i class="fas fa-phone-slash"></i></button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="deleteAccountOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="deleteAccountOverlay"><i class="fas fa-times"></i></button>
+<h3 style="color:var(--danger);">⚠️ Удалить аккаунт?</h3>
+<p style="text-align:center;color:var(--text-secondary);font-size:12.5px;line-height:1.5;margin-bottom:14px;">Это действие <strong>необратимо</strong>. Все данные удалятся из облака.</p>
+<div class="input-group"><label>Введите пароль</label><input type="password" id="deleteAccountPassword" placeholder="Ваш пароль"></div>
+<div class="input-group" style="margin-top:8px;"><label>Введите слово <strong>УДАЛИТЬ</strong></label><input type="text" id="deleteAccountConfirm" placeholder="УДАЛИТЬ" autocomplete="off"></div>
+<div class="modal-actions"><button class="btn btn-secondary" id="deleteAccountCancel">Отмена</button><button class="btn btn-danger" id="deleteAccountConfirmBtn">Удалить навсегда</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="confirmDeleteProfileOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="confirmDeleteProfileOverlay"><i class="fas fa-times"></i></button>
+<h3 style="color:var(--danger);">⚠️ Удалить профиль?</h3>
+<p style="text-align:center;color:var(--text-secondary);font-size:12.5px;line-height:1.5;margin-bottom:14px;">Это действие <strong>необратимо</strong>.</p>
+<label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:10px;background:var(--bg);border-radius:var(--radius);margin-bottom:6px;">
+<input type="checkbox" id="deleteProfileCheck" disabled style="margin-top:2px;width:16px;height:16px;cursor:pointer;flex-shrink:0;">
+<span style="font-size:12.5px;color:var(--text);line-height:1.4;">Я знаю, что делаю. Понимаю, что восстановить данные невозможно.</span>
+</label>
+<div class="input-group" style="margin-bottom:8px;"><label>Введите пароль</label><input type="password" id="deleteProfilePassword" placeholder="Ваш пароль"></div>
+<div id="deleteProfileTimer" style="text-align:center;font-size:11.5px;color:var(--text-muted);margin-bottom:12px;">Подождите <span id="deleteProfileTimerValue">5</span> сек...</div>
+<div class="modal-actions" style="margin-top:0;"><button class="btn btn-secondary" id="deleteProfileCancelBtn">Отмена</button><button class="btn btn-danger" id="deleteProfileConfirmBtn" disabled style="opacity:0.5;"><i class="fas fa-user-times"></i> Удалить профиль</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="adminPurgeOverlay">
+<div class="modal" style="max-width:440px;">
+<button class="modal-close-x" data-close="adminPurgeOverlay"><i class="fas fa-times"></i></button>
+<h3 style="color:var(--danger);">⚠️ Очистка базы данных</h3>
+<p style="text-align:center;color:var(--text-secondary);font-size:12.5px;line-height:1.5;margin-bottom:14px;">Будут удалены ВСЕ сообщения и чаты, <b>кроме помеченных как важные</b>. Это действие нельзя отменить.</p>
+<label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:10px;background:var(--bg);border-radius:var(--radius);margin-bottom:6px;">
+<input type="checkbox" id="purgeCheck" disabled style="margin-top:2px;width:16px;height:16px;cursor:pointer;flex-shrink:0;">
+<span style="font-size:12.5px;color:var(--text);line-height:1.4;">Я понимаю, что все неважные сообщения будут удалены навсегда.</span>
+</label>
+<div id="purgeTimer" style="text-align:center;font-size:11.5px;color:var(--text-muted);margin-bottom:12px;">Подождите <span id="purgeTimerValue">5</span> сек...</div>
+<div class="input-group"><label>Введите пароль</label><input type="password" id="purgePassword" placeholder="Пароль администратора"></div>
+<div class="input-group" style="margin-top:8px;"><label>Введите слово <strong>ОЧИСТИТЬ</strong></label><input type="text" id="purgeConfirmWord" placeholder="ОЧИСТИТЬ" autocomplete="off"></div>
+<div class="modal-actions" style="margin-top:14px;"><button class="btn btn-secondary" id="purgeCancelBtn">Отмена</button><button class="btn btn-danger" id="purgeConfirmBtn" disabled style="opacity:0.5;"><i class="fas fa-trash-alt"></i> Очистить БД</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="lightboxOverlay" style="background:rgba(0,0,0,0.95);">
+<button class="modal-close-x" id="lightboxClose" style="color:#fff;top:16px;right:16px;width:44px;height:44px;font-size:20px;"><i class="fas fa-times"></i></button>
+<a id="lightboxDownload" download="flype-photo.jpg" style="position:absolute;top:20px;left:20px;color:#fff;text-decoration:none;font-size:20px;z-index:10;" title="Скачать"><i class="fas fa-download"></i></a>
+<img id="lightboxImg" src="" style="max-width:95%;max-height:95%;border-radius:8px;user-select:none;">
+</div>
+
+<div class="modal-overlay" id="reportOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="reportOverlay"><i class="fas fa-times"></i></button>
+<h3 style="color:#E85D22;"><i class="fas fa-flag"></i> Жалоба на пользователя</h3>
+<div id="reportTargetInfo" style="text-align:center;font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;"></div>
+<div class="input-group">
+<label>Причина жалобы</label>
+<select id="reportReason" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;outline:none;">
+<option value="">— Выберите причину —</option>
+<option value="spam">Спам / реклама</option>
+<option value="insult">Оскорбления</option>
+<option value="threat">Угрозы</option>
+<option value="fraud">Мошенничество</option>
+<option value="inappropriate">Неприемлемый контент</option>
+<option value="other">Другое</option>
+</select>
+</div>
+<div class="input-group" style="margin-top:10px;">
+<label>Описание ситуации (до 300 символов)</label>
+<textarea id="reportDescription" maxlength="300" placeholder="Опишите, что произошло..." rows="4" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text);font-family:var(--font);font-size:13.5px;resize:vertical;outline:none;"></textarea>
+<div style="font-size:11px;color:var(--text-muted);text-align:right;margin-top:3px;"><span id="reportDescCounter">0</span>/300</div>
+</div>
+<div class="input-group" style="margin-top:10px;"><label>Доказательства (скриншот или файл)</label><input type="file" id="reportEvidenceFile" accept="image/*,.pdf,.txt" style="font-size:12px;padding:6px 0;"><div id="reportEvidencePreview" style="margin-top:6px;font-size:12px;color:var(--text-secondary);"></div></div>
+<div id="reportLimitInfo" style="margin-top:12px;padding:10px;background:var(--bg);border-radius:var(--radius);font-size:11.5px;color:var(--text-secondary);line-height:1.4;"></div>
+<div class="modal-actions"><button class="btn btn-secondary" id="reportCancelBtn">Отмена</button><button class="btn" id="reportSubmitBtn" style="background:#E85D22;">Отправить жалобу</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="adminActionOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="adminActionOverlay"><i class="fas fa-times"></i></button>
+<h3><i class="fas fa-shield-alt" style="color:var(--accent);"></i> Действия администратора</h3>
+<div id="adminActionTarget" style="text-align:center;font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;"></div>
+<div class="input-group"><label>Комментарий (опционально)</label><input type="text" id="adminActionComment" maxlength="100" placeholder="Например: нарушение правил"></div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
+<button class="btn btn-secondary" id="adminWarnBtn" style="justify-content:flex-start;padding:12px 14px;"><i class="fas fa-exclamation-triangle" style="color:#F4B400;"></i><span style="flex:1;text-align:left;">Отправить предупреждение</span></button>
+<button class="btn btn-secondary" id="adminTempBanBtn" style="justify-content:flex-start;padding:12px 14px;"><i class="fas fa-clock" style="color:#E85D22;"></i><span style="flex:1;text-align:left;">Заблокировать на срок</span></button>
+<button class="btn btn-danger" id="adminDeleteUserBtn" style="justify-content:flex-start;padding:12px 14px;"><i class="fas fa-user-times"></i><span style="flex:1;text-align:left;">Удалить аккаунт</span></button>
+</div>
+<div class="modal-actions"><button class="btn btn-secondary" id="adminActionCancel">Закрыть</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="banDaysOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="banDaysOverlay"><i class="fas fa-times"></i></button>
+<h3>Заблокировать на сколько дней?</h3>
+<div class="input-group"><label>Число дней (1–365)</label><input type="number" id="banDaysInput" min="1" max="365" value="7"></div>
+<div class="modal-actions"><button class="btn btn-secondary" id="banDaysCancel">Отмена</button><button class="btn btn-danger" id="banDaysConfirm">Заблокировать</button></div>
+</div>
+</div>
+
+<div class="voice-recording-overlay hidden" id="voiceRecordingOverlay">
+  <div class="voice-recording-box">
+    <div class="voice-recording-dot"></div>
+    <div class="voice-recording-time" id="voiceRecordingTime">0:00</div>
+    <div class="voice-recording-hint">Отпустите, чтобы отправить</div>
+    <button class="voice-recording-cancel" id="voiceRecordingCancel"><i class="fas fa-times"></i></button>
+  </div>
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -306,35 +945,140 @@ body.theme-white:not(.theme-oldflype) .btn{color:#1C1C1C!important;}
 const STORAGE_KEYS = { users: 'flype_users', currentUserId: 'flype_current_user', chats: 'flype_chats', messages: 'flype_messages', statuses: 'flype_statuses', settings: 'flype_settings' };
 const ADMIN_UID = 'oqqFsE0hg3Rg2tJnCjLdWNd8o892';
 const ADMIN_EMAIL = 'admin.servera.ec@gmail.com';
-let state = { currentUser: null, users: [], chats: [], messages: [], statuses: [], settings: {}, activeChatId: null, searchQuery: '' };
-let presenceInterval = null;
+const JITSI_DOMAIN = 'meet.jit.si';
+const SYNC_REQUEST_TTL = 24*60*60*1000;
+const SYNC_CODE_TTL = 5*60*1000;
+const SYNC_UNLOCK_TTL = 24*60*60*1000;
+const MAX_MESSAGES_PER_CHAT = 500;
+let syncKeysListener = null;
+
+const SOUND_FILES = { 
+  ringtone:'sounds/Flype-Standart.mp3', error:'sounds/error.mp3', notification:'sounds/notification.mp3', 
+  systemNotification:'sounds/system-notification.mp3', callConnect:'sounds/connection-(call).mp3', 
+  callStart:'sounds/start-of-the-call.mp3', callEnded:'sounds/call-failed.mp3', 
+  callFailed:'sounds/failed-to-connect.mp3', connectionLost:'sounds/connection-was-lost.mp3', 
+  logout:'sounds/logout.mp3', statusSent:'sounds/status-or-photo-has-been-sent.mp3', 
+  statusFailed:'sounds/failed-to-send-the-status-or-photo.mp3' 
+};
+
+const soundCache = {}; const soundFailed = new Set();
+function playSoundFile(name, volume = 0.5) {
+  if (!state.settings.sounds) return;
+  const src = SOUND_FILES[name]; if (!src) return;
+  if (soundFailed.has(name)) return;
+  try { if (!soundCache[name]) { soundCache[name] = new Audio(src); soundCache[name].preload = 'auto'; soundCache[name].addEventListener('error', () => { soundFailed.add(name); }, { once: true }); } const player = soundCache[name].cloneNode(); player.volume = volume; player.play().catch(() => {}); } catch (e) {}
+}
+function playCallSound(name, volume = 0.6) {
+  const src = SOUND_FILES[name]; if (!src) return;
+  try { const p = new Audio(src); p.volume = volume; p.play().catch(() => {}); } catch (e) {}
+}
+const Sound = { messageIn() { playSoundFile('notification', 0.6); }, system() { playSoundFile('systemNotification', 0.5); }, error() { playSoundFile('error', 0.5); }, callConnect() { playCallSound('callConnect', 0.6); }, callStart() { playCallSound('callStart', 0.7); }, callEnded() { playCallSound('callEnded', 0.6); }, callFailed() { playCallSound('callFailed', 0.6); }, statusSent() { playSoundFile('statusSent', 0.5); }, statusFailed() { playSoundFile('statusFailed', 0.5); }, logout() { playSoundFile('logout', 0.5); } };
+
+async function compressImage(file, maxWidth = 800, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function compressVideo(file) {
+  return new Promise(async (resolve) => {
+    const video = document.createElement('video');
+    video.src = URL.createObjectURL(file); video.muted = true;
+    await new Promise(r => video.onloadedmetadata = r);
+    if (video.duration <= 60) return resolve(file);
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    const stream = canvas.captureStream(30);
+    const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+    const chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' }));
+    video.currentTime = 0; video.play(); recorder.start();
+    const draw = () => { if (video.currentTime >= 60 || video.ended) { video.pause(); recorder.stop(); return; } ctx.drawImage(video, 0, 0, canvas.width, canvas.height); requestAnimationFrame(draw); }; draw();
+  });
+}
+
+async function generateKeyPair() { return await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey', 'deriveBits']); }
+async function exportPublicKey(pk) { const e = await crypto.subtle.exportKey('raw', pk); return btoa(String.fromCharCode(...new Uint8Array(e))); }
+async function importPublicKey(b64) { const bin = atob(b64); const b = new Uint8Array(bin.length); for (let i=0;i<bin.length;i++) b[i]=bin.charCodeAt(i); return await crypto.subtle.importKey('raw', b, { name: 'ECDH', namedCurve: 'P-256' }, true, []); }
+async function exportPrivateKey(pk) { const e = await crypto.subtle.exportKey('pkcs8', pk); return btoa(String.fromCharCode(...new Uint8Array(e))); }
+async function importPrivateKey(b64) { const bin = atob(b64); const b = new Uint8Array(bin.length); for (let i=0;i<bin.length;i++) b[i]=bin.charCodeAt(i); return await crypto.subtle.importKey('pkcs8', b, { name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey', 'deriveBits']); }
+async function deriveSharedSecret(mp, tp) { return await crypto.subtle.deriveKey({ name: 'ECDH', public: tp }, mp, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']); }
+async function encryptMessage(text, key) { const e = new TextEncoder(); const iv = crypto.getRandomValues(new Uint8Array(12)); const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, e.encode(text)); const c = new Uint8Array(iv.length + enc.byteLength); c.set(iv, 0); c.set(new Uint8Array(enc), iv.length); return btoa(String.fromCharCode(...c)); }
+async function decryptMessage(b64, key) { const c = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0)); const iv = c.slice(0, 12); const enc = c.slice(12); const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, enc); return new TextDecoder().decode(dec); }
 
 function loadData(key, fallback = []) { try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch (e) { return fallback; } }
 function saveData(key, data) { try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {} }
+let state = { currentUser: null, users: [], chats: [], messages: [], statuses: [], settings: { darkTheme: false, sounds: true, theme: 'standard', oldFlype: false, ringtone: 'sounds/Flype-Standart.mp3' }, activeChatId: null, searchQuery: '' };
 function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
 function formatTime(ts) { return new Date(ts).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }); }
-function formatDate(ts) { const d = new Date(ts); const n = new Date(); if (d.toDateString() === n.toDateString()) return 'Сегодня'; const y = new Date(n); y.setDate(y.getDate()-1); if (d.toDateString() === y.toDateString()) return 'Вчера'; return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }); }
-function initial(name) { return name ? name.trim().charAt(0).toUpperCase() : '?'; }
+function formatContactGroup(ts) { const d = new Date(ts); const n = new Date(); if (d.toDateString() === n.toDateString()) return 'Сегодня'; const y = new Date(n); y.setDate(y.getDate()-1); if (d.toDateString() === y.toDateString()) return 'Вчера'; const w = new Date(n); w.setDate(w.getDate()-7); if (d >= w) return 'На этой неделе'; return 'Раньше'; }
+function formatFileSize(bytes) { if (bytes < 1024) return bytes + ' Б'; if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' КБ'; return (bytes/1048576).toFixed(1) + ' МБ'; }
 function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+function initial(name) { return name ? name.trim().charAt(0).toUpperCase() : '?'; }
+function isUserOnline(u) { if (!u) return false; if (u.isAdmin === true) return true; if (!u.lastSeen) return false; return (Date.now() - u.lastSeen) < 60000; }
+
 function showToast(title, text, icon = 'fa-comment', duration = 3500) { const c = document.getElementById('toastContainer'); const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `<i class="fas ${icon}"></i><div class="toast-text"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(text)}</span></div>`; c.appendChild(t); setTimeout(() => { t.remove(); }, duration); }
-function getChatInfo(chat) { if (!chat) return { name: 'Чат', avatar: '', online: false }; if (chat.type === 'group') return { name: chat.name || 'Группа', avatar: chat.avatar || '', online: false }; const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (other) return { name: `${other.firstName} ${other.lastName}`.trim(), avatar: other.avatar || '', online: false, flypeId: other.flypeId }; return { name: 'Пользователь', avatar: '', online: false, flypeId: '—' }; }
-function getLastMessage(chatId) { const msgs = state.messages.filter(m => m.chatId === chatId); if (msgs.length === 0) return null; return msgs.sort((a, b) => b.timestamp - a.timestamp)[0]; }
-function getMessagePreview(msg) { if (msg.type === 'voice') return '🎤 Голосовое'; if (msg.type === 'image') return '📷 Фото'; return msg.text || ''; }
+function applyTheme() { const themes = ['theme-standard', 'theme-green', 'theme-red', 'theme-blue', 'theme-white', 'theme-orange', 'theme-purple', 'theme-pink', 'theme-turquoise', 'theme-gold']; document.body.classList.remove(...themes, 'theme-oldflype'); const theme = state.settings.theme || 'standard'; document.body.classList.add('theme-' + theme); if (state.settings.oldFlype === true) document.body.classList.add('theme-oldflype'); document.body.classList.toggle('dark', state.settings.darkTheme === true); document.querySelectorAll('.theme-swatch').forEach(sw => { sw.classList.toggle('selected', sw.dataset.theme === theme); }); }
+
+function loadState() { 
+  const userId = state.currentUser.id; 
+  state.users = loadData(STORAGE_KEYS.users, []); 
+  state.currentUser = state.users.find(u => u.id === userId) || state.currentUser; 
+  state.chats = loadData(STORAGE_KEYS.chats, []); 
+  state.messages = loadData(STORAGE_KEYS.messages, []); 
+  state.statuses = loadData(STORAGE_KEYS.statuses, []); 
+  const s = loadData(STORAGE_KEYS.settings, null); 
+  if (s) state.settings = { ...state.settings, ...s }; 
+  applyTheme(); 
+  state.chats = state.chats.filter(c => c.participants.includes(userId) && (!c.hiddenFor || !c.hiddenFor.includes(userId))); 
+  if (typeof renderAll === 'function') renderAll();
+}
 function persistChats() { saveData(STORAGE_KEYS.chats, state.chats); }
 function persistMessages() { saveData(STORAGE_KEYS.messages, state.messages); }
+function persistUsers() { saveData(STORAGE_KEYS.users, state.users); }
 function persistStatuses() { saveData(STORAGE_KEYS.statuses, state.statuses); }
 
-// --- ОСНОВНЫЕ ФУНКЦИИ ОТРИСОВКИ ---
-function renderAll() { renderChatList(); renderStatusList(); renderActiveChat(); updateSidebarProfile(); }
-function updateSidebarProfile() { const u = state.currentUser; if (!u) return; const name = `${u.firstName} ${u.lastName}`.trim(); const sn = document.getElementById('sidebarName'); if (sn) sn.textContent = name; const sa = document.getElementById('sidebarAvatar'); if (sa) { if (u.avatar) sa.innerHTML = `<img src="${escapeHtml(u.avatar)}">`; else sa.textContent = initial(name); } }
+function renderAll() { 
+  if (typeof renderChatList === 'function') renderChatList(); 
+  if (typeof renderStatusList === 'function') renderStatusList(); 
+  if (typeof renderActiveChat === 'function') renderActiveChat(); 
+  if (typeof updateSidebarProfile === 'function') updateSidebarProfile(); 
+}
+
+function updateSidebarProfile() { const u = state.currentUser; if (!u) return; const name = `${u.firstName} ${u.lastName}`.trim(); const sn = document.getElementById('sidebarName'); if (sn) sn.textContent = name; const sa = document.getElementById('sidebarAvatar'); if (sa) { if (u.avatar) sa.innerHTML = `<img src="${escapeHtml(u.avatar)}">`; else sa.textContent = initial(name); } const st = document.getElementById('sidebarStatus'); if (st) st.textContent = u.isAdmin ? 'Администратор' : 'В сети'; }
+
+function getChatInfo(chat) { if (!chat) return { name: 'Чат', avatar: '', online: false }; if (chat.type === 'group') return { name: chat.name || 'Группа', avatar: chat.avatar || '', online: false }; const oid = chat.participants.find(p => p !== state.currentUser.id); const other = state.users.find(u => u.id === oid); if (other) return { name: `${other.firstName} ${other.lastName}`.trim(), avatar: other.avatar || '', online: isUserOnline(other), flypeId: other.flypeId, isAdmin: other.isAdmin === true }; return { name: 'Пользователь', avatar: '', online: false, flypeId: '—' }; }
+function getLastMessage(chatId) { const msgs = state.messages.filter(m => m.chatId === chatId); if (msgs.length === 0) return null; return msgs.sort((a, b) => b.timestamp - a.timestamp)[0]; }
+function getUnreadCount(chatId) { return state.messages.filter(m => m.chatId === chatId && m.senderId !== state.currentUser.id && !m.read).length; }
+function getMessagePreview(msg) { if (msg.type === 'voice') return '🎤 Голосовое'; if (msg.type === 'image') return '📷 Фото'; if (msg.type === 'file') return `📎 ${msg.fileName || 'Файл'}`; if (msg.encrypted) return '🔒 Сообщение'; return msg.text || ''; }
 
 function renderChatList() {
   const c = document.getElementById('chatList'); if (!c) return;
   let chats = [...state.chats]; const q = state.searchQuery.toLowerCase();
   if (q) chats = chats.filter(x => getChatInfo(x).name.toLowerCase().includes(q));
-  if (chats.length === 0) { c.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-secondary);font-size:12.5px;">Нет чатов</div>`; return; }
   chats.sort((a, b) => (b.lastMessageAt || b.createdAt) - (a.lastMessageAt || a.createdAt));
-  c.innerHTML = chats.map(chat => { const info = getChatInfo(chat); const lastMsg = getLastMessage(chat.id); const isActive = chat.id === state.activeChatId; return `<div class="chat-item ${isActive ? 'active' : ''}" data-chat-id="${chat.id}"><div class="avatar">${info.avatar ? `<img src="${escapeHtml(info.avatar)}">` : initial(info.name)}</div><div class="chat-info"><div class="name">${escapeHtml(info.name)}</div><div class="last-msg">${lastMsg ? escapeHtml(getMessagePreview(lastMsg)) : 'Нет сообщений'}</div></div></div>`; }).join('');
+  if (chats.length === 0) { c.innerHTML = `<div style="padding:20px 16px;text-align:center;color:var(--text-secondary);font-size:12.5px;">Нет чатов.<br>Нажмите «Новый» или «Группа».</div>`; return; }
+  const groups = {}; chats.forEach(x => { const k = formatContactGroup(x.lastMessageAt || x.createdAt); if (!groups[k]) groups[k] = []; groups[k].push(x); });
+  const order = ['Сегодня', 'Вчера', 'На этой неделе', 'Раньше']; let html = '';
+  order.forEach(key => { if (!groups[key]) return; html += `<div class="contacts-group-title">${key}</div>`; html += groups[key].map(chat => { const info = getChatInfo(chat); const lastMsg = getLastMessage(chat.id); const unread = getUnreadCount(chat.id); const isActive = chat.id === state.activeChatId; const lastText = lastMsg ? getMessagePreview(lastMsg) : 'Нет сообщений'; const lastTime = lastMsg ? formatTime(lastMsg.timestamp) : ''; const online = chat.type === 'private' && isUserOnline(state.users.find(u => u.id === chat.participants.find(p => p !== state.currentUser.id))); return `<div class="chat-item ${isActive ? 'active' : ''}" data-chat-id="${chat.id}"><div class="avatar">${info.avatar ? `<img src="${escapeHtml(info.avatar)}">` : initial(info.name)}${online ? '<span class="online-dot"></span>' : ''}</div><div class="chat-info"><div class="name">${escapeHtml(info.name)}</div><div class="last-msg">${escapeHtml(lastText)}</div></div><div class="chat-meta"><span class="time">${lastTime}</span>${unread > 0 ? `<span class="unread-badge">${unread}</span>` : ''}</div></div>`; }).join(''); });
+  c.innerHTML = html;
   c.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => { state.activeChatId = el.dataset.chatId; renderAll(); if (window.innerWidth <= 900) document.getElementById('sidebar').classList.add('hidden'); }));
 }
 
@@ -344,6 +1088,8 @@ function renderActiveChat() {
   const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) { state.activeChatId = null; renderActiveChat(); return; }
   emptyChat.classList.add('hidden'); chatHeader.classList.remove('hidden'); messagesContainer.classList.remove('hidden'); chatInputArea.classList.remove('hidden');
   const info = getChatInfo(chat); document.getElementById('chatHeaderName').textContent = info.name;
+  const statusEl = document.getElementById('chatHeaderStatus');
+  if (chat.type === 'group') { statusEl.textContent = `${chat.participants.length} участников`; statusEl.className = 'status'; } else if (info.online) { statusEl.textContent = 'В сети'; statusEl.className = 'status online'; } else { statusEl.textContent = 'Был(а) недавно'; statusEl.className = 'status'; }
   const ae = document.getElementById('chatHeaderAvatar'); if (info.avatar) ae.innerHTML = `<img src="${escapeHtml(info.avatar)}">`; else ae.textContent = initial(info.name);
   renderMessages(chat.id);
 }
@@ -351,11 +1097,11 @@ function renderActiveChat() {
 function renderMessages(chatId) {
   const c = document.getElementById('messagesContainer'); if (!c) return;
   const msgs = state.messages.filter(m => m.chatId === chatId).sort((a, b) => a.timestamp - b.timestamp);
-  if (msgs.length === 0) { c.innerHTML = `<div style="text-align:center;color:var(--text-secondary);padding:30px;">Нет сообщений</div>`; return; }
+  if (msgs.length === 0) { c.innerHTML = `<div style="text-align:center;color:var(--text-secondary);font-size:13px;padding:30px 0;">Нет сообщений</div>`; return; }
   c.innerHTML = msgs.map(msg => {
     const isOut = msg.senderId === state.currentUser.id; const sender = state.users.find(u => u.id === msg.senderId); const senderName = sender ? `${sender.firstName} ${sender.lastName}` : 'Неизвестный';
     let content = msg.type === 'image' ? `<img src="${msg.imageUrl}" style="max-width:100%;border-radius:8px;">` : escapeHtml(msg.text);
-    return `<div class="message-row ${isOut ? 'out' : 'in'}"><div class="message-bubble">${!isOut && state.chats.find(c=>c.id===chatId).type==='group' ? `<div class="sender-name">${escapeHtml(senderName)}</div>` : ''}<div>${content}</div><div class="msg-time">${formatTime(msg.timestamp)}</div></div></div>`;
+    return `<div class="message-row ${isOut ? 'out' : 'in'}"><div class="message-bubble">${!isOut && state.chats.find(ch=>ch.id===chatId).type==='group' ? `<div class="sender-name">${escapeHtml(senderName)}</div>` : ''}<div>${content}</div><div class="msg-time">${formatTime(msg.timestamp)}</div></div></div>`;
   }).join('');
   c.scrollTop = c.scrollHeight;
 }
@@ -363,117 +1109,112 @@ function renderMessages(chatId) {
 function renderStatusList() {
   const c = document.getElementById('statusList'); if (!c) return;
   const statuses = state.statuses.sort((a, b) => b.timestamp - a.timestamp);
-  if (statuses.length === 0) { c.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-secondary);font-size:12.5px;">Нет статусов</div>`; return; }
+  if (statuses.length === 0) { c.innerHTML = `<div style="padding:20px 16px;text-align:center;color:var(--text-secondary);font-size:12.5px;">Нет статусов</div>`; return; }
   c.innerHTML = statuses.map(s => { const u = state.users.find(x => x.id === s.userId); const name = u ? `${u.firstName} ${u.lastName}`.trim() : 'Неизвестный'; return `<div class="status-item"><div class="status-avatar"><div class="inner">${u && u.avatar ? `<img src="${escapeHtml(u.avatar)}">` : initial(name)}</div></div><div class="status-info"><div class="name">${escapeHtml(name)}</div><div class="time">${formatTime(s.timestamp)}</div></div></div>`; }).join('');
 }
 
-// --- ОТПРАВКА СООБЩЕНИЙ ---
+function handleLogin(e) {
+  if (e) e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase(); const password = document.getElementById('loginPassword').value;
+  let foundUser = loadData(STORAGE_KEYS.users, []).find(u => u.email === email && u.password === password);
+  if (!foundUser) return showToast('Ошибка', 'Неверный логин или пароль', 'fa-exclamation-circle');
+  localStorage.setItem(STORAGE_KEYS.currentUserId, foundUser.id); state.currentUser = foundUser;
+  document.getElementById('authScreen').classList.remove('active'); document.getElementById('mainScreen').classList.add('active');
+  loadState();
+}
+function handleRegister(e) {
+  if (e) e.preventDefault();
+  const fName = document.getElementById('regFirstName').value.trim(); const lName = document.getElementById('regLastName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase(); const uname = document.getElementById('regUsername').value.trim().toLowerCase();
+  const password = document.getElementById('regPassword').value;
+  if (!fName || !lName || !email || !uname || password.length < 6) return showToast('Ошибка', 'Заполните все поля', 'fa-exclamation-circle');
+  const newUser = { id: genId(), flypeId: uname, firstName: fName, lastName: lName, email, password, avatar: '', about: '' };
+  const users = loadData(STORAGE_KEYS.users, []); users.push(newUser); saveData(STORAGE_KEYS.users, users);
+  localStorage.setItem(STORAGE_KEYS.currentUserId, newUser.id); state.currentUser = newUser;
+  document.getElementById('authScreen').classList.remove('active'); document.getElementById('mainScreen').classList.add('active');
+  loadState();
+}
+function handleLogout() { if (!confirm('Выйти?')) return; localStorage.removeItem(STORAGE_KEYS.currentUserId); state.currentUser = null; document.getElementById('mainScreen').classList.remove('active'); document.getElementById('authScreen').classList.add('active'); }
+function checkAuth() { const userId = localStorage.getItem(STORAGE_KEYS.currentUserId); if (userId) { const user = loadData(STORAGE_KEYS.users, []).find(u => u.id === userId); if (user) { state.currentUser = user; document.getElementById('authScreen').classList.remove('active'); document.getElementById('mainScreen').classList.add('active'); loadState(); return; } } document.getElementById('authScreen').classList.add('active'); }
+
 async function sendMessage(text, type = 'text', extra = {}) {
   if (!state.activeChatId) return;
-  if (type === 'text' && !text.trim()) return;
   const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) return;
-  const msg = { chatId: state.activeChatId, senderId: state.currentUser.id, text, encrypted: false, timestamp: Date.now(), type, ...extra };
-  state.messages.push({ id: genId(), ...msg });
-  if (chat) { chat.lastMessageAt = Date.now(); chat.lastMessage = text; }
+  const msg = { chatId: state.activeChatId, senderId: state.currentUser.id, text, timestamp: Date.now(), type, ...extra };
+  state.messages.push({ id: genId(), ...msg }); if (chat) { chat.lastMessageAt = Date.now(); }
   persistMessages(); persistChats(); renderMessages(state.activeChatId); renderChatList();
-  if (window.flypeFirebase) { const { database, ref, push, set } = window.flypeFirebase; const nm = push(ref(database, 'messages')); await set(nm, msg); }
 }
-
-// --- ВХОД И РЕГИСТРАЦИЯ ---
-async function handleLogin(e) {
-  if (e) e.preventDefault();
-  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-  const password = document.getElementById('loginPassword').value;
-  if (!email || password.length < 6) return showToast('Ошибка', 'Введите email и пароль', 'fa-exclamation-circle');
-  let foundUser = loadData(STORAGE_KEYS.users, []).find(u => u.email === email && u.password === password);
-  if (!foundUser && window.flypeFirebase) {
-    try { 
-      const cred = await window.flypeFirebase.signInWithEmailAndPassword(window.flypeFirebase.auth, email, password); 
-      const snap = await window.flypeFirebase.get(window.flypeFirebase.ref(window.flypeFirebase.database, 'users/' + cred.user.uid)); 
-      if (snap.exists()) foundUser = { id: cred.user.uid, ...snap.val() }; 
-    } catch (err) { return showToast('Ошибка', 'Неверный логин или пароль', 'fa-exclamation-circle'); }
-  }
-  if (!foundUser) return showToast('Ошибка', 'Пользователь не найден', 'fa-exclamation-circle');
-  localStorage.setItem(STORAGE_KEYS.currentUserId, foundUser.id);
-  state.currentUser = foundUser;
-  localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(loadData(STORAGE_KEYS.users, []).filter(u => u.id !== foundUser.id).concat([foundUser])));
-  showMainScreen();
-}
-
-async function handleRegister(e) {
-  if (e) e.preventDefault();
-  const fName = document.getElementById('regFirstName').value.trim();
-  const lName = document.getElementById('regLastName').value.trim();
-  const email = document.getElementById('regEmail').value.trim().toLowerCase();
-  const uname = document.getElementById('regUsername').value.trim().toLowerCase();
-  const password = document.getElementById('regPassword').value;
-  if (!fName || !lName || !email || !uname || password.length < 6) return showToast('Ошибка', 'Заполните все поля (пароль от 6 символов)', 'fa-exclamation-circle');
-  let uid = genId();
-  if (window.flypeFirebase) {
-    try { const cred = await window.flypeFirebase.createUserWithEmailAndPassword(window.flypeFirebase.auth, email, password); uid = cred.user.uid; } catch (err) { return showToast('Ошибка', err.message, 'fa-exclamation-circle'); }
-  }
-  const newUser = { id: uid, flypeId: uname, firstName: fName, lastName: lName, email, password, avatar: '', about: '' };
-  state.currentUser = newUser; state.users.push(newUser);
-  localStorage.setItem(STORAGE_KEYS.currentUserId, uid); localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(state.users));
-  if (window.flypeFirebase) await window.flypeFirebase.set(window.flypeFirebase.ref(window.flypeFirebase.database, 'users/' + uid), newUser);
-  showMainScreen();
-}
-
-function handleLogout() {
-  if (!confirm('Выйти?')) return;
-  if (window.flypeFirebase) window.flypeFirebase.signOut(window.flypeFirebase.auth).catch(()=>{});
-  localStorage.removeItem(STORAGE_KEYS.currentUserId);
-  state.currentUser = null; state.activeChatId = null;
-  document.getElementById('mainScreen').classList.remove('active');
-  document.getElementById('authScreen').classList.add('active');
-}
-
-function showMainScreen() {
-  document.getElementById('authScreen').classList.remove('active');
-  document.getElementById('mainScreen').classList.add('active');
-  state.users = loadData(STORAGE_KEYS.users, []);
-  state.chats = loadData(STORAGE_KEYS.chats, []);
-  state.messages = loadData(STORAGE_KEYS.messages, []);
-  state.statuses = loadData(STORAGE_KEYS.statuses, []);
-  renderAll();
-  if (window.flypeFirebase) {
-    window.flypeFirebase.onValue(window.flypeFirebase.ref(window.flypeFirebase.database, 'users'), (snap) => {
-      const data = snap.val() || {}; Object.values(data).forEach(u => { if (!state.users.find(x => x.id === u.id)) state.users.push(u); });
-      renderAll();
-    });
-    window.flypeFirebase.onValue(window.flypeFirebase.ref(window.flypeFirebase.database, 'chats'), (snap) => {
-      const data = snap.val() || {}; state.chats = Object.values(data).filter(c => c.participants.includes(state.currentUser.id)); renderChatList();
-    });
-    window.flypeFirebase.onValue(window.flypeFirebase.ref(window.flypeFirebase.database, 'messages'), (snap) => {
-      const data = snap.val() || {}; state.messages = Object.entries(data).map(([id, m]) => ({ id, ...m })); if (state.activeChatId) renderMessages(state.activeChatId); renderChatList();
-    });
-  }
-}
-function checkAuth() { const userId = localStorage.getItem(STORAGE_KEYS.currentUserId); if (userId) { const user = loadData(STORAGE_KEYS.users, []).find(u => u.id === userId); if (user) { state.currentUser = user; showMainScreen(); return true; } } document.getElementById('authScreen').classList.add('active'); return false; }
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, get, push, update } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-database.js";
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-const firebaseConfig = { apiKey: "AIzaSyAIbeepIF2GPcXQUZAt2cr2r54JNM6jMLM", authDomain: "flype-d8034.firebaseapp.com", databaseURL: "https://flype-d8034-default-rtdb.firebaseio.com", projectId: "flype-d8034" };
-const app = initializeApp(firebaseConfig); const database = getDatabase(app); const auth = getAuth(app);
-window.flypeFirebase = { database, ref, set, onValue, get, push, update, auth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut };
+import { getDatabase, ref, set, onValue, get, child, push, update, remove } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-database.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+
+const firebaseConfig = { apiKey: "AIzaSyAIbeepIF2GPcXQUZAt2cr2r54JNM6jMLM", authDomain: "flype-d8034.firebaseapp.com", databaseURL: "https://flype-d8034-default-rtdb.firebaseio.com", projectId: "flype-d8034", storageBucket: "flype-d8034.firebasestorage.app", messagingSenderId: "928586015641", appId: "1:928586015641:web:1fd2c85c48d49694e9e908", measurementId: "G-RRG5QFNC7" };
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+const auth = getAuth(app);
+
+window.flypeFirebase = { database, ref, set, onValue, get, child, push, update, remove, auth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential };
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const savedId = localStorage.getItem('flype_current_user');
+    if (!savedId) {
+      try {
+        const snap = await get(ref(database, 'users/' + user.uid));
+        if (snap.exists()) {
+          const userData = snap.val();
+          localStorage.setItem('flype_current_user', user.uid);
+          const users = JSON.parse(localStorage.getItem('flype_users') || '[]');
+          if (!users.find(u => u.id === user.uid)) {
+            users.push({...userData, id: user.uid});
+            localStorage.setItem('flype_users', JSON.stringify(users));
+          }
+        }
+      } catch (err) {}
+    }
+  }
+});
 </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  
+  // --- ГЛОБАЛЬНЫЕ ФИКСЫ ---
   document.getElementById('globalRefreshBtn').onclick = () => location.reload();
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey && e.key === 'F5') || (e.ctrlKey && e.shiftKey && e.key === 'R')) {
+      e.preventDefault();
+      alert('⚠️ Полностью обновить страницу на этом устройстве нельзя.\n\nНа этом устройстве хранятся ваши ключи шифрования. Если вы хотите сбросить кэш, вам придётся заново запрашивать ключи с основного устройства.');
+    }
+  });
+
+  // --- 1. КРЕСТИКИ (Делегирование событий для всех окон) ---
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.modal-close-x');
+    if (!btn) return;
+    e.preventDefault(); e.stopPropagation();
+    const oid = btn.dataset.close;
+    if (oid) { const el = document.getElementById(oid); if (el) el.classList.remove('open'); }
+    else { const parent = btn.closest('.modal-overlay'); if (parent) parent.classList.remove('open'); }
+  });
+
+  // --- 2. ВХОД И РЕГИСТРАЦИЯ ---
   document.getElementById('realLoginBtn').onclick = (e) => { e.preventDefault(); handleLogin(e); };
   document.getElementById('realRegisterBtn').onclick = (e) => { e.preventDefault(); handleRegister(e); };
   document.getElementById('logoutLink').onclick = handleLogout;
-  
   document.querySelectorAll('.auth-tab').forEach(tab => {
-    tab.onclick = function() { document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active')); document.getElementById(this.dataset.tab === 'login' ? 'loginForm' : 'registerForm').classList.add('active'); };
-  });
-  document.querySelectorAll('.sidebar-tab').forEach(tab => {
-    tab.onclick = function() { document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active')); document.getElementById(this.dataset.stab === 'chats' ? 'tabChats' : 'tabStatuses').classList.add('active'); };
+    tab.onclick = function() {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      document.getElementById(this.dataset.tab === 'login' ? 'loginForm' : 'registerForm').classList.add('active');
+    };
   });
 
-  // НОВЫЙ ЧАТ
+  // --- 3. НОВЫЙ ЧАТ И ГРУППА ---
   document.getElementById('newChatBtn').onclick = () => {
     document.getElementById('newChatSearch').value = '';
     renderNewChatResults('');
@@ -500,7 +1241,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // СОЗДАТЬ ГРУППУ
   document.getElementById('newGroupBtn').onclick = () => {
     document.getElementById('groupName').value = '';
     renderNewGroupContacts();
@@ -521,7 +1261,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.activeChatId = chat.id; renderAll(); document.getElementById('newGroupOverlay').classList.remove('open');
   };
 
-  // НАСТРОЙКИ
+  // --- 4. НАСТРОЙКИ ПРОФИЛЯ ---
   document.getElementById('sidebarProfileBtn').onclick = () => {
     const u = state.currentUser; if (!u) return;
     document.getElementById('settingsFirstName').value = u.firstName || '';
@@ -554,17 +1294,84 @@ document.addEventListener('DOMContentLoaded', () => {
     }; reader.readAsDataURL(file);
   };
 
-  // ОТПРАВКА СООБЩЕНИЙ
+  // --- 5. ЧАТЫ, СООБЩЕНИЯ И ПРАВАЯ КНОПКА МЫШИ ---
   document.getElementById('sendBtn').onclick = () => {
     const input = document.getElementById('messageInput'); const txt = input.value.trim();
     if (txt) { sendMessage(txt); input.value = ''; input.style.height = 'auto'; }
   };
 
-  // КРЕСТИКИ
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.modal-close-x'); if (!btn) return;
-    e.preventDefault(); const parent = btn.closest('.modal-overlay'); if (parent) parent.classList.remove('open');
-    const oid = btn.dataset.close; if (oid) { const el = document.getElementById(oid); if (el) el.classList.remove('open'); }
+  window.showMessageMenu = function(x, y, msg, chatId) {
+    const old = document.getElementById('msgMenu'); if (old) old.remove();
+    const menu = document.createElement('div'); menu.className = 'message-menu'; menu.id = 'msgMenu';
+    menu.style.left = Math.min(x, window.innerWidth - 220) + 'px';
+    menu.style.top = Math.min(y, window.innerHeight - 320) + 'px';
+    const isMine = msg.senderId === state.currentUser.id;
+    menu.innerHTML = `
+      <button data-action="copy"><i class="fas fa-copy"></i> Копировать</button>
+      ${isMine ? `<button data-action="delete-all" class="danger"><i class="fas fa-trash-alt"></i> Удалить у всех</button>` : ''}
+      <button data-action="delete-me" class="danger"><i class="fas fa-eye-slash"></i> Удалить у себя</button>
+      <button data-action="close"><i class="fas fa-times"></i> Отмена</button>
+    `;
+    document.body.appendChild(menu);
+    menu.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation(); const action = btn.dataset.action; menu.remove();
+        if (action === 'copy') navigator.clipboard.writeText(msg.text);
+        else if (action === 'delete-all') { state.messages = state.messages.filter(m => m.id !== msg.id); persistMessages(); renderMessages(chatId); }
+      });
+    });
+    setTimeout(() => { const ch = (e) => { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', ch); } }; document.addEventListener('click', ch); }, 50);
+  };
+
+  // Привязка ПКМ и долгого нажатия к сообщениям
+  document.getElementById('messagesContainer').addEventListener('contextmenu', (e) => {
+    const bubble = e.target.closest('.message-bubble'); if (!bubble) return;
+    e.preventDefault();
+    // (упрощенно берем последнее сообщение для примера)
+  });
+
+  // --- 6. КНОПКИ ЗВОНКОВ И ИНФО ---
+  document.getElementById('callBtn').onclick = () => alert('Звонок');
+  document.getElementById('videoCallBtn').onclick = () => alert('Видеозвонок');
+  document.getElementById('infoBtn').onclick = () => {
+    if (!state.activeChatId) return;
+    const chat = state.chats.find(c => c.id === state.activeChatId); const info = getChatInfo(chat);
+    document.getElementById('contactName').textContent = info.name || 'Неизвестный';
+    document.getElementById('contactStatus').textContent = info.online ? 'В сети' : 'Был(а) недавно';
+    document.getElementById('contactFlypeId').textContent = chat.type === 'group' ? `Группа` : (info.flypeId ? '@' + info.flypeId : '—');
+    const av = document.getElementById('contactAvatar');
+    if (info.avatar) av.innerHTML = `<img src="${escapeHtml(info.avatar)}">`; else av.textContent = initial(info.name);
+    document.getElementById('contactProfile').classList.remove('hidden');
+    document.getElementById('profilePanel').classList.add('open');
+  };
+  document.getElementById('closeProfileBtn').onclick = () => document.getElementById('profilePanel').classList.remove('open');
+
+  // --- 7. СТАТУСЫ ---
+  document.getElementById('addStatusBtn').onclick = () => {
+    document.getElementById('statusText').value = '';
+    document.getElementById('addStatusOverlay').classList.add('open');
+  };
+  document.getElementById('addStatusCancel').onclick = () => document.getElementById('addStatusOverlay').classList.remove('open');
+  document.getElementById('addStatusCreate').onclick = () => {
+    const text = document.getElementById('statusText').value.trim(); if (!text) return;
+    const status = { id: genId(), userId: state.currentUser.id, text, timestamp: Date.now() };
+    state.statuses.push(status); persistStatuses(); renderStatusList();
+    document.getElementById('addStatusOverlay').classList.remove('open');
+    showToast('Опубликован', '', 'fa-check');
+  };
+
+  // --- 8. ПОИСК ---
+  document.getElementById('globalSearch').oninput = (e) => {
+    state.searchQuery = e.target.value.toLowerCase();
+    renderChatList();
+  };
+  document.querySelectorAll('.sidebar-tab').forEach(tab => {
+    tab.onclick = function() {
+      document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(this.dataset.stab === 'chats' ? 'tabChats' : 'tabStatuses').classList.add('active');
+    };
   });
 
   checkAuth();
