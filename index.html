@@ -210,7 +210,7 @@ body.dark .sidebar-profile:hover .info .status{color:rgba(255,255,255,0.85);}
 .chat-header .chat-title .name{font-size:15px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .chat-header .chat-title .status{font-size:12px;color:var(--text-secondary);margin-top:2px;}
 .chat-header .chat-title .status.online{color:var(--online);}
-.chat-header .actions{display:flex;gap:6px;}
+.chat-header .actions{display:flex;gap:6px; margin-right: 30px;}
 .action-circle{width:42px;height:42px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.15s ease,background 0.15s,box-shadow 0.15s;}
 .action-circle:hover{background:var(--accent-hover);transform:scale(1.08);box-shadow:0 4px 12px var(--accent-shadow);}
 .action-circle:active{animation:circleRipple 0.5s ease;}
@@ -341,6 +341,7 @@ input:checked+.slider:before{transform:translateX(18px);}
 @media (max-width:500px){
 .chat-header{padding:8px 12px;}
 .chat-header .avatar{width:40px;height:40px;font-size:15px;}
+.chat-header .actions { margin-right: 20px; }
 .action-circle{width:36px;height:36px;font-size:14px;}
 .sidebar-profile{padding:10px;}
 .message-bubble{max-width:85%;word-break:break-word;overflow-wrap:anywhere;}
@@ -426,6 +427,9 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 </style>
 </head>
 <body class="theme-standard">
+<button id="globalRefreshBtn" title="Обновить страницу" style="position:fixed; top:16px; right:16px; z-index:9999; width:36px; height:36px; border-radius:50%; border:none; background:transparent; color:var(--text-muted); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:color 0.2s, transform 0.2s;" onmouseover="this.style.color='var(--accent)'; this.style.transform='rotate(180deg)'" onmouseout="this.style.color='var(--text-muted)'; this.style.transform='rotate(0deg)'">
+  <i class="fas fa-sync-alt"></i>
+</button>
 <div id="bannedScreen" class="screen" style="background:linear-gradient(135deg,#E53935 0%,#B71C1C 100%);justify-content:center;align-items:center;padding:20px;">
 <div class="auth-card" style="text-align:center;max-width:480px;">
 <div style="font-size:64px;color:#D93025;margin-bottom:20px;"><i class="fas fa-ban"></i></div>
@@ -444,6 +448,15 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 <div id="maintenanceMessage" style="font-size:13px;color:var(--text-muted);font-style:italic;padding:10px;background:var(--bg);border-radius:var(--radius);margin-bottom:20px;"></div>
 <div style="font-size:11px;color:var(--text-muted);">© 2026 Flype. Все права защищены.</div>
 </div>
+</div>
+
+<div id="brickScreen" class="screen" style="justify-content:center;align-items:center;background:var(--bg);padding:20px;z-index:9999;position:fixed;inset:0;">
+  <div class="auth-card" style="text-align:center;max-width:420px;">
+    <div style="font-size:64px;color:var(--accent);margin-bottom:20px;"><i class="fas fa-lock"></i></div>
+    <h1 style="font-size:22px;font-weight:600;color:var(--text);margin-bottom:12px;">Ключи шифрования не найдены</h1>
+    <p style="font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:20px;">На этом устройстве нет ваших приватных ключей. Все сообщения и статусы скрыты для вашей безопасности.</p>
+    <button class="btn" id="brickRequestKeyBtn" style="width:100%;margin-bottom:10px;"><i class="fas fa-key"></i> Запросить ключ с основного устройства</button>
+  </div>
 </div>
 
 <div id="authScreen" class="screen active">
@@ -608,6 +621,10 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 <div id="changeIdTimer" style="font-size:11px;color:var(--text-muted);text-align:center;display:none;"></div>
 </div>
 <hr style="border:none;border-top:1px solid var(--border-light);margin:4px 0;">
+<div id="deviceStatusBox" style="padding:10px; background:var(--bg); border-radius:var(--radius); margin-bottom:10px; font-size:12px;">
+  <i class="fas fa-shield-alt" style="color:var(--accent);"></i> 
+  Статус устройства: <span id="deviceStatusText" style="font-weight:600;">Проверка...</span>
+</div>
 <button type="button" class="btn btn-secondary" id="requestKeyBtn" style="font-size:12px;"><i class="fas fa-mobile-alt"></i> Запросить ключ с другого устройства</button>
 <button type="button" class="btn btn-secondary" id="makePrimaryBtn" style="font-size:12px;margin-top:6px;"><i class="fas fa-crown"></i> Сделать это устройство основным</button>
 <button type="button" class="btn btn-secondary" id="statusPrivacyBtn" style="font-size:12px;margin-top:6px;"><i class="fas fa-user-secret"></i> Настройки приватности статусов</button>
@@ -760,6 +777,16 @@ body.dark .voice-recording-cancel:hover{background:#23272D;}
 <input type="file" id="statusMediaFile" accept="image/*,video/*" multiple class="hidden">
 </div>
 <div class="modal-actions"><button class="btn btn-secondary" id="addStatusCancel">Отмена</button><button class="btn" id="addStatusCreate">Опубликовать</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="notifyStatusOverlay">
+<div class="modal">
+<button class="modal-close-x" data-close="notifyStatusOverlay"><i class="fas fa-times"></i></button>
+<h3>Отправить статус в чат</h3>
+<div class="input-group"><label>Поиск по чатам</label><input type="text" id="notifyStatusSearch" placeholder="Имя или название..."></div>
+<div id="notifyStatusResults" style="max-height:240px;overflow-y:auto;margin-top:10px;"></div>
+<div class="modal-actions"><button class="btn btn-secondary" id="notifyStatusCancel">Закрыть</button></div>
 </div>
 </div>
 
@@ -1102,6 +1129,18 @@ function showBannedScreen(user) { document.getElementById('authScreen').classLis
 function showAuthScreen() { document.getElementById('maintenanceScreen').classList.remove('active'); document.getElementById('bannedScreen').classList.remove('active'); document.getElementById('authScreen').classList.add('active'); document.getElementById('mainScreen').classList.remove('active'); document.getElementById('authFooter').style.display = 'block'; }
 function showMaintenanceScreen() { document.getElementById('authScreen').classList.remove('active'); document.getElementById('mainScreen').classList.remove('active'); document.getElementById('bannedScreen').classList.remove('active'); document.getElementById('maintenanceScreen').classList.add('active'); }
 function showMainScreen() {
+  // ПРОВЕРКА КЛЮЧЕЙ
+  const privateKey = localStorage.getItem('flype_private_key_' + state.currentUser.id);
+  const isPrimary = localStorage.getItem('flype_is_primary') === 'true' || state.currentUser.isPrimary === true;
+  
+  if (!privateKey && !isPrimary) {
+    document.getElementById('mainScreen').classList.remove('active');
+    document.getElementById('brickScreen').classList.add('active');
+    return; 
+  } else {
+    document.getElementById('brickScreen').classList.remove('active');
+  }
+
   const a = document.getElementById('authScreen'); a.style.opacity = '0'; a.style.transform = 'scale(0.98)'; a.style.transition = 'opacity 0.3s, transform 0.3s';
   setTimeout(() => {
     a.classList.remove('active'); a.style.opacity = ''; a.style.transform = ''; a.style.transition = '';
@@ -1128,9 +1167,40 @@ function persistSettings() { saveData(STORAGE_KEYS.settings, state.settings); }
 
 let presenceInterval = null;
 function startPresenceHeartbeat() {
+  // АВТОГЕНЕРАЦИЯ КЛЮЧЕЙ, ЕСЛИ ИХ НЕТ НА ОСНОВНОМ
+  if (state.currentUser && !localStorage.getItem('flype_private_key_' + state.currentUser.id)) {
+    const isPrimary = localStorage.getItem('flype_is_primary') === 'true' || state.currentUser.isPrimary === true;
+    if (isPrimary) {
+      generateKeyPair().then(async (kp) => {
+        const pubKey = await exportPublicKey(kp.publicKey);
+        const privKey = await exportPrivateKey(kp.privateKey);
+        localStorage.setItem('flype_private_key_' + state.currentUser.id, privKey);
+        if (window.flypeFirebase) {
+          const { database, ref, update } = window.flypeFirebase;
+          await update(ref(database, 'users/' + state.currentUser.id), { publicKey: pubKey });
+        }
+        showToast('Безопасность', 'Ключи восстановлены на основном устройстве', 'fa-shield-alt', 4000);
+        renderMessages(state.activeChatId);
+      }).catch(err => console.error('Ошибка генерации ключей:', err));
+    }
+  }
+
   if (presenceInterval) clearInterval(presenceInterval);
-  const update = async () => { if (!state.currentUser) return; state.currentUser.lastSeen = Date.now(); const lu = loadData(STORAGE_KEYS.users, []); const idx = lu.findIndex(u => u.id === state.currentUser.id); if (idx !== -1) { lu[idx] = state.currentUser; saveData(STORAGE_KEYS.users, lu); } if (window.flypeFirebase) { try { const { database, ref, update: fbU } = window.flypeFirebase; await fbU(ref(database, 'users/' + state.currentUser.id), { lastSeen: state.currentUser.lastSeen }); } catch (e) {} } };
-  update(); presenceInterval = setInterval(update, 30000);
+  const update = async () => { 
+    if (!state.currentUser) return; 
+    state.currentUser.lastSeen = Date.now(); 
+    const lu = loadData(STORAGE_KEYS.users, []); 
+    const idx = lu.findIndex(u => u.id === state.currentUser.id); 
+    if (idx !== -1) { lu[idx] = state.currentUser; saveData(STORAGE_KEYS.users, lu); } 
+    if (window.flypeFirebase) { 
+      try { 
+        const { database, ref, update: fbU } = window.flypeFirebase; 
+        await fbU(ref(database, 'users/' + state.currentUser.id), { lastSeen: state.currentUser.lastSeen }); 
+      } catch (e) {} 
+    } 
+  };
+  update(); 
+  presenceInterval = setInterval(update, 30000);
 }
 function stopPresenceHeartbeat() { if (presenceInterval) { clearInterval(presenceInterval); presenceInterval = null; } }
 
@@ -1210,6 +1280,8 @@ async function tryDecryptSyncKey(encryptedKey, code) {
   Sound.send();
   const label = ttl === 0 ? 'доступ навсегда' : `доступ ${Math.round(ttl / 3600000)} ч`;
   showToast('Синхронизировано!', `Сообщения расшифрованы (${label})`, 'fa-check-circle', 5000);
+  document.getElementById('brickScreen').classList.remove('active');
+  document.getElementById('mainScreen').classList.add('active');
   renderMessages(state.activeChatId);
   if (window.flypeFirebase) { try { const { database, ref, remove } = window.flypeFirebase; await remove(ref(database, 'sync_keys/' + state.currentUser.id)); } catch (e) {} }
 }
@@ -1309,6 +1381,7 @@ async function handleLogout() {
   stopRingtone(); showAuthScreen(); document.getElementById('loginForm').reset(); document.getElementById('registerForm').reset();
 }
 function updateLoginBlockUI() { const b = checkLoginBlock(); const btn = document.getElementById('realLoginBtn'); const note = document.getElementById('loginBlockNote'); if (!btn) return; if (b.blocked) { btn.disabled = true; btn.style.opacity = '0.5'; if (note) { note.textContent = b.message; note.style.display = 'block'; } } else { btn.disabled = false; btn.style.opacity = '1'; if (note) note.style.display = 'none'; } }
+</script>
 function listenToUsers() {
   if (!window.flypeFirebase) { setTimeout(listenToUsers, 500); return; }
   const { database, ref, onValue } = window.flypeFirebase;
@@ -1360,6 +1433,7 @@ function listenToChats() {
 
 let messagesUnsubscribe = null;
 function listenToMessages(chatId) {
+  if (!localStorage.getItem('flype_private_key_' + state.currentUser.id)) return; // Если ключа нет — не грузим
   if (!window.flypeFirebase) { setTimeout(() => listenToMessages(chatId), 500); return; }
   const { database, ref, onValue, update } = window.flypeFirebase;
   if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
@@ -1645,21 +1719,46 @@ async function exportChat(chatId) {
   Sound.send(); showToast('Экспортировано', 'Файл скачан', 'fa-download', 3000);
 }
 document.getElementById('exportChatBtn').addEventListener('click', () => { if (state.activeChatId) exportChat(state.activeChatId); });
+
 function renderStatusList() {
   const c = document.getElementById('statusList'); if (!c) return;
   const now = Date.now(); const day = 86400000;
   let statuses = state.statuses.filter(s => {
     if (now - s.timestamp >= day) return false;
     const author = state.users.find(u => u.id === s.userId);
-    if (author && author.hiddenStatusFor && author.hiddenStatusFor.includes(state.currentUser.id)) return false;
+    if (author && author.hiddenStatusFor) {
+      if (Array.isArray(author.hiddenStatusFor)) {
+        if (author.hiddenStatusFor.includes(state.currentUser.id)) return false;
+      } else if (typeof author.hiddenStatusFor === 'object') {
+        if (author.hiddenStatusFor[state.currentUser.id] === true) return false;
+      }
+    }
     return true;
   });
   const byUser = {}; statuses.forEach(s => { if (!byUser[s.userId] || s.timestamp > byUser[s.userId].timestamp) byUser[s.userId] = s; });
   statuses = Object.values(byUser).sort((a, b) => b.timestamp - a.timestamp);
   if (statuses.length === 0) { c.innerHTML = `<div style="padding:20px 16px;text-align:center;color:var(--text-secondary);font-size:12.5px;">Нет статусов за 24 часа</div>`; return; }
   c.innerHTML = statuses.map(s => { const u = state.users.find(x => x.id === s.userId); const name = u ? `${u.firstName} ${u.lastName}`.trim() : (s.userName || 'Неизвестный'); const avatar = u ? u.avatar : (s.avatar || ''); const viewed = s.viewedBy && s.viewedBy.includes(state.currentUser.id); return `<div class="status-item" data-status-id="${s.id}"><div class="status-avatar ${viewed ? 'viewed' : ''}"><div class="inner">${avatar ? `<img src="${escapeHtml(avatar)}">` : initial(name)}</div></div><div class="status-info"><div class="name">${escapeHtml(name)}</div><div class="time">${getTimeAgo(s.timestamp)}</div></div></div>`; }).join('');
-  c.querySelectorAll('.status-item').forEach(el => el.addEventListener('click', () => openStatusView(el.dataset.statusId)));
+  
+  c.querySelectorAll('.status-item').forEach(el => {
+    el.addEventListener('click', () => openStatusView(el.dataset.statusId));
+    el.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      showStatusMenu(e.clientX, e.clientY, el.dataset.statusId);
+    });
+    let touchTimer;
+    el.addEventListener('touchstart', (e) => {
+      touchTimer = setTimeout(() => {
+        const touch = e.touches[0];
+        showStatusMenu(touch.clientX, touch.clientY, el.dataset.statusId);
+        if (navigator.vibrate) navigator.vibrate(30);
+      }, 500);
+    }, { passive: true });
+    el.addEventListener('touchend', () => clearTimeout(touchTimer));
+    el.addEventListener('touchmove', () => clearTimeout(touchTimer));
+  });
 }
+
 function openStatusView(id) {
   const s = state.statuses.find(x => x.id === id); if (!s) return;
   const u = state.users.find(x => x.id === s.userId);
@@ -1683,6 +1782,128 @@ function openStatusView(id) {
   }
   document.getElementById('statusViewOverlay').classList.add('open');
 }
+
+function showStatusMenu(x, y, statusId) {
+  const old = document.getElementById('statusMenu'); if (old) old.remove();
+  const s = state.statuses.find(st => st.id === statusId); if (!s) return;
+  
+  const isMine = s.userId === state.currentUser.id;
+  
+  const menu = document.createElement('div');
+  menu.className = 'message-menu';
+  menu.id = 'statusMenu';
+  menu.style.left = Math.min(x, window.innerWidth - 220) + 'px';
+  menu.style.top = Math.min(y, window.innerHeight - 250) + 'px';
+  
+  menu.innerHTML = `
+    <button data-action="download"><i class="fas fa-download"></i> Скачать</button>
+    ${isMine ? `<button data-action="delete" class="danger"><i class="fas fa-trash-alt"></i> Удалить статус</button>` : ''}
+    <button data-action="notify"><i class="fas fa-paper-plane"></i> Отправить в чат</button>
+    <button data-action="close"><i class="fas fa-times"></i> Отмена</button>
+  `;
+  
+  document.body.appendChild(menu);
+  
+  menu.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const action = btn.dataset.action;
+      menu.remove();
+      
+      if (action === 'download') {
+        if (s.media && s.media.length > 0) {
+          const m = s.media[0];
+          const a = document.createElement('a');
+          a.href = m.data;
+          const ext = m.type === 'image' ? 'jpg' : 'webm';
+          a.download = `flype-status-${s.id}.${ext}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          showToast('Скачивание', 'Файл сохранен', 'fa-download');
+        } else {
+          showToast('Нет медиа', 'В этом статусе только текст', 'fa-info-circle');
+        }
+      } 
+      else if (action === 'delete') {
+        if (!confirm('Удалить этот статус?')) return;
+        if (window.flypeFirebase) {
+          const { database, ref, remove } = window.flypeFirebase;
+          await remove(ref(database, 'statuses/' + statusId));
+        }
+        state.statuses = state.statuses.filter(st => st.id !== statusId);
+        persistStatuses();
+        renderStatusList();
+        showToast('Удалено', 'Статус удален', 'fa-trash-alt');
+      }
+      else if (action === 'notify') {
+        openNotifyStatusOverlay(statusId);
+      }
+    });
+  });
+  
+  setTimeout(() => { 
+    const ch = (ev) => { 
+      if (!menu.contains(ev.target)) { menu.remove(); document.removeEventListener('click', ch); } 
+    }; 
+    document.addEventListener('click', ch); 
+  }, 50);
+}
+
+let pendingStatusToSendId = null;
+function openNotifyStatusOverlay(statusId) {
+  pendingStatusToSendId = statusId;
+  document.getElementById('notifyStatusSearch').value = '';
+  renderNotifyStatusResults('');
+  document.getElementById('notifyStatusOverlay').classList.add('open');
+}
+
+function renderNotifyStatusResults(query) {
+  const c = document.getElementById('notifyStatusResults');
+  const q = query.toLowerCase();
+  
+  let chats = state.chats.filter(ch => {
+    if (q) return getChatInfo(ch).name.toLowerCase().includes(q);
+    return true;
+  });
+  
+  if (chats.length === 0) {
+    c.innerHTML = `<div style="text-align:center;color:var(--text-secondary);padding:14px;">Нет чатов</div>`;
+    return;
+  }
+  
+  c.innerHTML = chats.map(ch => {
+    const info = getChatInfo(ch);
+    return `
+      <div class="chat-item" data-chat-id="${ch.id}" style="cursor:pointer;border-left:none;padding:10px 12px;">
+        <div class="avatar sm">${info.avatar ? `<img src="${escapeHtml(info.avatar)}">` : initial(info.name)}</div>
+        <div class="chat-info"><div class="name">${escapeHtml(info.name)}</div></div>
+      </div>
+    `;
+  }).join('');
+  
+  c.querySelectorAll('.chat-item').forEach(el => {
+    el.onclick = async () => {
+      const chatId = el.dataset.chatId;
+      await sendStatusToChat(chatId, pendingStatusToSendId);
+      document.getElementById('notifyStatusOverlay').classList.remove('open');
+    };
+  });
+}
+
+async function sendStatusToChat(chatId, statusId) {
+  const s = state.statuses.find(st => st.id === statusId);
+  if (!s) return;
+  
+  const text = `👀 Посмотри мой статус!\n${s.text || ''}\n\n(Открыть в мессенджере)`;
+  
+  await sendMessage(text);
+  showToast('Отправлено', 'Уведомление о статусе отправлено', 'fa-check-circle');
+}
+
+document.getElementById('notifyStatusSearch').addEventListener('input', (e) => renderNotifyStatusResults(e.target.value));
+document.getElementById('notifyStatusCancel').addEventListener('click', () => document.getElementById('notifyStatusOverlay').classList.remove('open'));
+
 async function deleteContact() {
   if (!state.activeChatId) return;
   const chat = state.chats.find(c => c.id === state.activeChatId); if (!chat) return;
@@ -1940,7 +2161,7 @@ document.addEventListener('DOMContentLoaded', init);
 window.addEventListener('resize', () => { if (window.innerWidth > 900) document.getElementById('sidebar').classList.remove('hidden'); });
 if ('Notification' in window && Notification.permission === 'default') { document.addEventListener('click', function rn() { Notification.requestPermission(); document.removeEventListener('click', rn); }, { once: true }); }
 </script>
-<script type="module">
+    <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, get, child, push, update, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
@@ -1977,6 +2198,19 @@ window.flypeFirebase = { database, ref, set, onValue, get, child, push, update, 
 </script>
 
 <script>
+// ================== ГЛОБАЛЬНЫЕ ФИКСЫ И БЕЗОПАСНОСТЬ ==================
+document.getElementById('globalRefreshBtn').onclick = () => {
+  location.reload();
+};
+
+// Перехват Ctrl+F5 и Ctrl+Shift+R (жесткое обновление)
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey && e.key === 'F5') || (e.ctrlKey && e.shiftKey && e.key === 'R')) {
+    e.preventDefault();
+    alert('⚠️ Полностью обновить страницу на этом устройстве нельзя.\n\nНа этом устройстве хранятся ваши ключи шифрования. Если вы хотите сбросить кэш, вам придётся заново запрашивать ключи с основного устройства.');
+  }
+});
+
 // ================== ОБЪЕДИНЕННЫЙ ПУЛЬТ (ФИНАЛЬНЫЙ) ==================
 document.addEventListener('DOMContentLoaded', () => {
   
@@ -2024,6 +2258,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (u.avatar) preview.innerHTML = `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
         else preview.textContent = (u.firstName ? u.firstName.charAt(0).toUpperCase() : '?');
       }
+
+      // Обновляем статус устройства в настройках
+      const isPrimary = localStorage.getItem('flype_is_primary') === 'true';
+      const deviceStatusBox = document.getElementById('deviceStatusBox');
+      const deviceStatusText = document.getElementById('deviceStatusText');
+      
+      if (isPrimary) {
+        if (deviceStatusBox) deviceStatusBox.style.background = 'var(--accent-light)';
+        if (deviceStatusBox) deviceStatusBox.style.border = '1px solid var(--accent-border)';
+        if (deviceStatusText) deviceStatusText.innerHTML = '<span style="color:var(--accent-darker);">Основное (хранит ключи)</span>';
+      } else {
+        if (deviceStatusBox) deviceStatusBox.style.background = 'var(--bg)';
+        if (deviceStatusBox) deviceStatusBox.style.border = '1px solid var(--border)';
+        if (deviceStatusText) deviceStatusText.innerHTML = '<span style="color:var(--text-secondary);">Дополнительное (только просмотр)</span>';
+      }
+
       document.getElementById('settingsOverlay').classList.add('open');
     };
   }
@@ -2211,9 +2461,44 @@ document.addEventListener('DOMContentLoaded', () => {
     renderRingtones();
   }
 
-  // 8. СИНХРОНИЗАЦИЯ
+  // 8. СИНХРОНИЗАЦИЯ И ПОМЕТКА ОСНОВНОГО
+  const isPrimaryLocal = localStorage.getItem('flype_is_primary') === 'true';
+  if (isPrimaryLocal && state.currentUser) {
+    let deviceId = localStorage.getItem('flype_device_id');
+    if (!deviceId) {
+      deviceId = Math.random().toString(36).substring(2, 10).toUpperCase();
+      localStorage.setItem('flype_device_id', deviceId);
+    }
+    if (document.getElementById('sidebarStatus')) {
+      document.getElementById('sidebarStatus').innerHTML = `Основное • ID: ${deviceId}`;
+    }
+    if (window.flypeFirebase) {
+      const { database, ref, update } = window.flypeFirebase;
+      update(ref(database, 'users/' + state.currentUser.id), { 
+        isPrimary: true, 
+        primaryDeviceId: deviceId,
+        primaryDeviceDate: Date.now()
+      });
+    }
+  } else {
+    if (state.currentUser && state.currentUser.primaryDeviceId) {
+      if (document.getElementById('sidebarStatus')) {
+        document.getElementById('sidebarStatus').innerHTML = `Дополнительное • Основное: ${state.currentUser.primaryDeviceId}`;
+      }
+    }
+  }
+
   const requestKeyBtn = document.getElementById('requestKeyBtn');
   if (requestKeyBtn) requestKeyBtn.onclick = async () => { if (typeof requestKeyFromOtherDevice === 'function') await requestKeyFromOtherDevice(); };
+  
+  const brickRequestKeyBtn = document.getElementById('brickRequestKeyBtn');
+  if (brickRequestKeyBtn) {
+    brickRequestKeyBtn.onclick = async () => {
+      if (typeof requestKeyFromOtherDevice === 'function') {
+        await requestKeyFromOtherDevice();
+      }
+    };
+  }
   
   const makePrimaryBtn = document.getElementById('makePrimaryBtn');
   if (makePrimaryBtn) {
@@ -2246,6 +2531,10 @@ document.addEventListener('DOMContentLoaded', () => {
           const idx = localUsers.findIndex(x => x.id === u.id);
           if (idx !== -1) { localUsers[idx].isPrimary = true; localStorage.setItem('flype_users', JSON.stringify(localUsers)); }
           localStorage.setItem('flype_is_primary', 'true');
+          
+          localStorage.removeItem('flype_is_primary');
+          localStorage.removeItem('flype_device_id');
+
           document.getElementById('transferPrimaryOverlay').classList.remove('open');
           if (typeof showToast === 'function') showToast('Успех', 'Это устройство теперь основное', 'fa-crown');
         } catch (err) { if (typeof showToast === 'function') showToast('Ошибка', 'Не удалось передать права', 'fa-exclamation-circle'); }
@@ -2299,34 +2588,46 @@ document.addEventListener('DOMContentLoaded', () => {
     statusPrivacyBtn.onclick = () => {
       document.getElementById('settingsOverlay').classList.remove('open');
       const list = document.getElementById('statusPrivacyList');
-      const hidden = state.currentUser.hiddenStatusFor || [];
+      
+      let hidden = state.currentUser.hiddenStatusFor || [];
+      let hiddenObj = {};
+      if (Array.isArray(hidden)) { hidden.forEach(id => hiddenObj[id] = true); } 
+      else { hiddenObj = hidden; }
+
       const otherUsers = state.users.filter(u => u.id !== state.currentUser.id && u.id !== 'flype_bot');
       list.innerHTML = otherUsers.map(u => {
-        const n = `${u.firstName} ${u.lastName}`.trim(); const isChecked = hidden.includes(u.id);
+        const n = `${u.firstName} ${u.lastName}`.trim(); 
+        const isChecked = hiddenObj[u.id] === true;
         return `<label style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--bg);border-radius:var(--radius);cursor:pointer;"><input type="checkbox" class="privacy-user-check" data-id="${u.id}" ${isChecked ? 'checked' : ''} style="width:16px;height:16px;"><div class="avatar sm">${u.avatar ? `<img src="${u.avatar}">` : initial(n)}</div><span style="font-size:13px;">${escapeHtml(n)}</span></label>`;
       }).join('');
-            list.querySelectorAll('.privacy-user-check').forEach(chk => {
+      list.querySelectorAll('.privacy-user-check').forEach(chk => {
         chk.onchange = async (e) => {
-          const uid = e.target.dataset.id; let current = state.currentUser.hiddenStatusFor || [];
-          if (e.target.checked) current.push(uid); else current = current.filter(id => id !== uid);
-          state.currentUser.hiddenStatusFor = current;
+          const uid = e.target.dataset.id; 
+          let currentData = state.currentUser.hiddenStatusFor;
+          let currentObj = {};
           
-          // Обновляем данные в Firebase
-          if (window.flypeFirebase) { const { database, ref, update } = window.flypeFirebase; await update(ref(database, 'users/' + state.currentUser.id), { hiddenStatusFor: current }); }
+          if (Array.isArray(currentData)) { currentData.forEach(id => currentObj[id] = true); } 
+          else if (currentData && typeof currentData === 'object') { currentObj = { ...currentData }; }
           
-          // Обновляем локальное хранилище
-          const localUsers = JSON.parse(localStorage.getItem('flype_users') || '[]'); 
-          const idx = localUsers.findIndex(u => u.id === state.currentUser.id);
-          if (idx !== -1) { localUsers[idx].hiddenStatusFor = current; localStorage.setItem('flype_users', JSON.stringify(localUsers)); }
+          if (e.target.checked) { currentObj[uid] = true; } 
+          else { delete currentObj[uid]; }
           
-          // ФИКС: Обновляем массив state.users в оперативной памяти, чтобы интерфейс сразу это увидел
-          const stateUserIdx = state.users.findIndex(u => u.id === state.currentUser.id);
-          if (stateUserIdx !== -1) { 
-            state.users[stateUserIdx].hiddenStatusFor = current; 
+          state.currentUser.hiddenStatusFor = currentObj;
+          
+          if (window.flypeFirebase) { 
+            const { database, ref, update } = window.flypeFirebase; 
+            await update(ref(database, 'users/' + state.currentUser.id), { hiddenStatusFor: currentObj }); 
           }
           
-          // Принудительно перерисовываем список статусов
+          const localUsers = JSON.parse(localStorage.getItem('flype_users') || '[]'); 
+          const idx = localUsers.findIndex(u => u.id === state.currentUser.id);
+          if (idx !== -1) { localUsers[idx].hiddenStatusFor = currentObj; localStorage.setItem('flype_users', JSON.stringify(localUsers)); }
+          
+          const stateUserIdx = state.users.findIndex(u => u.id === state.currentUser.id);
+          if (stateUserIdx !== -1) { state.users[stateUserIdx].hiddenStatusFor = currentObj; }
+          
           if (typeof renderStatusList === 'function') renderStatusList();
+          if (typeof showToast === 'function') showToast('Сохранено', e.target.checked ? 'Пользователь скрыт' : 'Пользователь видит статусы', 'fa-check-circle', 2000);
         };
       });
       document.getElementById('statusPrivacyOverlay').classList.add('open');
