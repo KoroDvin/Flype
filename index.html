@@ -1129,10 +1129,10 @@ function showBannedScreen(user) { document.getElementById('authScreen').classLis
 function showAuthScreen() { document.getElementById('maintenanceScreen').classList.remove('active'); document.getElementById('bannedScreen').classList.remove('active'); document.getElementById('authScreen').classList.add('active'); document.getElementById('mainScreen').classList.remove('active'); document.getElementById('authFooter').style.display = 'block'; }
 function showMaintenanceScreen() { document.getElementById('authScreen').classList.remove('active'); document.getElementById('mainScreen').classList.remove('active'); document.getElementById('bannedScreen').classList.remove('active'); document.getElementById('maintenanceScreen').classList.add('active'); }
 function showMainScreen() {
-  // ПРОВЕРКА КЛЮЧЕЙ
   const privateKey = localStorage.getItem('flype_private_key_' + state.currentUser.id);
   const isPrimary = localStorage.getItem('flype_is_primary') === 'true' || state.currentUser.isPrimary === true;
   
+  // Показываем кирпич ТОЛЬКО если это не первый вход и нет ключей
   if (!privateKey && !isPrimary) {
     document.getElementById('mainScreen').classList.remove('active');
     document.getElementById('brickScreen').classList.add('active');
@@ -1158,7 +1158,22 @@ function showMainScreen() {
   }, 300);
 }
 function updateSidebarProfile() { const u = state.currentUser; if (!u) return; const name = `${u.firstName} ${u.lastName}`.trim(); const sn = document.getElementById('sidebarName'); if (sn) sn.textContent = name; const sa = document.getElementById('sidebarAvatar'); if (sa) { if (u.avatar) sa.innerHTML = `<img src="${escapeHtml(u.avatar)}">`; else sa.textContent = initial(name); } const st = document.getElementById('sidebarStatus'); if (st) st.textContent = u.isAdmin ? 'Администратор' : 'В сети'; }
-function loadState() { const userId = state.currentUser.id; state.users = loadData(STORAGE_KEYS.users, []); state.currentUser = state.users.find(u => u.id === userId) || state.currentUser; state.chats = loadData(STORAGE_KEYS.chats, []); state.messages = loadData(STORAGE_KEYS.messages, []); state.statuses = loadData(STORAGE_KEYS.statuses, []); const s = loadData(STORAGE_KEYS.settings, null); if (s) state.settings = { ...state.settings, ...s }; applySettings(); state.chats = state.chats.filter(c => c.participants.includes(userId) && (!c.hiddenFor || !c.hiddenFor.includes(userId))); }
+function loadState() { 
+  const userId = state.currentUser.id; 
+  state.users = loadData(STORAGE_KEYS.users, []); 
+  state.currentUser = state.users.find(u => u.id === userId) || state.currentUser; 
+  state.chats = loadData(STORAGE_KEYS.chats, []); 
+  state.messages = loadData(STORAGE_KEYS.messages, []); 
+  state.statuses = loadData(STORAGE_KEYS.statuses, []); 
+  const s = loadData(STORAGE_KEYS.settings, null); 
+  if (s) state.settings = { ...state.settings, ...s }; 
+  applySettings(); 
+  state.chats = state.chats.filter(c => c.participants.includes(userId) && (!c.hiddenFor || !c.hiddenFor.includes(userId))); 
+  
+  // ФИКС: Принудительная отрисовка после загрузки
+  if (typeof updateSidebarProfile === 'function') updateSidebarProfile();
+  if (typeof renderChatList === 'function') renderChatList();
+}
 function persistChats() { const all = loadData(STORAGE_KEYS.chats, []); const others = all.filter(c => !c.participants.includes(state.currentUser.id)); saveData(STORAGE_KEYS.chats, [...others, ...state.chats]); }
 function persistMessages() { const all = loadData(STORAGE_KEYS.messages, []); const ids = new Set(state.chats.map(c => c.id)); const others = all.filter(m => !ids.has(m.chatId)); saveData(STORAGE_KEYS.messages, [...others, ...state.messages]); }
 function persistUsers() { saveData(STORAGE_KEYS.users, state.users); }
@@ -2150,7 +2165,16 @@ document.getElementById('addMemberSearch').addEventListener('input', e => render
 document.getElementById('backToSidebar').addEventListener('click', () => document.getElementById('sidebar').classList.remove('hidden'));
 document.getElementById('lightboxClose').addEventListener('click', () => document.getElementById('lightboxOverlay').classList.remove('open'));
 document.getElementById('lightboxOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('lightboxOverlay')) document.getElementById('lightboxOverlay').classList.remove('open'); });
-document.querySelectorAll('.modal-close-x').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); const oid = btn.dataset.close; if (oid === 'confirmDeleteProfileOverlay') { closeConfirmDeleteProfile(); return; } if (oid) document.getElementById(oid).classList.remove('open'); else btn.closest('.modal-overlay')?.classList.remove('open'); }); });
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.modal-close-x');
+  if (!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const oid = btn.dataset.close;
+  if (oid === 'confirmDeleteProfileOverlay') { if (typeof closeConfirmDeleteProfile === 'function') closeConfirmDeleteProfile(); return; }
+  if (oid) { const el = document.getElementById(oid); if (el) el.classList.remove('open'); } 
+  else { const parent = btn.closest('.modal-overlay'); if (parent) parent.classList.remove('open'); }
+});
 document.querySelectorAll('.modal-overlay').forEach(overlay => { overlay.addEventListener('click', (e) => { if (e.target === overlay) { if (overlay.id === 'confirmDeleteProfileOverlay') { closeConfirmDeleteProfile(); return; } if (overlay.id === 'incomingCallOverlay') return; if (overlay.id === 'outgoingCallOverlay') return; if (overlay.id === 'syncConfirmOverlay') return; overlay.classList.remove('open'); } }); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.open').forEach(o => { if (o.id === 'confirmDeleteProfileOverlay') closeConfirmDeleteProfile(); else o.classList.remove('open'); }); } });
 function init() {
@@ -2491,12 +2515,47 @@ document.addEventListener('DOMContentLoaded', () => {
   const requestKeyBtn = document.getElementById('requestKeyBtn');
   if (requestKeyBtn) requestKeyBtn.onclick = async () => { if (typeof requestKeyFromOtherDevice === 'function') await requestKeyFromOtherDevice(); };
   
-  const brickRequestKeyBtn = document.getElementById('brickRequestKeyBtn');
+    const brickRequestKeyBtn = document.getElementById('brickRequestKeyBtn');
   if (brickRequestKeyBtn) {
     brickRequestKeyBtn.onclick = async () => {
-      if (typeof requestKeyFromOtherDevice === 'function') {
-        await requestKeyFromOtherDevice();
+      if (!window.flypeFirebase) { alert('Нет подключения к Firebase'); return; }
+      const u = state.currentUser;
+      
+      // ВРЕМЕННО ГЕНЕРИРУЕМ НОВЫЙ КЛЮЧ, ЕСЛИ ЕГО НЕТ (для запроса)
+      let pk = localStorage.getItem('flype_private_key_' + u.id);
+      if (!pk) {
+         const kp = await generateKeyPair();
+         pk = await exportPrivateKey(kp.privateKey);
+         localStorage.setItem('flype_private_key_' + u.id, pk);
       }
+
+      const { database, ref, set, onValue } = window.flypeFirebase;
+      try {
+        await set(ref(database, 'sync_requests/' + u.id), { requestedAt: Date.now(), expiresAt: Date.now() + 86400000, deviceInfo: navigator.userAgent });
+        document.getElementById('syncWaitingOverlay').classList.add('open');
+        
+        if (window.syncKeysListener) { window.syncKeysListener(); window.syncKeysListener = null; }
+        window.syncKeysListener = onValue(ref(database, 'sync_keys/' + u.id), (snapshot) => {
+          const data = snapshot.val();
+          if (data && data.expiresAt > Date.now()) {
+            document.getElementById('syncWaitingOverlay').classList.remove('open');
+            if (window.syncKeysListener) { window.syncKeysListener(); window.syncKeysListener = null; }
+            setTimeout(async () => {
+              const code = prompt('Введите код с основного устройства:');
+              if (code) { 
+                try { 
+                  const decKey = await decryptPrivateKeyWithCode(data.encryptedKey, code.trim().toUpperCase());
+                  localStorage.setItem('flype_private_key_' + u.id, decKey);
+                  document.getElementById('brickScreen').classList.remove('active');
+                  document.getElementById('mainScreen').classList.add('active');
+                  if (typeof showToast === 'function') showToast('Успех', 'Ключи получены!', 'fa-check-circle');
+                  if (typeof renderAll === 'function') renderAll();
+                } catch (err) { alert('Неверный код'); }
+              }
+            }, 300);
+          }
+        });
+      } catch (err) { alert('Ошибка: ' + err.message); }
     };
   }
   
